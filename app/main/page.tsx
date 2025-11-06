@@ -1,4 +1,4 @@
-export default function DashboardHome() {
+export default function mainHome() {
   return (
     <section className="space-y-2">
       <h1 className="text-2xl font-semibold">메인</h1>
