@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -49,12 +48,7 @@ export default function LoginPage() {
             로그인
           </button>
         </form>
-        <p className="mt-4 text-sm text-zinc-600">
-          계정이 없으신가요? {" "}
-          <Link className="underline" href="/auth/signup">
-            회원가입
-          </Link>
-        </p>
+
       </div>
     </main>
   );
