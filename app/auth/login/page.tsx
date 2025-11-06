@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import Logo from '@/components/icons/Logo';
+import { FaGithub } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,9 +40,7 @@ export default function LoginPage() {
               className="w-full flex items-center justify-center gap-3"
             >
               {/* GitHub 아이콘 */}
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385..." />
-              </svg>
+              <FaGithub className="w-5 h-5" />
               Continue with GitHub
             </Button>
 
@@ -51,9 +51,7 @@ export default function LoginPage() {
               className="w-full flex items-center justify-center gap-3"
             >
               {/* Google 아이콘 */}
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92..." />
-              </svg>
+              <FcGoogle className="w-5 h-5" />
               Continue with Google
             </Button>
           </div>
