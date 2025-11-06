@@ -7,7 +7,7 @@ import Activity from '@/components/icons/Activity';
 import ArrowRight from '@/components/icons/ArrowRight';
 import BarChart3 from '@/components/icons/BarChart3';
 import Zap from '@/components/icons/Zap';
-import AlertTriangle from '@/components/icons/Error'; // ⚠️ 퍼플 톤으로 조정
+import AlertTriangle from '@/components/icons/Error';
 
 // Sign In 버튼 클릭
 interface LandingPageProps {
