@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback } from 'react';
-import Button from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import Button from '@/components/ui/BaseButton';
 import FeatureCard from '@/components/FeatureCard';
 import Logo from '@/components/icons/Logo';
 import ArrowRight from '@/components/icons/landing/ArrowRight';
@@ -11,12 +11,11 @@ import AlertTriangle from '@/components/icons/landing/Error';
 import Activity from '@/components/icons/landing/Activity';
 
 // Sign In 버튼 클릭
-interface LandingPageProps {
-  onNavigate: () => void;
-}
-
-export default function LandingPage({ onNavigate }: LandingPageProps) {
-  const handleNavigate = useCallback(() => onNavigate(), [onNavigate]);
+export default function LandingPage() {
+  const router = useRouter();
+  const handleNavigate = () => {
+    router.push('/auth/login');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
