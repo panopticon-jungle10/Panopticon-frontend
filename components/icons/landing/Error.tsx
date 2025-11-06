@@ -1,6 +1,6 @@
-import IconWrapper from './IconWrapper';
+import IconWrapper from '../IconWrapper';
 
-export default function BarChart3(props: React.SVGProps<SVGSVGElement>) {
+export default function AlertTriangle(props: React.SVGProps<SVGSVGElement>) {
   return (
     <IconWrapper>
       <svg
@@ -14,10 +14,9 @@ export default function BarChart3(props: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M3 3v18h18" />
-        <rect x="7" y="8" width="3" height="8" />
-        <rect x="12" y="5" width="3" height="11" />
-        <rect x="17" y="10" width="3" height="6" />
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
       </svg>
     </IconWrapper>
   );

@@ -1,6 +1,6 @@
-import IconWrapper from './IconWrapper';
+import IconWrapper from '../IconWrapper';
 
-export default function Zap(props: React.SVGProps<SVGSVGElement>) {
+export default function BarChart3(props: React.SVGProps<SVGSVGElement>) {
   return (
     <IconWrapper>
       <svg
@@ -14,7 +14,10 @@ export default function Zap(props: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+        <path d="M3 3v18h18" />
+        <rect x="7" y="8" width="3" height="8" />
+        <rect x="12" y="5" width="3" height="11" />
+        <rect x="17" y="10" width="3" height="6" />
       </svg>
     </IconWrapper>
   );

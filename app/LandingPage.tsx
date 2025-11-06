@@ -3,11 +3,12 @@
 import { useCallback } from 'react';
 import Button from '@/components/ui/button';
 import FeatureCard from '@/components/FeatureCard';
-import Activity from '@/components/icons/Activity';
-import ArrowRight from '@/components/icons/ArrowRight';
-import BarChart3 from '@/components/icons/BarChart3';
-import Zap from '@/components/icons/Zap';
-import AlertTriangle from '@/components/icons/Error';
+import Logo from '@/components/icons/Logo';
+import ArrowRight from '@/components/icons/landing/ArrowRight';
+import BarChart3 from '@/components/icons/landing/BarChart3';
+import Zap from '@/components/icons/landing/Zap';
+import AlertTriangle from '@/components/icons/landing/Error';
+import Activity from '@/components/icons/landing/Activity';
 
 // Sign In 버튼 클릭
 interface LandingPageProps {
@@ -22,12 +23,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold">Panopticon</span>
-          </div>
+          <Logo />
+
           <nav className="flex items-center gap-8">
             <a href="#features" className="text-gray-600 hover:text-gray-900 transition">
               Introduction

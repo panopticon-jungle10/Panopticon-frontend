@@ -1,12 +1,12 @@
-import IconWrapper from './IconWrapper';
+import IconWrapper from '../IconWrapper';
 
-export default function ArrowRight(props: React.SVGProps<SVGSVGElement>) {
+export default function Activity(props: React.SVGProps<SVGSVGElement>) {
   return (
     <IconWrapper>
       <svg
         viewBox="0 0 24 24"
-        width={props.width || 16}
-        height={props.height || 16}
+        width={props.width || 20}
+        height={props.height || 20}
         className={props.className}
         fill="none"
         stroke="currentColor"
@@ -14,8 +14,7 @@ export default function ArrowRight(props: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M5 12h14" />
-        <path d="m12 5 7 7-7 7" />
+        <path d="M22 12h-4l-3 7-6-14-3 7H2" />
       </svg>
     </IconWrapper>
   );
