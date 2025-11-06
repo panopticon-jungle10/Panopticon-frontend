@@ -25,7 +25,7 @@ export default function Logo({
       </div>
 
       {/* 서비스명 텍스트 */}
-      {showText && <span className={`${textSize} font-semibold`}>Panopticon</span>}
+      {showText && <span className={`${textSize} font-semibold text-black`}>Panopticon</span>}
     </div>
   );
 }
