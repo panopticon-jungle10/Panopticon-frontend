@@ -443,7 +443,7 @@ curl -s http://localhost:9100/health`;
       {verificationComplete && (
         <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
           <div className="flex items-start gap-3">
-            <IoCheckmarkCircle className="h-6 w-6 flex-shrink-0 text-green-600" />
+            <IoCheckmarkCircle className="h-6 w-6 shrink-0 text-green-600" />
             <div>
               <p className="font-semibold text-green-800">에이전트 설치가 확인되었습니다</p>
               <p className="text-sm text-green-700">
@@ -505,7 +505,7 @@ function TelemetryToggle({
       </div>
       <label className="ml-4 inline-flex cursor-pointer items-center">
         <input type="checkbox" className="peer sr-only" checked={checked} onChange={onChange} />
-        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:mt-[2px] after:ml-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:bg-blue-600 peer-checked:after:translate-x-full" />
+        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:mt-0.5 after:ml-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition peer-checked:bg-blue-600 peer-checked:after:translate-x-full" />
       </label>
     </div>
   );
@@ -542,7 +542,7 @@ function ConnectionStatus({ status }: { status: 'testing' | 'connected' | 'faile
   if (status === 'connected') {
     return (
       <div className="flex items-center gap-3 rounded-lg border-2 border-green-300 bg-green-50 p-4">
-        <IoCheckmarkCircle className="h-6 w-6 flex-shrink-0 text-green-600" />
+        <IoCheckmarkCircle className="h-6 w-6 shrink-0 text-green-600" />
         <div>
           <p className="font-semibold text-green-800">연결 성공</p>
           <p className="text-sm text-green-700">에이전트가 정상적으로 데이터를 전송하고 있습니다</p>
@@ -584,14 +584,14 @@ function SummaryCard({
       <h3 className="mb-3 font-semibold text-black">설정 요약</h3>
       <div className="space-y-3">
         <div className="flex items-start gap-2">
-          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
           <div>
             <span className="font-semibold">수집 데이터:</span>
             <span className="ml-2">{selected}</span>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
           <div>
             <span className="font-semibold">Kafka 브로커:</span>
             <span className="ml-2 rounded bg-gray-200 px-2 py-0.5 font-mono text-xs">
@@ -600,7 +600,7 @@ function SummaryCard({
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+          <IoCheckmarkCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
           <div>
             <span className="font-semibold">OTLP 엔드포인트:</span>
             <span className="ml-2">gRPC (4317) &amp; HTTP (4318)</span>
