@@ -1,5 +1,4 @@
 'use client';
-'use client';
 
 import React, { useState } from 'react';
 import { FiChevronUp, FiChevronDown } from 'react-icons/fi';
@@ -8,7 +7,7 @@ interface TableColumn<T> {
   key: keyof T;
   header: string;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
-  width: string; // 예: '200px', '20%'
+  width?: `${number}%`; // 예: '20%', '50%'
 }
 
 interface TableProps<T> {
@@ -57,7 +56,7 @@ export default function Table<T>({ columns, data, className = 'w-full' }: TableP
               <th
                 key={String(column.key)}
                 className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50 select-none cursor-pointer"
-                style={{ width: column.width }}
+                style={{ width: column.width || 'auto' }}
                 onClick={() => {
                   if (sortField === column.key) {
                     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -98,7 +97,7 @@ export default function Table<T>({ columns, data, className = 'w-full' }: TableP
                   <td
                     key={String(column.key)}
                     className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap truncate"
-                    style={{ width: column.width }}
+                    style={{ width: column.width || 'auto' }}
                   >
                     {column.render
                       ? column.render(row[column.key], row)

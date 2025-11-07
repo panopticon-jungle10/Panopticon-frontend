@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiClock, FiCalendar, FiChevronDown } from 'react-icons/fi';
 import { TimeRange } from '@/types/time';
+import { toast } from 'react-toastify';
 
 const PRESET_RANGES: TimeRange[] = [
   { label: '지난 1시간', value: '1h', hours: 1 },
@@ -30,8 +31,6 @@ interface PresetDropdownProps {
   onSelectRange: (range: TimeRange) => void;
   onShowCalendar: () => void;
 }
-
-const width = 48;
 
 function PresetDropdown({ selectedRange, onSelectRange, onShowCalendar }: PresetDropdownProps) {
   return (
@@ -81,7 +80,7 @@ function CalendarPicker({ onApply, onBack }: CalendarPickerProps) {
 
   const handleApply = () => {
     if (!customStartDate || !customEndDate) {
-      alert('시작일과 종료일을 모두 선택해주세요.');
+      toast.error('시작일과 종료일을 모두 선택해주세요.');
       return;
     }
 
@@ -89,7 +88,7 @@ function CalendarPicker({ onApply, onBack }: CalendarPickerProps) {
     const end = new Date(customEndDate);
 
     if (start > end) {
-      alert('시작일은 종료일보다 이전이어야 합니다.');
+      toast.error('시작일은 종료일보다 이전이어야 합니다.');
       return;
     }
 
@@ -212,7 +211,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-${width}`}
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-48"
       >
         <FiClock className="w-4 h-4 text-gray-500" />
         <span className="flex-1 truncate">{selectedRange.label}</span>
@@ -223,9 +222,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
 
       {/* 드롭다운 메뉴 */}
       {isOpen && (
-        <div
-          className={`absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-${width}`}
-        >
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-48">
           {!showCalendar ? (
             <PresetDropdown
               selectedRange={selectedRange}
