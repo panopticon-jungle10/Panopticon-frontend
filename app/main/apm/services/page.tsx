@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Bug } from 'lucide-react';
 import SearchInput from '@/components/ui/SearchInput';
 import { Header } from '@/components/common/app/Header';
 
@@ -69,7 +69,7 @@ export default function ApmPage() {
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center gap-2 mb-3">
               <svg
-                className="w-4 h-4 text-gray-600"
+                className="w-4 h-4 text-purple-500"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -185,7 +185,11 @@ export default function ApmPage() {
         <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-gray-900 text-sm">Issues</h3>
+            <div className="flex items-center gap-2">
+              <Bug className="w-4 h-4 text-purple-500" />
+              <h3 className="text-gray-900 text-sm">Issues</h3>
+            </div>
+
             <button
               type="button"
               className="text-gray-400 hover:text-gray-600"
