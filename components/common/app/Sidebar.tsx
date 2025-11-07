@@ -91,7 +91,7 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* Footer */}
+      {/* Footer -> 후에 유저 정보에 따라 수정 필요(더미 데이터)*/}
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <div className="flex items-center gap-3">
           <IoPersonCircle className="w-6 h-6 text-gray-500" />
