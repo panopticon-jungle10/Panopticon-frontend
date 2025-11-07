@@ -4,7 +4,9 @@ export default function APMPage() {
   return (
     <section>
       <Header />
-      <p className="text-zinc-600">여기에 APM 관련 UI를 구성하세요.</p>
+      <section className="p-6">
+        <p className="text-zinc-600">여기에 APM 관련 UI를 구성하세요.</p>
+      </section>
     </section>
   );
 }
