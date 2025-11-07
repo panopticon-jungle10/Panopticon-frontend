@@ -161,6 +161,34 @@ export default function ApmPage() {
             </div>
           </div>
 
+          {/* Table Header */}
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 uppercase">
+              <button
+                onClick={() => handleIssuesSort('details')}
+                className="flex items-center hover:text-gray-900 transition cursor-pointer"
+              >
+                Issue Details
+                <SortIcon
+                  field="details"
+                  currentField={issuesSortField}
+                  direction={issuesSortDirection}
+                />
+              </button>
+              <button
+                onClick={() => handleIssuesSort('errorCount')}
+                className="flex items-center hover:text-gray-900 transition cursor-pointer"
+              >
+                Error Count
+                <SortIcon
+                  field="errorCount"
+                  currentField={issuesSortField}
+                  direction={issuesSortDirection}
+                />
+              </button>
+            </div>
+          </div>
+
           {/* Empty State */}
           <div className="px-4 py-16 flex flex-col items-center justify-center text-center">
             <FiAlertOctagon className="w-12 h-12 mb-3 text-purple-400" />
