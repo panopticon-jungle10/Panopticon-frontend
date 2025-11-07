@@ -1,7 +1,7 @@
 'use client';
 
 import Logo from '@/components/icons/Logo';
-import { SiKubernetes, SiDocker, SiApple, SiAmazonecs } from 'react-icons/si';
+import { SiKubernetes, SiDocker, SiApple, SiAmazonecs, SiOpentelemetry } from 'react-icons/si';
 
 export default function AgentInstallPage() {
   return (
@@ -17,13 +17,11 @@ export default function AgentInstallPage() {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Install Panopticon Agent
           </h1>
-          <p className="text-lg text-gray-600">컨테이너 플랫폼을 선택하고 에이전트를 설치하세요</p>
+          <p className="text-lg text-gray-600">플랫폼을 선택하고 에이전트를 설치하세요</p>
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-semibold mb-6 text-center text-black">
-            Container Platform 선택
-          </h2>
+          <h2 className="text-xl font-semibold mb-6 text-center text-black">Container Platform</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button className={`p-8 rounded-xl border-2 transition-all duration-200 text-black`}>
               <div className="flex flex-col items-center gap-4">
@@ -31,19 +29,7 @@ export default function AgentInstallPage() {
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Kubernetes</h3>
                   <p className="text-sm text-gray-600">
-                    K8s 클러스터에서 에이전트를 DaemonSet으로 배포
-                  </p>
-                </div>
-              </div>
-            </button>
-            {/* Docker Card */}
-            <button className={`p-8 rounded-xl border-2 transition-all duration-200 text-black`}>
-              <div className="flex flex-col items-center gap-4">
-                <SiApple className={`w-16 h-16`} />
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Kubernetes</h3>
-                  <p className="text-sm text-gray-600">
-                    K8s 클러스터에서 에이전트를 DaemonSet으로 배포
+                    K8s 클러스터에서 에이전트를 DaemonSet으로 배포해 서비스 데이터를 수집
                   </p>
                 </div>
               </div>
@@ -52,9 +38,9 @@ export default function AgentInstallPage() {
               <div className="flex flex-col items-center gap-4">
                 <SiDocker className={`w-16 h-16`} />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Kubernetes</h3>
+                  <h3 className="text-xl font-semibold mb-2">Docker</h3>
                   <p className="text-sm text-gray-600">
-                    K8s 클러스터에서 에이전트를 DaemonSet으로 배포
+                    Docker 컨테이너 내에서 에이전트를 실행해 서비스 데이터를 수집
                   </p>
                 </div>
               </div>
@@ -63,9 +49,43 @@ export default function AgentInstallPage() {
               <div className="flex flex-col items-center gap-4">
                 <SiAmazonecs className={`w-16 h-16`} />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Kubernetes</h3>
+                  <h3 className="text-xl font-semibold mb-2">macOS</h3>
                   <p className="text-sm text-gray-600">
-                    K8s 클러스터에서 에이전트를 DaemonSet으로 배포
+                    macOS 환경에 로컬 에이전트를 설치해 서비스 데이터를 수집
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold mb-6 text-center text-black">Host based</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button className={`p-8 rounded-xl border-2 transition-all duration-200 text-black`}>
+              <div className="flex flex-col items-center gap-4">
+                <SiApple className={`w-16 h-16`} />
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">Amazon ECS</h3>
+                  <p className="text-sm text-gray-600">
+                    ECS 태스크에 에이전트를 포함해 서비스 데이터를 수집
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold mb-6 text-center text-black">Monitoring</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button className={`p-8 rounded-xl border-2 transition-all duration-200 text-black`}>
+              <div className="flex flex-col items-center gap-4">
+                <SiOpentelemetry className={`w-16 h-16`} />
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">OpenTelemetry</h3>
+                  <p className="text-sm text-gray-600">
+                    OpenTelemetry SDK 또는 Collector로 서비스 데이터를 수집
                   </p>
                 </div>
               </div>
