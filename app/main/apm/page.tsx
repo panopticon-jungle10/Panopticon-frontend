@@ -4,17 +4,39 @@ import { useState } from 'react';
 import { FiChevronUp, FiChevronDown, FiAlertOctagon, FiZap } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
-import { Header } from '@/components/common/app/Header';
+
+/* 정렬 아이콘 컴포넌트 - 컴포넌트 외부로 이동 */
+function SortIcon({
+  field,
+  currentField,
+  direction,
+}: {
+  field: string;
+  currentField: string | null;
+  direction: 'asc' | 'desc';
+}) {
+  if (currentField !== field) {
+    return (
+      <div className="flex flex-col ml-1">
+        <FiChevronUp className="w-3 h-3 -mb-1 text-gray-300" />
+        <FiChevronDown className="w-3 h-3 text-gray-300" />
+      </div>
+    );
+  }
+
+  return direction === 'asc' ? (
+    <FiChevronUp className="w-3 h-3 ml-1" />
+  ) : (
+    <FiChevronDown className="w-3 h-3 ml-1" />
+  );
+}
 
 export default function ApmPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [issuesSortField, setIssuesSortField] = useState<string | null>(null);
-  const [issuesSortDirection, setIssuesSortDirection] = useState<'asc' | 'desc'>('asc');
 
   /* 정렬 핸들러 */
-  //   서비스T
   const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -24,45 +46,8 @@ export default function ApmPage() {
     }
   };
 
-  // 에러T
-  const handleIssuesSort = (field: string) => {
-    if (issuesSortField === field) {
-      setIssuesSortDirection(issuesSortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setIssuesSortField(field);
-      setIssuesSortDirection('asc');
-    }
-  };
-
-  /* 정렬 아이콘 컴포넌트 */
-  const SortIcon = ({
-    field,
-    currentField,
-    direction,
-  }: {
-    field: string;
-    currentField: string | null;
-    direction: 'asc' | 'desc';
-  }) => {
-    if (currentField !== field) {
-      return (
-        <div className="flex flex-col ml-1">
-          <FiChevronUp className="w-3 h-3 -mb-1 text-gray-300" />
-          <FiChevronDown className="w-3 h-3 text-gray-300" />
-        </div>
-      );
-    }
-
-    return direction === 'asc' ? (
-      <FiChevronUp className="w-3 h-3 ml-1" />
-    ) : (
-      <FiChevronDown className="w-3 h-3 ml-1" />
-    );
-  };
-
   return (
     <>
-      <Header />
       <div className="p-8 bg-gray-50 min-h-screen space-y-6">
         {/* APM Services */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm overflow-hidden">
