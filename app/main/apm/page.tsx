@@ -4,17 +4,39 @@ import { useState } from 'react';
 import { FiChevronUp, FiChevronDown, FiAlertOctagon, FiZap } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
-import { Header } from '@/components/common/app/Header';
+
+/* 정렬 아이콘 컴포넌트 - 컴포넌트 외부로 이동 */
+function SortIcon({
+  field,
+  currentField,
+  direction,
+}: {
+  field: string;
+  currentField: string | null;
+  direction: 'asc' | 'desc';
+}) {
+  if (currentField !== field) {
+    return (
+      <div className="flex flex-col ml-1">
+        <FiChevronUp className="w-3 h-3 -mb-1 text-gray-300" />
+        <FiChevronDown className="w-3 h-3 text-gray-300" />
+      </div>
+    );
+  }
+
+  return direction === 'asc' ? (
+    <FiChevronUp className="w-3 h-3 ml-1" />
+  ) : (
+    <FiChevronDown className="w-3 h-3 ml-1" />
+  );
+}
 
 export default function ApmPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [issuesSortField, setIssuesSortField] = useState<string | null>(null);
-  const [issuesSortDirection, setIssuesSortDirection] = useState<'asc' | 'desc'>('asc');
 
   /* 정렬 핸들러 */
-  //   서비스T
   const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -24,45 +46,8 @@ export default function ApmPage() {
     }
   };
 
-  // 에러T
-  const handleIssuesSort = (field: string) => {
-    if (issuesSortField === field) {
-      setIssuesSortDirection(issuesSortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setIssuesSortField(field);
-      setIssuesSortDirection('asc');
-    }
-  };
-
-  /* 정렬 아이콘 컴포넌트 */
-  const SortIcon = ({
-    field,
-    currentField,
-    direction,
-  }: {
-    field: string;
-    currentField: string | null;
-    direction: 'asc' | 'desc';
-  }) => {
-    if (currentField !== field) {
-      return (
-        <div className="flex flex-col ml-1">
-          <FiChevronUp className="w-3 h-3 -mb-1 text-gray-300" />
-          <FiChevronDown className="w-3 h-3 text-gray-300" />
-        </div>
-      );
-    }
-
-    return direction === 'asc' ? (
-      <FiChevronUp className="w-3 h-3 ml-1" />
-    ) : (
-      <FiChevronDown className="w-3 h-3 ml-1" />
-    );
-  };
-
   return (
     <>
-      <Header />
       <div className="p-8 bg-gray-50 min-h-screen space-y-6">
         {/* APM Services */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -158,34 +143,6 @@ export default function ApmPage() {
             <div className="flex items-center gap-2">
               <BiBug className="w-4 h-4 text-purple-500" />
               <h3 className="text-gray-900 text-sm">Issues</h3>
-            </div>
-          </div>
-
-          {/* Table Header */}
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-            <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 uppercase">
-              <button
-                onClick={() => handleIssuesSort('details')}
-                className="flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Issue Details
-                <SortIcon
-                  field="details"
-                  currentField={issuesSortField}
-                  direction={issuesSortDirection}
-                />
-              </button>
-              <button
-                onClick={() => handleIssuesSort('errorCount')}
-                className="flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Error Count
-                <SortIcon
-                  field="errorCount"
-                  currentField={issuesSortField}
-                  direction={issuesSortDirection}
-                />
-              </button>
             </div>
           </div>
 
