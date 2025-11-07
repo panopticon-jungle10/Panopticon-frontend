@@ -7,8 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:ci": "eslint \"app/**/*\" \"components/**/*\" \"types/**/*\" --max-warnings=0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "format:check:ci": "prettier --check \"app/**/*.{js,jsx,ts,tsx,json,css,md,html,svg}\" \"components/**/*.{js,jsx,ts,tsx,json,css,md,html,svg}\" \"types/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.0.1",
