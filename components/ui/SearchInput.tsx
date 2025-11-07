@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search } from 'lucide-react';
+import { FiSearch } from 'react-icons/fi';
 
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
@@ -16,7 +16,7 @@ export default function SearchInput({
     <div
       className={`flex items-center gap-2 border border-input rounded-md px-3 py-1 bg-input-background focus-within:ring-2 focus-within:ring-ring/50 transition ${className}`}
     >
-      <Search className="w-4 h-4 text-muted-foreground" />
+      <FiSearch className="w-4 h-4 text-gray-400" />
       <input
         type="text"
         placeholder={placeholder}
