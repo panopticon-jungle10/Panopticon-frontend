@@ -7,7 +7,7 @@ export const Header = () => {
   // APM 드롭다운 아이템
   const apmItems = [
     {
-      href: '/main/apm/services',
+      href: '/main/apm',
       label: 'Services',
       ariaLabel: 'Go to Services',
     },
