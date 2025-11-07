@@ -4,7 +4,7 @@ interface ListMapProps {
   onSelect: (type: 'list' | 'map') => void;
 }
 
-export default function ListMap({ selected, onSelect }: ListMapProps) {
+export default function ViewModeSelectBox({ selected, onSelect }: ListMapProps) {
   return (
     <div className="flex rounded-lg border border-gray-300 overflow-hidden w-fit bg-white">
       <button

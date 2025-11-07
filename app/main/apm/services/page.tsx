@@ -5,7 +5,7 @@ import DatabaseIcon from '@/components/icons/service/Database';
 import FrontendIcon from '@/components/icons/service/Frontend';
 import ApiIcon from '@/components/icons/service/Api';
 import { SelectDate } from '@/components/common/SelectDate';
-import ListMap from './components/ListMap';
+import ViewModeSelectBox from './components/ViewModeSelectBox';
 import PageSizeSelect from './components/PageSizeSelect';
 import Pagination from './components/Pagination';
 import { useState } from 'react';
@@ -152,7 +152,7 @@ export default function ServicesPage() {
 
       <div className="flex justify-start items-center mb-2 gap-3">
         <SelectDate />
-        <ListMap selected={viewType} onSelect={setViewType} />
+        <ViewModeSelectBox selected={viewType} onSelect={setViewType} />
         <PageSizeSelect
           value={pageSize}
           onChange={(v) => {

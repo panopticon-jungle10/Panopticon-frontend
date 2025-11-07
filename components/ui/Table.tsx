@@ -7,7 +7,7 @@ interface TableColumn<T> {
   key: keyof T;
   header: string;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
-  width?: `${number}%`; // 예: '20%', '50%'
+  width?: `${number}%` | string; // 예: '20%', '50%'
 }
 
 interface TableProps<T> {

@@ -15,10 +15,9 @@ export default function PageSizeSelect({ value, onChange }: PageSizeSelectProps)
         onChange={(e) => onChange(Number(e.target.value))}
         className="border rounded px-2 py-1 text-sm focus:outline-none"
       >
-        <option value={5}>5개</option>
         <option value={10}>10개</option>
-        <option value={20}>20개</option>
         <option value={50}>50개</option>
+        <option value={100}>100개</option>
       </select>
     </div>
   );
