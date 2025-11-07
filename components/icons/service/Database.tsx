@@ -1,14 +1,11 @@
-import IconWrapper from "../IconWrapper";
+import IconWrapper from '../IconWrapper';
 
 interface DatabaseIconProps {
   size?: number;
   color?: string;
 }
 
-export default function DatabaseIcon({
-  size = 20,
-  color = "currentColor",
-}: DatabaseIconProps) {
+export default function DatabaseIcon({ size = 20, color = 'currentColor' }: DatabaseIconProps) {
   return (
     <IconWrapper>
       <svg

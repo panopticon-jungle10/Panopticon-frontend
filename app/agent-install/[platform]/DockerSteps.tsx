@@ -1,6 +1,5 @@
 import { ReactNode, useMemo } from 'react';
 import { IoCheckmarkCircle } from 'react-icons/io5';
-import { FiClock, FiCopy, FiCheck } from 'react-icons/fi';
 import { CopyableCodeBlock } from './CopyableCodeBlock';
 import { MonitoringOptions } from './types';
 
