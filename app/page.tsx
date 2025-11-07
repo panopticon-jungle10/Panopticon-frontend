@@ -13,7 +13,7 @@ import Activity from '@/components/icons/landing/Activity';
 export default function LandingPage() {
   const router = useRouter();
   const handleNavigate = () => {
-    router.push('/login');
+    router.push('/auth');
   };
 
   return (
