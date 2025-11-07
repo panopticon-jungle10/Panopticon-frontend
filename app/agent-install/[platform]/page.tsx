@@ -5,24 +5,53 @@ import { useRouter, useParams } from 'next/navigation';
 import Logo from '@/components/icons/Logo';
 import { platformsData, PlatformType } from '../platforms';
 import { IoArrowBack } from 'react-icons/io5';
-import { FiCopy, FiCheck } from 'react-icons/fi';
+import { StepIndicator } from './StepIndicator';
+import {
+  DockerStepOne,
+  DockerStepTwo,
+  DockerStepThree,
+  DockerVerificationStep,
+} from './DockerSteps';
+import { InstallStep, MonitoringOptions, StepConfig } from './types';
+
+const platformStepConfig: Record<PlatformType, StepConfig> = {
+  docker: { total: 4, showOptions: true },
+  kubernetes: { total: 3, showOptions: true },
+  ecs: { total: 3, showOptions: true },
+  macos: { total: 3, showOptions: false },
+  opentelemetry: { total: 3, showOptions: true },
+};
 
 export default function PlatformInstallPage() {
   const router = useRouter();
   const params = useParams();
-  const [copiedCommand, setCopiedCommand] = useState(false);
-
   const platformKey = params.platform as PlatformType;
   const platform = platformsData[platformKey];
+  const stepConfig = platformStepConfig[platformKey] || { total: 3, showOptions: true };
+
+  const [currentStep, setCurrentStep] = useState<InstallStep>(1);
+  const [apiKey, setApiKey] = useState('');
+  const kafkaBroker = 'kafka.panopticon.io:9092';
+  const [monitoringOptions, setMonitoringOptions] = useState<MonitoringOptions>({
+    traces: true,
+    metrics: true,
+    logs: false,
+  });
+  const [connectionStatus, setConnectionStatus] = useState<
+    'testing' | 'connected' | 'failed' | null
+  >(null);
+  const [verificationAcknowledged, setVerificationAcknowledged] = useState(false);
+  const [verificationComplete, setVerificationComplete] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   if (!platform) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Platform not found</h1>
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">Platform not found</h1>
           <button
             onClick={() => router.push('/agent-install')}
-            className="text-blue-600 hover:text-blue-700 underline"
+            className="text-blue-600 underline transition hover:text-blue-700"
           >
             Go back to platform selection
           </button>
@@ -31,142 +60,143 @@ export default function PlatformInstallPage() {
     );
   }
 
-  const handleCopyCommand = async (command: string) => {
-    try {
-      await navigator.clipboard.writeText(command);
-      console.log('Command copied successfully');
-      setCopiedCommand(true);
-      setTimeout(() => setCopiedCommand(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy command:', err);
-      alert('Failed to copy command. Please try again or copy manually.');
+  const handleBack = () => router.push('/agent-install');
+
+  const handleNextStep = () => {
+    if (currentStep < stepConfig.total) {
+      setCurrentStep((prev) => (prev + 1) as InstallStep);
     }
   };
 
-  const handleBack = () => {
-    router.push('/agent-install');
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as InstallStep);
+    }
+  };
+
+  const handleToggleOption = (option: keyof MonitoringOptions) => {
+    setMonitoringOptions((prev) => ({
+      ...prev,
+      [option]: !prev[option],
+    }));
+  };
+
+  const handleTestConnection = () => {
+    setConnectionStatus('testing');
+    setTimeout(() => {
+      const isConnected = Math.random() > 0.3;
+      setConnectionStatus(isConnected ? 'connected' : 'failed');
+    }, 3000);
+  };
+
+  const handleVerificationToggle = (checked: boolean) => {
+    setVerificationAcknowledged(checked);
+    if (!checked) {
+      setVerificationComplete(false);
+    }
+  };
+
+  const handleInstallComplete = () => {
+    if (!verificationAcknowledged) {
+      return;
+    }
+    setIsInstalling(true);
+    setTimeout(() => {
+      setIsInstalling(false);
+      setVerificationComplete(true);
+    }, 2000);
+  };
+
+  const renderContent = () => {
+    if (platformKey !== 'docker') {
+      return (
+        <section className="rounded-2xl border border-dashed border-gray-300 bg-white/80 p-12 text-center text-gray-400">
+          <div className="text-lg font-semibold text-gray-500">작성 전</div>
+        </section>
+      );
+    }
+
+    switch (currentStep) {
+      case 1:
+        return (
+          <DockerStepOne
+            icon={platform.iconLarge}
+            title={platform.title}
+            totalSteps={stepConfig.total}
+            monitoringOptions={monitoringOptions}
+            onToggleOption={handleToggleOption}
+            onNext={handleNextStep}
+          />
+        );
+      case 2:
+        return (
+          <DockerStepTwo
+            icon={platform.iconLarge}
+            title={platform.title}
+            totalSteps={stepConfig.total}
+            kafkaBroker={kafkaBroker}
+            apiKey={apiKey}
+            onApiKeyChange={setApiKey}
+            monitoringOptions={monitoringOptions}
+            onPrev={handlePrevStep}
+            onNext={handleNextStep}
+          />
+        );
+      case 3:
+        return (
+          <DockerStepThree
+            icon={platform.iconLarge}
+            title={platform.title}
+            totalSteps={stepConfig.total}
+            monitoringOptions={monitoringOptions}
+            kafkaBroker={kafkaBroker}
+            connectionStatus={connectionStatus}
+            onTestConnection={handleTestConnection}
+            onPrev={handlePrevStep}
+            onNext={handleNextStep}
+          />
+        );
+      case 4:
+        return (
+          <DockerVerificationStep
+            icon={platform.iconLarge}
+            title={platform.title}
+            totalSteps={stepConfig.total}
+            verificationAcknowledged={verificationAcknowledged}
+            verificationComplete={verificationComplete}
+            isInstalling={isInstalling}
+            onVerificationChange={handleVerificationToggle}
+            onPrev={handlePrevStep}
+            onComplete={handleInstallComplete}
+            onInstallAnother={handleBack}
+            onGoDashboard={() => router.push('/main')}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Logo />
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mx-auto max-w-4xl px-6 py-16">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-8"
+          className="mb-8 flex items-center gap-2 text-blue-600 transition hover:text-blue-700"
         >
-          <IoArrowBack className="w-5 h-5" />
-          <span>Select a different Platform</span>
+          <IoArrowBack className="h-5 w-5" />
+          <span>다른 플랫폼 선택</span>
         </button>
 
-        <div className="bg-white test-black rounded-xl shadow-sm p-8 mb-8">
-          <div className="flex items-center gap-4 mb-6">
-            {platform.iconLarge}
-            <h1 className="text-3xl font-bold text-black">{platform.title}</h1>
-          </div>
+        <StepIndicator currentStep={currentStep} totalSteps={stepConfig.total} />
 
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center font-semibold flex-shrink-0">
-                  1
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold mb-4 text-black">
-                    Customize your observability coverage
-                  </h2>
-                  <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-500 mb-3">CORE OBSERVABILITY</p>
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between p-3 bg-white rounded border">
-                          <div>
-                            <h3 className="font-semibold text-black">Infrastructure Monitoring</h3>
-                            <p className="text-sm text-gray-600">
-                              Full visibility into your infrastructure with performance metrics and
-                              integrations.
-                            </p>
-                          </div>
-                          <span className="text-sm text-gray-500 ml-4">Included</span>
-                        </div>
-                        <div className="flex items-start justify-between p-3 bg-white rounded border">
-                          <div>
-                            <h3 className="font-semibold text-black">
-                              Application Performance Monitoring
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              Instrument services to collect health metrics and trace distributed
-                              requests.
-                            </p>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer ml-4">
-                            <input type="checkbox" className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                          </label>
-                        </div>
-                        <div className="flex items-start justify-between p-3 bg-white rounded border">
-                          <div>
-                            <h3 className="font-semibold text-black">Log Management</h3>
-                            <p className="text-sm text-gray-600">
-                              Collect, analyze, and correlate logs from over 850 sources.
-                            </p>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer ml-4">
-                            <input type="checkbox" className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center font-semibold flex-shrink-0">
-                  2
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold mb-4 text-black">Run the install command</h2>
-                  <button className="mb-4 px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-700 text-sm font-medium">
-                    Select API Key
-                  </button>
-                  <div className="relative">
-                    <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                      <code>{platform.command}</code>
-                    </pre>
-                    <button
-                      onClick={() => handleCopyCommand(platform.command)}
-                      className="absolute top-4 right-4 p-2 bg-gray-800 hover:bg-gray-700 rounded text-white"
-                    >
-                      {copiedCommand ? (
-                        <FiCheck className="w-5 h-5" />
-                      ) : (
-                        <FiCopy className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => router.push('/main')}
-            className="text-gray-600 hover:text-gray-900 underline text-sm"
-          >
-            Skip for now
-          </button>
-        </div>
+        {renderContent()}
       </div>
     </div>
   );
