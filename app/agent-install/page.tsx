@@ -11,6 +11,14 @@ export default function AgentInstallPage() {
     router.push(`/agent-install/${platform}`);
   };
 
+  const platformNames: Record<PlatformType, string> = {
+    kubernetes: 'Kubernetes',
+    macos: 'macOS',
+    opentelemetry: 'OpenTelemetry',
+    docker: 'Docker',
+    ecs: 'ECS',
+  };
+
   const groupedPlatforms = {
     'Container Platform': ['kubernetes', 'docker', 'ecs'] as PlatformType[],
     'Host based': ['macos'] as PlatformType[],
@@ -49,7 +57,7 @@ export default function AgentInstallPage() {
                       {platform.icon}
                       <div>
                         <h3 className="text-lg font-semibold mb-2">
-                          {platformKey.charAt(0).toUpperCase() + platformKey.slice(1)}
+                          {platformNames[platformKey]}
                         </h3>
                         <p className="text-sm text-gray-600">
                           {platform.description.split('\n').map((line, idx) => (
