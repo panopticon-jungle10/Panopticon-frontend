@@ -156,7 +156,7 @@ export default function ServiceOverview() {
     <div className="space-y-8">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-gray-800">Service Overview</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Overview</h1>
 
         {/* 기간 선택 드롭다운 */}
         <div className="relative">
