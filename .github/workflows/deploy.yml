@@ -27,6 +27,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Debug environment variables
+        run: |
+          echo "S3_BUCKET: $S3_BUCKET"
+          echo "CLOUDFRONT_DISTRIBUTION_ID: $CLOUDFRONT_DISTRIBUTION_ID"
+          echo "AWS_ACCESS_KEY_ID length: ${#AWS_ACCESS_KEY_ID}"
+
       - name: Deploy to S3
         env:
           AWS_REGION: ap-northeast-2
