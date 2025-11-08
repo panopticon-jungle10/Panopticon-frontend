@@ -1,14 +1,11 @@
-import IconWrapper from "../IconWrapper";
+import IconWrapper from '../IconWrapper';
 
 interface ApiIconProps {
   size?: number;
   color?: string;
 }
 
-export default function ApiIcon({
-  size = 20,
-  color = "currentColor",
-}: ApiIconProps) {
+export default function ApiIcon({ size = 20, color = 'currentColor' }: ApiIconProps) {
   return (
     <IconWrapper>
       <svg

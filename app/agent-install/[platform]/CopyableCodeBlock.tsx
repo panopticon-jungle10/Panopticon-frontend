@@ -9,7 +9,11 @@ interface CopyableCodeBlockProps {
   copyLabel?: string;
 }
 
-export function CopyableCodeBlock({ code, className = '', copyLabel = '복사' }: CopyableCodeBlockProps) {
+export function CopyableCodeBlock({
+  code,
+  className = '',
+  copyLabel = '복사',
+}: CopyableCodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

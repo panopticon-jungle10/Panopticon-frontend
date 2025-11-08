@@ -1,4 +1,6 @@
-export default function mainHome() {
+'use client';
+
+export default function MainHome() {
   return (
     <>
       <h1 className="text-2xl font-semibold">메인</h1>

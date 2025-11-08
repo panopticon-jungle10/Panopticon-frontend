@@ -1,10 +1,9 @@
 ---
-name: Feature
+name: Feature Template
 about: Feature
-title: "[Feature]"
+title: '[Feature]'
 labels: feature
 assignees: ''
-
 ---
 
 # Feature 제목
