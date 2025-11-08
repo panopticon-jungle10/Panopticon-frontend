@@ -1,14 +1,11 @@
-import IconWrapper from "../IconWrapper";
+import IconWrapper from '../IconWrapper';
 
 interface FrontendIconProps {
   size?: number;
   color?: string;
 }
 
-export default function FrontendIcon({
-  size = 20,
-  color = "currentColor",
-}: FrontendIconProps) {
+export default function FrontendIcon({ size = 20, color = 'currentColor' }: FrontendIconProps) {
   return (
     <IconWrapper>
       <svg

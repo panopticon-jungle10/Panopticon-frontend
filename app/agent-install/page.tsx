@@ -56,9 +56,7 @@ export default function AgentInstallPage() {
                     <div className="flex flex-col items-center gap-4">
                       {platform.icon}
                       <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          {platformNames[platformKey]}
-                        </h3>
+                        <h3 className="text-lg font-semibold mb-2">{platformNames[platformKey]}</h3>
                         <p className="text-sm text-gray-600">
                           {platform.description.split('\n').map((line, idx) => (
                             <span key={idx}>

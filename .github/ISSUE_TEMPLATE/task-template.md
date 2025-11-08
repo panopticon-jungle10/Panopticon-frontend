@@ -1,10 +1,9 @@
 ---
 name: Task Template
 about: Task
-title: "[Task]"
+title: '[Task]'
 labels: task
 assignees: ''
-
 ---
 
 # Task 제목
