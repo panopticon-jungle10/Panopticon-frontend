@@ -218,6 +218,7 @@ export default function ServiceOverview() {
           seriesName: string;
           value: number;
         }[];
+        if (!list?.length) return '';
         const header = `<div style="margin-bottom:4px;"><b>${list[0].axisValue}</b></div>`;
         const lines = list
           .map(
