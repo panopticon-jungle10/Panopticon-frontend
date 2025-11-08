@@ -3,7 +3,6 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import * as echarts from 'echarts';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -32,7 +31,6 @@ export default function ServiceOverview() {
   const fetchChartData = async (range: string) => {
     setIsLoading(true);
 
-    // 실제 API라면: fetch(`/api/metrics?range=${range}`)
     await new Promise((res) => setTimeout(res, 400)); // 로딩 딜레이 시뮬레이션
 
     const timestamps = generateTimestamps(range);
@@ -59,7 +57,10 @@ export default function ServiceOverview() {
 
   // 기간 변경 시 데이터 다시 불러오기
   useEffect(() => {
-    fetchChartData(timeRange);
+    const loadData = async () => {
+      await fetchChartData(timeRange);
+    };
+    loadData();
   }, [timeRange]);
 
   /* -------------------- 실시간 갱신(2초) -------------------- */
@@ -163,7 +164,7 @@ export default function ServiceOverview() {
     ],
   };
 
-  /* -------------------- Errors  -------------------- */
+  /* -------------------- Errors -------------------- */
   const errorsOption = {
     ...baseStyle,
     title: {
@@ -210,11 +211,17 @@ export default function ServiceOverview() {
       borderColor: 'transparent',
       textStyle: { color: '#f9fafb', fontSize: 12 },
       padding: 6,
-      formatter: (params: any) => {
-        const header = `<div style="margin-bottom:4px;"><b>${params[0].axisValue}</b></div>`;
-        const lines = params
+      formatter: (params: unknown) => {
+        const list = params as {
+          axisValue: string;
+          color: string;
+          seriesName: string;
+          value: number;
+        }[];
+        const header = `<div style="margin-bottom:4px;"><b>${list[0].axisValue}</b></div>`;
+        const lines = list
           .map(
-            (p: any) =>
+            (p) =>
               `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${p.seriesName}: ${p.value} ms</div>`,
           )
           .join('');
@@ -350,7 +357,7 @@ export default function ServiceOverview() {
 }
 
 /* -------------------------------
-   헬퍼 함수: 시간 라벨 만드는 함수
+   헬퍼 함수
 --------------------------------*/
 function generateTimestamps(range: string): string[] {
   const now = new Date();
