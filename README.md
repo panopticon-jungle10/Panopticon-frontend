@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Panopticon_userside
 
-## Getting Started
+유저환경 구성
 
-First, run the development server:
+# 👀 Panopticon
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+“모든 서비스의 로그를 한눈에 관찰하다.”
+
+## 🌿 Branch Naming
+
+| 타입          | 예시                    | 설명                                                  |
+| ------------- | ----------------------- | ----------------------------------------------------- |
+| **feature/**  | `feature/signup-ui`     | 새로운 기능 개발                                      |
+| **fix/**      | `fix/post-api-error`    | 오류 수정 (일반 + 긴급)                               |
+| **refactor/** | `refactor/comment-hook` | 리팩토링 (기능 변화 없고 코드 구조 개선과 관련)       |
+| **test/**     | `test/routing-next`     | 테스트 (기능 개발과 관계없이 테스트가 필요할때)       |
+| **...**       | `...`                   | 코드 구현과 관련없는 이외의 작업들은 바로 Main에 커밋 |
+
+---
+
+> 각 브랜치는 **작업 목적이 명확하게 드러나도록** 이름을 붙이세요
+> 예: `feature/login-api`, `fix/user-auth-bug`, `refactor/dashboard-layout`
+
+---
+
+## 💬 Conventional Commits
+
+```
+<type>(<scope>): <subject>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **type**: 커밋의 유형 (예: `feat`, `fix`, `docs` 등)
+- **scope**: 변경된 범위나 영역 (선택 사항)
+- **subject**: 간단한 변경 내용 설명
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| 타입                | 설명                                                              | 예시                                          |
+| ------------------- | ----------------------------------------------------------------- | --------------------------------------------- |
+| **feat**            | 새로운 기능을 추가할 때 사용                                      | `[feat(auth)]: 소셜 로그인 기능 추가`         |
+| **refactor**        | 코드 리팩토링, 기능 추가나 버그 수정 아님                         | `[refactor(user-service)]: 로직 최적화`       |
+| **fix**             | 버그 수정 시 사용                                                 | `[fix(api)]: 로그인 오류 수정`                |
+| **docs**            | 문서 수정 (코드 변경 없음)                                        | `[docs(readme)]: 설치 가이드 업데이트`        |
+| **style**           | 코드 형식이나 포맷 변경 (기능 변화 없음)                          | `[style(global)]: 들여쓰기 규칙 통일`         |
+| **test**            | 테스트 코드 추가 또는 수정                                        | `[test(api)]: 인증 기능 테스트 추가`          |
+| **chore**           | 빌드 프로세스 변경, 패키지 업데이트 등 코드와 직접 관련 없는 작업 | `[chore(build)]: 의존성 패키지 업데이트`      |
+| **perf**            | 성능을 개선하기 위한 코드 변경                                    | `[perf(images)]: 이미지 로딩 속도 개선`       |
+| **BREAKING CHANGE** | 호환성을 깨는 변경 사항을 설명할 때 사용                          | `[BREAKING CHANGE]: 스키마가 변경되었습니다.` |
