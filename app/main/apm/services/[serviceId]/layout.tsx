@@ -1,13 +1,14 @@
 import Sidebar from '@/components/common/app/Sidebar';
 
-export default function ApmLayout({ children }: { children: React.ReactNode }) {
+export default function ServiceDetailLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex">
-      {/* 좌측 사이드바 */}
+    <div className="bg-gray-50 min-h-screen">
       <Sidebar />
 
-      {/* 본문 */}
-      <main className="flex-1 pl-64 p-6 bg-gray-50 min-h-screen">{children}</main>
+      {/* 본문: 사이드바 너비(w-64 = 256px)만큼 padding-left */}
+      <main className="pl-64 p-6 overflow-y-auto">
+        <div className="max-w-[1600px] mx-auto">{children}</div>
+      </main>
     </div>
   );
 }
