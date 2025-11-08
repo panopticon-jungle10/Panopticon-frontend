@@ -6,7 +6,6 @@ export default function mainLayout({ children }: { children: ReactNode }) {
     <>
       <Header />
       <main className="w-screen h-screen p-6">{children}</main>
-      {/* {children} */}
     </>
   );
 }
