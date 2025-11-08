@@ -24,7 +24,7 @@ export default function Sidebar() {
   >('overview');
 
   return (
-    <aside className="fixed left-0 top-[64px] w-64 h-[calc(100vh-64px)] flex flex-col border-r border-gray-200 bg-white">
+    <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] flex flex-col border-r border-gray-200 bg-white">
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
         {/* Integration */}
@@ -75,7 +75,17 @@ export default function Sidebar() {
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
-                  onClick={() => setSelectedApmSubmenu(key as any)}
+                  onClick={() =>
+                    setSelectedApmSubmenu(
+                      key as
+                        | 'overview'
+                        | 'resources'
+                        | 'dependencies'
+                        | 'traces'
+                        | 'errors'
+                        | 'logs',
+                    )
+                  }
                   className={`w-full px-3 py-2 rounded-md flex items-center gap-2 text-sm transition ${
                     selectedApmSubmenu === key
                       ? 'bg-gray-100 text-gray-900 font-medium'
