@@ -7,7 +7,7 @@ import StatGrid from '@/components/features/apm/services/service_id/logs/StatGri
 import LogList from '@/components/features/apm/services/service_id/logs/LogList';
 import { mockLogs, mockStats } from '@/components/features/apm/services/service_id/logs/mock';
 
-export default function ServiceLogsPage({ params }: { params: { serviceId: string } }) {
+export default function ServiceLogsPage() {
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('');
   const [service, setService] = useState('');

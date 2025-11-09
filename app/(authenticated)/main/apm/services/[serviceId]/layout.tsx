@@ -7,10 +7,8 @@ export async function generateStaticParams() {
 
 export default function ApmLayout({
   children,
-  _params,
 }: {
   children: React.ReactNode;
-  _params: { serviceId: string };
 }) {
   return (
     <div className="flex">
