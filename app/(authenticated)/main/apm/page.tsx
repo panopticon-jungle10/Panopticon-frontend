@@ -5,14 +5,33 @@ import { FiAlertOctagon } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
 import Table from '@/components/ui/Table';
+import DatabaseIcon from '@/components/icons/services/Database';
+import FrontendIcon from '@/components/icons/services/Frontend';
+import ApiIcon from '@/components/icons/services/Api';
+
+type ServiceType = 'DB' | 'Frontend' | 'API';
 
 interface ApmService {
-  type: string;
+  type: ServiceType;
   service: string;
   requests: number;
   latency: number;
   errorRate: number;
 }
+
+// 서비스 타입별 아이콘 렌더링 함수
+const renderServiceIcon = (type: ServiceType) => {
+  switch (type) {
+    case 'DB':
+      return <DatabaseIcon size={20} color="#3b82f6" />;
+    case 'Frontend':
+      return <FrontendIcon size={20} color="#8b5cf6" />;
+    case 'API':
+      return <ApiIcon size={20} color="#10b981" />;
+    default:
+      return null;
+  }
+};
 
 // 임시 데이터 (추후 API로 대체)
 const services: ApmService[] = [
@@ -24,7 +43,7 @@ const services: ApmService[] = [
     errorRate: 0.5,
   },
   {
-    type: 'Database',
+    type: 'DB',
     service: 'payment-db',
     requests: 8234,
     latency: 230,
@@ -44,6 +63,12 @@ const columns = [
     key: 'type' as keyof ApmService,
     header: 'Type',
     width: '20%',
+    render: (_value: ApmService[keyof ApmService], row: ApmService) => (
+      <div className="flex items-center gap-2">
+        {renderServiceIcon(row.type)}
+        <span className="text-sm text-gray-600">{row.type}</span>
+      </div>
+    ),
   },
   {
     key: 'service' as keyof ApmService,

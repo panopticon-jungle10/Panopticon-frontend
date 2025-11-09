@@ -28,7 +28,7 @@ export default function Table<T>({
   onFavoriteClick,
 }: TableProps<T>) {
   const [sortField, setSortField] = useState<keyof T | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // 정렬 함수
   const getComparator = (key: keyof T, direction: 'asc' | 'desc') => {
@@ -76,7 +76,10 @@ export default function Table<T>({
           <tr className="border-b border-gray-200">
             {/* 즐겨찾기 열 */}
             {showFavorite && (
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50 w-12">
+              <th
+                className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50 w-12"
+                aria-label="favorite"
+              >
                 <Star className="w-4 h-4 text-black" />
               </th>
             )}
