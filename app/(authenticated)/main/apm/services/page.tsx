@@ -164,7 +164,7 @@ export default function ServicesPage() {
 
       {viewType === 'list' ? (
         <>
-          <Table<Service> columns={columns} data={pagedData} />
+          <Table<Service> columns={columns} data={pagedData} showFavorite={true} />
           <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
         </>
       ) : (
