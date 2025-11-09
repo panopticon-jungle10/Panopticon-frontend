@@ -92,7 +92,7 @@ services:
 | `./:/app`              | 소스코드 전체 마운트       | 파일 변경 감지 → 즉시 반영              |
 | `/app/node_modules`    | 호스트 node_modules 제외   | 네이티브 모듈 호환성 (ARM64 vs x86 등)  |
 | `3000:3000`            | Next.js dev 서버 포트 노출 | 브라우저에서 http://localhost:3000 접근 |
-| `NODE_ENV=development` | 개발 모드                  | Next.js 고속 재빌드, 소스맵 포함        |
+| `NODE_ENV=development` | 개발 모드                  | Next.js 고속 리빌드, 소스맵 포함        |
 
 ---
 
@@ -193,13 +193,13 @@ docker compose up --build
 
 ### ❌ 포트 3000이 이미 사용 중
 
-**해결책 1: 다른 포트 사용**
+**해결책 1: 환경변수로 포트 변경**
 
 ```bash
-docker compose -f docker-compose.yml -e "PORT=3001" up
+PORT=3001 docker compose up
 ```
 
-**해결책 2: docker-compose.yml에서 포트 변경**
+**해결책 2: docker-compose.yml에서 포트 직접 변경**
 
 ```yaml
 ports:
