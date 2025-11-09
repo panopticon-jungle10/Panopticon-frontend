@@ -1,4 +1,4 @@
-import Sidebar from '@/components/common/app/Sidebar';
+import Sidebar from '@/components/features/apm/services/service_id/Sidebar';
 
 // Next.js 정적 export를 위한 함수
 export async function generateStaticParams() {
