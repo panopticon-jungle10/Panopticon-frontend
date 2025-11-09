@@ -17,8 +17,14 @@ type Props = {
 };
 
 export default function FilterBar({
-  query, level, service, levels, services,
-  onChangeQuery, onChangeLevel, onChangeService,
+  query,
+  level,
+  service,
+  levels,
+  services,
+  onChangeQuery,
+  onChangeLevel,
+  onChangeService,
 }: Props) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-3 md:p-4 flex flex-col gap-3 md:flex-row md:items-center">
@@ -31,12 +37,28 @@ export default function FilterBar({
         />
       </div>
       {/* 로그 레벨 선택 */}
-      <select className="h-11 rounded-xl bg-gray-100 px-4 text-sm" value={level} onChange={(e) => onChangeLevel(e.target.value)}>
-        {levels.map((l) => (<option key={l} value={l}>{l === '' ? '모든 레벨' : l}</option>))}
+      <select
+        className="h-11 rounded-xl bg-gray-100 px-4 text-sm"
+        value={level}
+        onChange={(e) => onChangeLevel(e.target.value)}
+      >
+        {levels.map((l) => (
+          <option key={l} value={l}>
+            {l === '' ? '모든 레벨' : l}
+          </option>
+        ))}
       </select>
       {/* 서비스 선택 */}
-      <select className="h-11 rounded-xl bg-gray-100 px-4 text-sm" value={service} onChange={(e) => onChangeService(e.target.value)}>
-        {services.map((s) => (<option key={s} value={s}>{s === '' ? '모든 서비스' : s}</option>))}
+      <select
+        className="h-11 rounded-xl bg-gray-100 px-4 text-sm"
+        value={service}
+        onChange={(e) => onChangeService(e.target.value)}
+      >
+        {services.map((s) => (
+          <option key={s} value={s}>
+            {s === '' ? '모든 서비스' : s}
+          </option>
+        ))}
       </select>
     </div>
   );

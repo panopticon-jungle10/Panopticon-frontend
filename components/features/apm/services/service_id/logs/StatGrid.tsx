@@ -6,7 +6,9 @@ import StatCard from './StatCard';
 export default function StatGrid({ items }: { items: StatItem[] }) {
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-      {items.map((s) => (<StatCard key={s.id} item={s} />))}
+      {items.map((s) => (
+        <StatCard key={s.id} item={s} />
+      ))}
     </div>
   );
 }

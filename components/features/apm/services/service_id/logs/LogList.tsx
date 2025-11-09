@@ -6,7 +6,9 @@ import LogItem from './LogItem';
 export default function LogList({ items }: { items: LogEntry[] }) {
   return (
     <div className="flex flex-col gap-3">
-      {items.map((l) => (<LogItem key={l.id} item={l} />))}
+      {items.map((l) => (
+        <LogItem key={l.id} item={l} />
+      ))}
     </div>
   );
 }

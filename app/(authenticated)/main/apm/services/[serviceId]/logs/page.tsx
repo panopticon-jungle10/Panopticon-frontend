@@ -12,10 +12,7 @@ export default function ServiceLogsPage({ params }: { params: { serviceId: strin
   const [level, setLevel] = useState('');
   const [service, setService] = useState('');
 
-  const services = useMemo(
-    () => ['', ...Array.from(new Set(mockLogs.map((l) => l.service)))],
-    []
-  );
+  const services = useMemo(() => ['', ...Array.from(new Set(mockLogs.map((l) => l.service)))], []);
   const levels = ['', 'ERROR', 'WARNING', 'INFO'];
 
   // 필터링
