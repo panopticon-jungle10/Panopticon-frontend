@@ -1,9 +1,9 @@
 'use client';
 
 import Table from '@/components/ui/Table';
-import DatabaseIcon from '@/components/icons/service/Database';
-import FrontendIcon from '@/components/icons/service/Frontend';
-import ApiIcon from '@/components/icons/service/Api';
+import DatabaseIcon from '@/components/icons/services/Database';
+import FrontendIcon from '@/components/icons/services/Frontend';
+import ApiIcon from '@/components/icons/services/Api';
 import ViewModeSelectBox from './components/ViewModeSelectBox';
 import PageSizeSelect from './components/PageSizeSelect';
 import Pagination from './components/Pagination';
