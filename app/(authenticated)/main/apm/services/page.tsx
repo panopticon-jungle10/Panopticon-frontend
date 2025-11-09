@@ -4,12 +4,12 @@ import Table from '@/components/ui/Table';
 import DatabaseIcon from '@/components/icons/service/Database';
 import FrontendIcon from '@/components/icons/service/Frontend';
 import ApiIcon from '@/components/icons/service/Api';
-import { SelectDate } from '@/components/common/SelectDate';
 import ViewModeSelectBox from './components/ViewModeSelectBox';
 import PageSizeSelect from './components/PageSizeSelect';
 import Pagination from './components/Pagination';
 import { useState } from 'react';
 import SearchInput from '@/components/ui/SearchInput';
+import { SelectDate } from '@/components/common/authenticated/SelectDate';
 
 type ServiceType = 'DB' | 'Frontend' | 'API';
 
