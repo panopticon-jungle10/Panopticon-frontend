@@ -81,7 +81,7 @@ export default function ApmPage() {
 
   return (
     <>
-      <div className="p-8 bg-gray-50 min-h-screen space-y-6">
+      <div className="p-8 bg-gray-50 h-full space-y-6">
         {/* APM Services */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           {/* Header */}
