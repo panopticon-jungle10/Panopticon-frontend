@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/BaseButton';
+import Button from '@/components/ui/Button';
 import FeatureCard from '@/components/ui/FeatureCard';
 import Logo from '@/components/icons/Logo';
 import ArrowRight from '@/components/icons/landing/ArrowRight';
@@ -34,7 +34,7 @@ export default function LandingPage() {
               Docs
             </a>
             <Button onClick={handleNavigate} variant="default">
-              Sign In
+              회원가입 / 로그인
             </Button>
           </nav>
         </div>

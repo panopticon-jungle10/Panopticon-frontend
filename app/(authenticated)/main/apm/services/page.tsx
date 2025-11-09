@@ -145,7 +145,7 @@ export default function ServicesPage() {
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
 
   return (
-    <>
+    <div id="apm-services-container" className="p-8">
       <h1 className="text-2xl font-bold mb-6">서비스 목록</h1>
 
       <SearchInput placeholder="서비스 검색..." className="mb-4 w-80 h-10" />
@@ -170,6 +170,6 @@ export default function ServicesPage() {
       ) : (
         <div>맵 뷰 구현 예정...</div>
       )}
-    </>
+    </div>
   );
 }
