@@ -1,22 +1,23 @@
 import Sidebar from '@/components/features/apm/services/service_id/Sidebar';
 
-// Next.js 정적 export를 위한 함수
 export async function generateStaticParams() {
-  // 정적으로 빌드할 서비스 목록
   const services = ['auth', 'user', 'frontend', 'backend', 'payment'];
-  return services.map((id) => ({
-    serviceId: id,
-  }));
+  return services.map((id) => ({ serviceId: id }));
 }
 
-export default function ApmLayout({ children }: { children: React.ReactNode }) {
+export default function ApmLayout({
+  children,
+  _params,
+}: {
+  children: React.ReactNode;
+  _params: { serviceId: string };
+}) {
   return (
     <div className="flex">
-      {/* 좌측 사이드바 */}
       <Sidebar />
-
-      {/* 본문 */}
-      <main className="flex-1 pl-64 p-6 bg-gray-50 min-h-screen">{children}</main>
+      <main className="flex-1 pl-64 p-6 bg-gray-50 min-h-screen">
+        {children}
+      </main>
     </div>
   );
 }
