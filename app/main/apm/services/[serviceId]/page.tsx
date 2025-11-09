@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { FiChevronDown } from 'react-icons/fi';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -302,7 +302,7 @@ export default function ServiceOverview() {
             className="flex items-center justify-between gap-2 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white hover:bg-gray-50 transition"
           >
             <span>{TIME_RANGES.find((t) => t.value === timeRange)?.label}</span>
-            <ChevronDown size={16} />
+            <FiChevronDown size={16} />
           </button>
 
           <AnimatePresence>
