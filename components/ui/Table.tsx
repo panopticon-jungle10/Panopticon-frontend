@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import Star from '../icons/Star';
 
 interface TableColumn<T> {
   key: keyof T;
@@ -17,7 +18,6 @@ interface TableProps<T> {
   className?: string;
   showFavorite?: boolean; // 즐겨찾기 열 표시 여부
   onFavoriteClick?: (row: T, index: number) => void; // 즐겨찾기 클릭 핸들러
-  favoriteIcon?: (row: T, index: number) => React.ReactNode; // 즐겨찾기 아이콘 커스텀
 }
 
 export default function Table<T>({
@@ -26,7 +26,6 @@ export default function Table<T>({
   className = 'w-full',
   showFavorite = false,
   onFavoriteClick,
-  favoriteIcon,
 }: TableProps<T>) {
   const [sortField, setSortField] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -78,9 +77,7 @@ export default function Table<T>({
             {/* 즐겨찾기 열 */}
             {showFavorite && (
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50 w-12">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                <Star className="w-4 h-4 text-black" />
               </th>
             )}
             {columns.map((column) => (
@@ -131,18 +128,7 @@ export default function Table<T>({
                     className="px-4 py-3 text-sm"
                     onClick={() => onFavoriteClick?.(row, rowIndex)}
                   >
-                    {favoriteIcon ? (
-                      favoriteIcon(row, rowIndex)
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-gray-400 hover:text-yellow-500 cursor-pointer"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    )}
+                    <Star className="w-4 h-4 text-gray-400 hover:text-yellow-500 cursor-pointer" />
                   </td>
                 )}
                 {columns.map((column) => (

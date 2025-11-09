@@ -22,6 +22,20 @@ interface Service {
   issues: number;
 }
 
+// 서비스 타입별 아이콘 렌더링 함수
+const renderServiceIcon = (type: ServiceType) => {
+  switch (type) {
+    case 'DB':
+      return <DatabaseIcon size={20} color="#3b82f6" />;
+    case 'Frontend':
+      return <FrontendIcon size={20} color="#8b5cf6" />;
+    case 'API':
+      return <ApiIcon size={20} color="#10b981" />;
+    default:
+      return null;
+  }
+};
+
 // 임시 데이터 (추후 API로 대체)
 const services: Service[] = [
   {
@@ -58,82 +72,68 @@ const services: Service[] = [
   },
 ];
 
+const columns = [
+  {
+    key: 'type' as keyof Service,
+    header: 'Type',
+    width: '12%',
+    render: (_value: Service[keyof Service], row: Service) => (
+      <div className="flex items-center gap-2">
+        {renderServiceIcon(row.type)}
+        <span className="text-sm text-gray-600">{row.type}</span>
+      </div>
+    ),
+  },
+  {
+    key: 'name' as keyof Service,
+    header: 'Name',
+    width: '40%',
+  },
+  {
+    key: 'requests' as keyof Service,
+    header: 'Requests',
+    width: '12%',
+    render: (value: Service[keyof Service]) => (value as number).toLocaleString(),
+  },
+  {
+    key: 'errorRate' as keyof Service,
+    header: 'Error Rate',
+    width: '12%',
+    render: (value: Service[keyof Service]) => (
+      <span className={(value as number) > 2 ? 'text-red-600 font-semibold' : ''}>
+        {value as number}%
+      </span>
+    ),
+  },
+  {
+    key: 'p95Latency' as keyof Service,
+    header: 'P95 Latency',
+    width: '12%',
+    render: (value: Service[keyof Service]) => <span>{value as number}ms</span>,
+  },
+  {
+    key: 'issues' as keyof Service,
+    header: 'Issues',
+    width: '12%',
+    render: (value: Service[keyof Service]) => {
+      const issueCount = value as number;
+      return (
+        <span
+          className={`inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-semibold ${
+            issueCount > 0 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          {issueCount}
+        </span>
+      );
+    },
+  },
+];
+
 export default function ServicesPage() {
   const [viewType, setViewType] = useState<'list' | 'map'>('list');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  // 서비스 타입별 아이콘 렌더링 함수
-  const renderServiceIcon = (type: ServiceType) => {
-    switch (type) {
-      case 'DB':
-        return <DatabaseIcon size={20} color="#3b82f6" />;
-      case 'Frontend':
-        return <FrontendIcon size={20} color="#8b5cf6" />;
-      case 'API':
-        return <ApiIcon size={20} color="#10b981" />;
-      default:
-        return null;
-    }
-  };
-
-  const columns = [
-    {
-      key: 'type' as keyof Service,
-      header: 'Type',
-      width: '12%',
-      render: (_value: Service[keyof Service], row: Service) => (
-        <div className="flex items-center gap-2">
-          {renderServiceIcon(row.type)}
-          <span className="text-sm text-gray-600">{row.type}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'name' as keyof Service,
-      header: 'Name',
-      width: '40%',
-    },
-    {
-      key: 'requests' as keyof Service,
-      header: 'Requests',
-      width: '12%',
-      render: (value: Service[keyof Service]) => (value as number).toLocaleString(),
-    },
-    {
-      key: 'errorRate' as keyof Service,
-      header: 'Error Rate',
-      width: '12%',
-      render: (value: Service[keyof Service]) => (
-        <span className={(value as number) > 2 ? 'text-red-600 font-semibold' : ''}>
-          {value as number}%
-        </span>
-      ),
-    },
-    {
-      key: 'p95Latency' as keyof Service,
-      header: 'P95 Latency',
-      width: '12%',
-      render: (value: Service[keyof Service]) => <span>{value as number}ms</span>,
-    },
-    {
-      key: 'issues' as keyof Service,
-      header: 'Issues',
-      width: '12%',
-      render: (value: Service[keyof Service]) => {
-        const issueCount = value as number;
-        return (
-          <span
-            className={`inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-semibold ${
-              issueCount > 0 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            {issueCount}
-          </span>
-        );
-      },
-    },
-  ];
 
   // 페이징 계산
   const total = services.length;

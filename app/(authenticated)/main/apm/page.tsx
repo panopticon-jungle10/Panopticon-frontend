@@ -14,70 +14,70 @@ interface ApmService {
   errorRate: number;
 }
 
+// 임시 데이터 (추후 API로 대체)
+const services: ApmService[] = [
+  {
+    type: 'API',
+    service: 'user-service',
+    requests: 12453,
+    latency: 125,
+    errorRate: 0.5,
+  },
+  {
+    type: 'Database',
+    service: 'payment-db',
+    requests: 8234,
+    latency: 230,
+    errorRate: 1.2,
+  },
+  {
+    type: 'Frontend',
+    service: 'web-app',
+    requests: 5621,
+    latency: 340,
+    errorRate: 3.8,
+  },
+];
+
+const columns = [
+  {
+    key: 'type' as keyof ApmService,
+    header: 'Type',
+    width: '20%',
+  },
+  {
+    key: 'service' as keyof ApmService,
+    header: 'Service',
+    width: '25%',
+  },
+  {
+    key: 'requests' as keyof ApmService,
+    header: 'Requests',
+    width: '20%',
+    render: (value: ApmService[keyof ApmService]) => (value as number).toLocaleString(),
+  },
+  {
+    key: 'latency' as keyof ApmService,
+    header: 'P99 Latency',
+    width: '15%',
+    render: (value: ApmService[keyof ApmService]) => (
+      <span className="flex items-center gap-1">{value as number}ms</span>
+    ),
+  },
+  {
+    key: 'errorRate' as keyof ApmService,
+    header: 'Error Rate',
+    width: '15%',
+    render: (value: ApmService[keyof ApmService]) => (
+      <span className={(value as number) > 2 ? 'text-red-600 font-semibold' : ''}>
+        {value as number}%
+      </span>
+    ),
+  },
+];
+
 export default function ApmPage() {
   const [searchQuery, setSearchQuery] = useState('');
-
-  // 임시 데이터 (추후 API로 대체)
-  const services: ApmService[] = [
-    {
-      type: 'API',
-      service: 'user-service',
-      requests: 12453,
-      latency: 125,
-      errorRate: 0.5,
-    },
-    {
-      type: 'Database',
-      service: 'payment-db',
-      requests: 8234,
-      latency: 230,
-      errorRate: 1.2,
-    },
-    {
-      type: 'Frontend',
-      service: 'web-app',
-      requests: 5621,
-      latency: 340,
-      errorRate: 3.8,
-    },
-  ];
-
-  const columns = [
-    {
-      key: 'type' as keyof ApmService,
-      header: 'Type',
-      width: '20%',
-    },
-    {
-      key: 'service' as keyof ApmService,
-      header: 'Service',
-      width: '25%',
-    },
-    {
-      key: 'requests' as keyof ApmService,
-      header: 'Requests',
-      width: '20%',
-      render: (value: ApmService[keyof ApmService]) => (value as number).toLocaleString(),
-    },
-    {
-      key: 'latency' as keyof ApmService,
-      header: 'P99 Latency',
-      width: '15%',
-      render: (value: ApmService[keyof ApmService]) => (
-        <span className="flex items-center gap-1">{value as number}ms</span>
-      ),
-    },
-    {
-      key: 'errorRate' as keyof ApmService,
-      header: 'Error Rate',
-      width: '15%',
-      render: (value: ApmService[keyof ApmService]) => (
-        <span className={(value as number) > 2 ? 'text-red-600 font-semibold' : ''}>
-          {value as number}%
-        </span>
-      ),
-    },
-  ];
 
   return (
     <>
