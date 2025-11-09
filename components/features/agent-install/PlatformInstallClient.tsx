@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Logo from '@/components/icons/Logo';
 import { IoArrowBack } from 'react-icons/io5';
 import { StepIndicator } from './StepIndicator';
 import { InstallStep, MonitoringOptions, PlatformType, StepConfig } from '@/types/agent-install';
