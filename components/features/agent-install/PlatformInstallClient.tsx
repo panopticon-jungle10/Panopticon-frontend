@@ -3,16 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/icons/Logo';
-import { platformsData, PlatformType } from '../platforms';
 import { IoArrowBack } from 'react-icons/io5';
 import { StepIndicator } from './StepIndicator';
+import { InstallStep, MonitoringOptions, PlatformType, StepConfig } from '@/types/agent-install';
+import { platformsData } from '@/app/(authenticated)/agent-install/platforms';
 import {
   DockerStepOne,
-  DockerStepTwo,
   DockerStepThree,
+  DockerStepTwo,
   DockerVerificationStep,
 } from './DockerSteps';
-import { InstallStep, MonitoringOptions, StepConfig } from './types';
 
 const platformStepConfig: Record<PlatformType, StepConfig> = {
   docker: { total: 4, showOptions: true },

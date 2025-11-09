@@ -9,7 +9,7 @@ import PageSizeSelect from './components/PageSizeSelect';
 import Pagination from './components/Pagination';
 import { useState } from 'react';
 import SearchInput from '@/components/ui/SearchInput';
-import { SelectDate } from '@/components/common/authenticated/SelectDate';
+import { SelectDate } from '@/components/features/apm/services/SelectDate';
 
 type ServiceType = 'DB' | 'Frontend' | 'API';
 

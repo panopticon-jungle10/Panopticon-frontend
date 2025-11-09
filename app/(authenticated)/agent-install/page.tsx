@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Logo from '@/components/icons/Logo';
-import { platformsData, PlatformType } from './platforms';
+import { platformsData } from './platforms';
+import { PlatformType } from '@/types/agent-install';
 
 export default function AgentInstallPage() {
   const router = useRouter();
