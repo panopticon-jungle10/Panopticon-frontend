@@ -18,9 +18,13 @@ export default function ApiIcon({ size = 20, color = 'currentColor' }: ApiIconPr
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-        <path d="M12 8v8" />
-        <path d="M8 12h8" />
+        {/* 본체 */}
+        <rect x="5" y="6" width="14" height="12" rx="2" />
+        {/* 상단 네트워크/안테나 */}
+        <line x1="12" y1="2" x2="12" y2="6" />
+        {/* 하단 포트 */}
+        <circle cx="8.5" cy="18.5" r="1" />
+        <circle cx="15.5" cy="18.5" r="1" />
       </svg>
     </IconWrapper>
   );

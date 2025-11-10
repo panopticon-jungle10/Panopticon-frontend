@@ -13,7 +13,8 @@ export default function PageSizeSelect({ value, onChange }: PageSizeSelectProps)
         id="pageSize"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="border rounded px-2 py-1 text-sm focus:outline-none"
+        className="px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white shadow-sm transition-colors duration-150 outline-none appearance-none"
+        style={{ minHeight: '40px' }}
       >
         <option value={10}>10개</option>
         <option value={50}>50개</option>
