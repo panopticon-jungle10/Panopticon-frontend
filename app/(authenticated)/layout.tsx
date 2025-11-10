@@ -3,9 +3,9 @@ import type { ReactNode } from 'react';
 
 export default function mainLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <div className="h-screen flex flex-col">
       <AuthenticatedHeader />
-      <main className="w-screen h-screen">{children}</main>
-    </>
+      <main className="flex-1 overflow-y-auto w-full">{children}</main>
+    </div>
   );
 }
