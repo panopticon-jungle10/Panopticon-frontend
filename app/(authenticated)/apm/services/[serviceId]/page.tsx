@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import LogsSection from '../../../../../../components/features/apm/services/[serviceId]/section/Logs';
+import LogsSection from '../../../../../components/features/apm/services/[serviceId]/section/Logs';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
