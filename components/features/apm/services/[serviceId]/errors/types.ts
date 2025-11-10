@@ -8,8 +8,8 @@ export interface ErrorItem {
   count: number;
   first_seen: string;
   last_seen: string;
-  stack_trace: string;
-  sample_trace_ids: string[];
+  stack_trace?: string;
+  sample_trace_ids?: string[];
 }
 
 export interface ErrorResponse {
@@ -17,4 +17,16 @@ export interface ErrorResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+/* 시간별 에러 트렌드용 */
+export interface ErrorTrendPoint {
+  timestamp: string;
+  count: number;
+}
+
+export interface ErrorTrendSeries {
+  service: string;
+  color: string;
+  data: ErrorTrendPoint[];
 }
