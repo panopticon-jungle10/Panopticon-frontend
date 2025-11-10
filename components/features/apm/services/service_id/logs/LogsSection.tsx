@@ -46,4 +46,3 @@ export default function LogsSection() {
     </section>
   );
 }
-
