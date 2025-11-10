@@ -1,5 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
+import LogsSection from './components/Logs';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
@@ -353,6 +354,12 @@ export default function ServiceOverview() {
           </div>
         </>
       )}
+
+      {/* Logs section */}
+      <div className="pt-4">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Logs</h2>
+        <LogsSection />
+      </div>
     </div>
   );
 }

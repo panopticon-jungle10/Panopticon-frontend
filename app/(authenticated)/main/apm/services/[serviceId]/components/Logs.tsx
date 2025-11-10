@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-
 import FilterBar from '@/components/features/apm/services/service_id/logs/FilterBar';
 import StatGrid from '@/components/features/apm/services/service_id/logs/StatGrid';
 import LogList from '@/components/features/apm/services/service_id/logs/LogList';
 import { mockLogs, mockStats } from '@/components/features/apm/services/service_id/logs/mock';
 
-export default function ServiceLogsPage() {
+export default function LogsSection() {
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('');
   const [service, setService] = useState('');
@@ -15,7 +14,6 @@ export default function ServiceLogsPage() {
   const services = useMemo(() => ['', ...Array.from(new Set(mockLogs.map((l) => l.service)))], []);
   const levels = ['', 'ERROR', 'WARNING', 'INFO'];
 
-  // 필터링
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return mockLogs.filter((l) => {
@@ -31,7 +29,7 @@ export default function ServiceLogsPage() {
   }, [query, level, service]);
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6">
+    <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
       <FilterBar
         query={query}
         level={level}
@@ -44,6 +42,6 @@ export default function ServiceLogsPage() {
       />
       <StatGrid items={mockStats} />
       <LogList items={filtered} />
-    </div>
+    </section>
   );
 }
