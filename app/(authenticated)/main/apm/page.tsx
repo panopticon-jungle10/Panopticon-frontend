@@ -1,54 +1,112 @@
 'use client';
 
 import { useState } from 'react';
-import { FiChevronUp, FiChevronDown, FiAlertOctagon, FiZap } from 'react-icons/fi';
+import { FiAlertOctagon } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
+import Table from '@/components/ui/Table';
+import DatabaseIcon from '@/components/icons/services/Database';
+import FrontendIcon from '@/components/icons/services/Frontend';
+import ApiIcon from '@/components/icons/services/Api';
 
-/* 정렬 아이콘 컴포넌트 - 컴포넌트 외부로 이동 */
-function SortIcon({
-  field,
-  currentField,
-  direction,
-}: {
-  field: string;
-  currentField: string | null;
-  direction: 'asc' | 'desc';
-}) {
-  if (currentField !== field) {
-    return (
-      <div className="flex flex-col ml-1">
-        <FiChevronUp className="w-3 h-3 -mb-1 text-gray-300" />
-        <FiChevronDown className="w-3 h-3 text-gray-300" />
-      </div>
-    );
-  }
+type ServiceType = 'DB' | 'Frontend' | 'API';
 
-  return direction === 'asc' ? (
-    <FiChevronUp className="w-3 h-3 ml-1" />
-  ) : (
-    <FiChevronDown className="w-3 h-3 ml-1" />
-  );
+interface ApmService {
+  type: ServiceType;
+  service: string;
+  requests: number;
+  latency: number;
+  errorRate: number;
 }
+
+// 서비스 타입별 아이콘 렌더링 함수
+const renderServiceIcon = (type: ServiceType) => {
+  switch (type) {
+    case 'DB':
+      return <DatabaseIcon size={20} color="#3b82f6" />;
+    case 'Frontend':
+      return <FrontendIcon size={20} color="#8b5cf6" />;
+    case 'API':
+      return <ApiIcon size={20} color="#10b981" />;
+    default:
+      return null;
+  }
+};
+
+// 임시 데이터 (추후 API로 대체)
+const services: ApmService[] = [
+  {
+    type: 'API',
+    service: 'user-service',
+    requests: 12453,
+    latency: 125,
+    errorRate: 0.5,
+  },
+  {
+    type: 'DB',
+    service: 'payment-db',
+    requests: 8234,
+    latency: 230,
+    errorRate: 1.2,
+  },
+  {
+    type: 'Frontend',
+    service: 'web-app',
+    requests: 5621,
+    latency: 340,
+    errorRate: 3.8,
+  },
+];
+
+const columns = [
+  {
+    key: 'type' as keyof ApmService,
+    header: 'Type',
+    width: '20%',
+    render: (_value: ApmService[keyof ApmService], row: ApmService) => (
+      <div className="flex items-center gap-2">
+        {renderServiceIcon(row.type)}
+        <span className="text-sm text-gray-600">{row.type}</span>
+      </div>
+    ),
+  },
+  {
+    key: 'service' as keyof ApmService,
+    header: 'Service',
+    width: '25%',
+  },
+  {
+    key: 'requests' as keyof ApmService,
+    header: 'Requests',
+    width: '20%',
+    render: (value: ApmService[keyof ApmService]) => (value as number).toLocaleString(),
+  },
+  {
+    key: 'latency' as keyof ApmService,
+    header: 'P99 Latency',
+    width: '15%',
+    render: (value: ApmService[keyof ApmService]) => (
+      <span className="flex items-center gap-1">{value as number}ms</span>
+    ),
+  },
+  {
+    key: 'errorRate' as keyof ApmService,
+    header: 'Error Rate',
+    width: '15%',
+    render: (value: ApmService[keyof ApmService]) => (
+      <span className={(value as number) > 2 ? 'text-red-600 font-semibold' : ''}>
+        {value as number}%
+      </span>
+    ),
+  },
+];
 
 export default function ApmPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  /* 정렬 핸들러 */
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
 
   return (
     <>
-      <div className="p-8 bg-gray-50 min-h-screen space-y-6">
+      <div className="p-8 bg-gray-50 h-full space-y-6">
         {/* APM Services */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           {/* Header */}
@@ -75,65 +133,21 @@ export default function ApmPage() {
             </div>
           </div>
 
-          {/* Table Header */}
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-            <div className="grid grid-cols-11 gap-2 text-xs text-gray-600 uppercase">
-              <div className="col-span-1 flex items-center">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleSort('type')}
-                className="col-span-2 flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Type
-                <SortIcon field="type" currentField={sortField} direction={sortDirection} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSort('service')}
-                className="col-span-2 flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Service
-                <SortIcon field="service" currentField={sortField} direction={sortDirection} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSort('requests')}
-                className="col-span-2 flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Requests
-                <SortIcon field="requests" currentField={sortField} direction={sortDirection} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSort('latency')}
-                className="col-span-3 flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                <FiZap className="w-3 h-3 mr-1" />
-                P99 Latency
-                <SortIcon field="latency" currentField={sortField} direction={sortDirection} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSort('errorRate')}
-                className="col-span-1 flex items-center hover:text-gray-900 transition cursor-pointer"
-              >
-                Error Rate
-                <SortIcon field="errorRate" currentField={sortField} direction={sortDirection} />
-              </button>
+          {/* Table */}
+          {services.length === 0 ? (
+            <div className="px-4 py-16 flex flex-col items-center justify-center text-center">
+              <FiAlertOctagon className="w-12 h-12 mb-3 text-purple-400" />
+              <p className="text-gray-600 text-sm">No services match the filter</p>
+              <p className="text-xs text-gray-400 mt-1">Please widen your filter</p>
             </div>
-          </div>
-
-          {/* Empty State */}
-          <div className="px-4 py-16 flex flex-col items-center justify-center text-center">
-            <FiAlertOctagon className="w-12 h-12 mb-3 text-purple-400" />
-            <p className="text-gray-600 text-sm">No services match the filter</p>
-            <p className="text-xs text-gray-400 mt-1">Please widen your filter</p>
-          </div>
+          ) : (
+            <Table<ApmService>
+              columns={columns}
+              data={services}
+              showFavorite={true}
+              className="w-full"
+            />
+          )}
         </div>
 
         {/* Issues Section */}
