@@ -60,9 +60,7 @@ export default function Sidebar() {
                 key={key}
                 onClick={() => scrollToSection(key)}
                 className={`w-full px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm transition ${
-                  active
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'text-gray-600 hover:bg-gray-50'
+                  active ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Icon className="w-4 h-4" />

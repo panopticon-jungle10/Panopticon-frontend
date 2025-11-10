@@ -1,4 +1,4 @@
-import Sidebar from "@/components/features/apm/services/[serviceId]/Sidebar";
+import Sidebar from '@/components/features/apm/services/[serviceId]/Sidebar';
 
 export async function generateStaticParams() {
   const services = ['auth', 'user', 'frontend', 'backend', 'payment'];

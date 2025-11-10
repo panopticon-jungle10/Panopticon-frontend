@@ -372,7 +372,11 @@ export default function TracesSection() {
       {/* 차트 */}
       <ReactECharts option={option} style={{ height: 400 }} />
       <div className="mt-4 flex justify-between items-center text-sm text-gray-600">
-        <PageSizeSelect value={itemsPerPage} onChange={handlePageSizeChange} options={[10, 30, 50]} />
+        <PageSizeSelect
+          value={itemsPerPage}
+          onChange={handlePageSizeChange}
+          options={[10, 30, 50]}
+        />
       </div>
 
       {/* 테이블 */}
