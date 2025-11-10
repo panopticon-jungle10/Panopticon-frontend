@@ -7,7 +7,7 @@ export const AuthenticatedHeader = () => {
   // APM 드롭다운 아이템
   const apmItems = [
     {
-      href: '/main/apm/services',
+      href: '/apm/services',
       label: 'Services',
       ariaLabel: 'Go to Services',
     },
@@ -16,7 +16,7 @@ export const AuthenticatedHeader = () => {
   // Agent 드롭다운 아이템
   const agentItems = [
     {
-      href: '/agent-install',
+      href: '/install',
       label: 'Install Agents',
       ariaLabel: 'Go to Install Agents page',
     },
@@ -34,14 +34,14 @@ export const AuthenticatedHeader = () => {
           <HeaderDropdown
             triggerIcon={<SiGoogleanalytics className="w-6 h-6 text-zinc-700" />}
             triggerLabel="APM menu"
-            triggerHref="/main/apm"
+            triggerHref="/apm"
             title="APM"
             items={apmItems}
           />
           <HeaderDropdown
             triggerIcon={<GrHostMaintenance className="w-6 h-6 text-zinc-700" />}
             triggerLabel="Agent menu"
-            triggerHref="/agent-install"
+            triggerHref="/install"
             title="Integration"
             items={agentItems}
           />
