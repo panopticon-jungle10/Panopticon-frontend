@@ -309,7 +309,7 @@ export default function ServiceOverview() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-2">
+      <div id="overview" className="flex justify-between items-center mb-2 scroll-mt-8">
         <h1 className="text-2xl font-semibold text-gray-800">Overview</h1>
 
         {/* Dropdown */}
@@ -371,14 +371,38 @@ export default function ServiceOverview() {
         </>
       )}
 
+      {/* Resources section - 준비중 */}
+      <div id="resources" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Resources</h2>
+        <div className="bg-white p-8 rounded-lg border border-gray-200 text-center text-gray-500">
+          Coming soon...
+        </div>
+      </div>
+
+      {/* Dependencies section - 준비중 */}
+      <div id="dependencies" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Dependencies</h2>
+        <div className="bg-white p-8 rounded-lg border border-gray-200 text-center text-gray-500">
+          Coming soon...
+        </div>
+      </div>
+
       {/* Traces section */}
-      <div className='pt-4'>
+      <div id="traces" className='pt-4 scroll-mt-8'>
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Traces</h2>
         <TracesSection />
       </div>
 
+      {/* Errors section - 준비중 */}
+      <div id="errors" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Errors</h2>
+        <div className="bg-white p-8 rounded-lg border border-gray-200 text-center text-gray-500">
+          Coming soon...
+        </div>
+      </div>
+
       {/* Logs section */}
-      <div className="pt-4">
+      <div id="logs" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Logs</h2>
         <LogsSection />
       </div>
