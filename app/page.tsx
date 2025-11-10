@@ -34,7 +34,7 @@ export default function LandingPage() {
             fontFamily: `'Galmuri11', sans-serif`,
           }}
         >
-          쿠버네티스, 실시간으로 모니터링하세요.
+          실시간으로 모니터링하세요.
         </h1>
 
         <p
