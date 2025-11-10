@@ -2,5 +2,5 @@ import FrameworkInstallClient from '@/components/features/install/FrameworkInsta
 import { frameworksData } from '../frameworks';
 
 export default function NodejsInstallPage() {
-  return <FrameworkInstallClient framework={frameworksData.nodejs} frameworkKey="nodejs" />;
+  return <FrameworkInstallClient framework={frameworksData.nodejs} />;
 }

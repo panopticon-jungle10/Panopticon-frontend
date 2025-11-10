@@ -2,5 +2,5 @@ import FrameworkInstallClient from '@/components/features/install/FrameworkInsta
 import { frameworksData } from '../frameworks';
 
 export default function PythonInstallPage() {
-  return <FrameworkInstallClient framework={frameworksData.python} frameworkKey="python" />;
+  return <FrameworkInstallClient framework={frameworksData.python} />;
 }

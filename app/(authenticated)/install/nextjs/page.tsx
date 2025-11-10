@@ -2,5 +2,5 @@ import FrameworkInstallClient from '@/components/features/install/FrameworkInsta
 import { frameworksData } from '../frameworks';
 
 export default function NextjsInstallPage() {
-  return <FrameworkInstallClient framework={frameworksData.nextjs} frameworkKey="nextjs" />;
+  return <FrameworkInstallClient framework={frameworksData.nextjs} />;
 }
