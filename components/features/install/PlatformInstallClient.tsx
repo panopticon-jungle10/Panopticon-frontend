@@ -126,13 +126,9 @@ export default function PlatformInstallClient({ platformKey }: Props) {
           <div key={index} className="rounded-xl bg-white p-6 shadow-sm border border-gray-200">
             <h2 className="mb-4 text-xl font-semibold text-gray-900">{step.title}</h2>
 
-            {step.description && (
-              <p className="mb-4 text-gray-600">{step.description}</p>
-            )}
+            {step.description && <p className="mb-4 text-gray-600">{step.description}</p>}
 
-            {step.code && (
-              <CopyableCodeBlock code={step.code} />
-            )}
+            {step.code && <CopyableCodeBlock code={step.code} />}
           </div>
         ))}
 

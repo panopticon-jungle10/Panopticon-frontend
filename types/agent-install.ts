@@ -11,7 +11,13 @@ export interface StepConfig {
   showOptions: boolean;
 }
 
-export type PlatformType = 'kubernetes' | 'docker' | 'ecs' | 'macos' | 'opentelemetry' | 'fluentbit';
+export type PlatformType =
+  | 'kubernetes'
+  | 'docker'
+  | 'ecs'
+  | 'macos'
+  | 'opentelemetry'
+  | 'fluentbit';
 
 export interface PlatformData {
   icon: React.ReactNode;

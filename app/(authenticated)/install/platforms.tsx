@@ -1,13 +1,14 @@
 import { PlatformData, PlatformType } from '@/types/agent-install';
 import { SiKubernetes, SiDocker, SiApple, SiAmazonecs, SiOpentelemetry } from 'react-icons/si';
-import { SiFluentbit } from "react-icons/si";
+import { SiFluentbit } from 'react-icons/si';
 
 export const platformsData: Record<PlatformType, PlatformData> = {
   kubernetes: {
     icon: <SiKubernetes className="w-12 h-12 text-blue-600" />,
     iconLarge: <SiKubernetes className="w-8 h-8 text-blue-600" />,
     title: 'Kubernetes에서 OpenTelemetry Collector 배포',
-    description: 'K8s 클러스터에서 OTel Collector를 DaemonSet으로 배포하여 애플리케이션 데이터를 수집',
+    description:
+      'K8s 클러스터에서 OTel Collector를 DaemonSet으로 배포하여 애플리케이션 데이터를 수집',
     steps: [
       {
         title: '1. Namespace 생성',
@@ -77,7 +78,8 @@ EOF`,
       },
       {
         title: '3. OTel Collector DaemonSet 배포',
-        description: 'DaemonSet으로 각 노드마다 Collector를 배포합니다. hostPort를 사용하여 localhost 접근을 허용합니다.',
+        description:
+          'DaemonSet으로 각 노드마다 Collector를 배포합니다. hostPort를 사용하여 localhost 접근을 허용합니다.',
         code: `kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: DaemonSet
@@ -157,7 +159,8 @@ kubectl logs -n observability -l app=otel-collector`,
     steps: [
       {
         title: 'Docker 컨테이너로 Panopticon Agent 실행',
-        description: 'Docker 명령어로 Panopticon Agent 컨테이너를 실행합니다. 호스트 시스템의 Docker 소켓과 시스템 정보에 접근하여 데이터를 수집합니다.',
+        description:
+          'Docker 명령어로 Panopticon Agent 컨테이너를 실행합니다. 호스트 시스템의 Docker 소켓과 시스템 정보에 접근하여 데이터를 수집합니다.',
         code: `docker run -d --name panopticon-agent \\
   -e PANOPTICON_API_KEY=<YOUR_API_KEY> \\
   -e PANOPTICON_SITE="panopticon.com" \\
@@ -178,7 +181,8 @@ kubectl logs -n observability -l app=otel-collector`,
     steps: [
       {
         title: 'ECS Task Definition 생성',
-        description: 'Panopticon Agent를 포함한 ECS 태스크 정의를 생성합니다. API 키와 사이트 정보를 환경변수로 설정합니다.',
+        description:
+          'Panopticon Agent를 포함한 ECS 태스크 정의를 생성합니다. API 키와 사이트 정보를 환경변수로 설정합니다.',
         code: `{
   "family": "panopticon-agent",
   "containerDefinitions": [
@@ -291,7 +295,8 @@ EOF`,
     steps: [
       {
         title: 'Fluent Bit Kubernetes 배포',
-        description: 'Namespace, RBAC, ConfigMap, DaemonSet을 포함한 전체 Fluent Bit 로그 수집 시스템을 배포합니다.',
+        description:
+          'Namespace, RBAC, ConfigMap, DaemonSet을 포함한 전체 Fluent Bit 로그 수집 시스템을 배포합니다.',
         code: `kubectl apply -f - <<EOF
 ---
 apiVersion: v1

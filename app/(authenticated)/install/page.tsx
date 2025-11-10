@@ -58,7 +58,9 @@ export default function InstallPage() {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
                 <span className="text-3xl font-bold text-blue-600">2</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-900">Infrastructure Agents 배포</h3>
+              <h3 className="font-semibold text-lg mb-2 text-gray-900">
+                Infrastructure Agents 배포
+              </h3>
               <p className="text-sm text-gray-600">
                 OTel Collector와 Fluent Bit을 배포하여 데이터 수집
               </p>
@@ -94,7 +96,9 @@ export default function InstallPage() {
                 <div className="flex flex-col items-center gap-4">
                   {framework.icon}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">{frameworkNames[frameworkKey as FrameworkType]}</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      {frameworkNames[frameworkKey as FrameworkType]}
+                    </h3>
                     <p className="text-sm text-gray-600">
                       {framework.description.split('\n').map((line, idx) => (
                         <span key={idx}>
@@ -129,7 +133,9 @@ export default function InstallPage() {
                 <div className="flex flex-col items-center gap-4">
                   {platform.icon}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">{platformNames[platformKey as PlatformType]}</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      {platformNames[platformKey as PlatformType]}
+                    </h3>
                     <p className="text-sm text-gray-600">
                       {platform.description.split('\n').map((line, idx) => (
                         <span key={idx}>

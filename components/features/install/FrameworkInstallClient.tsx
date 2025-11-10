@@ -40,13 +40,9 @@ export default function FrameworkInstallClient({ framework }: Props) {
             <div key={index} className="rounded-xl bg-white p-6 shadow-sm border border-gray-200">
               <h2 className="mb-4 text-xl font-semibold text-gray-900">{step.title}</h2>
 
-              {step.description && (
-                <p className="mb-4 text-gray-600">{step.description}</p>
-              )}
+              {step.description && <p className="mb-4 text-gray-600">{step.description}</p>}
 
-              {step.code && (
-                <CopyableCodeBlock code={step.code} />
-              )}
+              {step.code && <CopyableCodeBlock code={step.code} />}
             </div>
           ))}
         </div>
@@ -59,7 +55,8 @@ export default function FrameworkInstallClient({ framework }: Props) {
               ✓ Step 1 완료: Application SDK 설치
             </h3>
             <p className="text-green-800">
-              {framework.title} SDK 설치가 완료되었습니다. 애플리케이션이 Traces와 Metrics를 생성할 준비가 되었습니다.
+              {framework.title} SDK 설치가 완료되었습니다. 애플리케이션이 Traces와 Metrics를 생성할
+              준비가 되었습니다.
             </p>
           </div>
 
@@ -69,7 +66,8 @@ export default function FrameworkInstallClient({ framework }: Props) {
               Step 2: Infrastructure Agents 설치
             </h3>
             <p className="mb-4 text-blue-800">
-              애플리케이션이 생성한 데이터를 수집하고 Panopticon으로 전송하려면 인프라 에이전트가 필요합니다:
+              애플리케이션이 생성한 데이터를 수집하고 Panopticon으로 전송하려면 인프라 에이전트가
+              필요합니다:
             </p>
             <ul className="list-disc list-inside space-y-2 text-blue-800 mb-4">
               <li>
@@ -89,17 +87,23 @@ export default function FrameworkInstallClient({ framework }: Props) {
 
           {/* 환경변수 참고 */}
           <div className="rounded-xl bg-gray-50 p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              중요: 엔드포인트 설정
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">중요: 엔드포인트 설정</h3>
             <p className="text-gray-700 mb-3">
-              <code className="bg-gray-200 px-2 py-1 rounded text-sm">OTEL_EXPORTER_OTLP_ENDPOINT</code>는
-              Panopticon 데이터 수집 서버 주소입니다.
+              <code className="bg-gray-200 px-2 py-1 rounded text-sm">
+                OTEL_EXPORTER_OTLP_ENDPOINT
+              </code>
+              는 Panopticon 데이터 수집 서버 주소입니다.
             </p>
             <div className="space-y-2 text-sm text-gray-600">
-              <p>• <strong>프로덕션:</strong> https://api.panopticon.io/otlp</p>
-              <p>• <strong>개발/로컬:</strong> http://localhost:4318</p>
-              <p>• <strong>Kubernetes:</strong> http://otel-collector:4318</p>
+              <p>
+                • <strong>프로덕션:</strong> https://api.panopticon.io/otlp
+              </p>
+              <p>
+                • <strong>개발/로컬:</strong> http://localhost:4318
+              </p>
+              <p>
+                • <strong>Kubernetes:</strong> http://otel-collector:4318
+              </p>
             </div>
           </div>
 
