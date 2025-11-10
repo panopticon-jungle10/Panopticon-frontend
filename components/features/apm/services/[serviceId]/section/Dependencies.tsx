@@ -164,6 +164,7 @@ export default function DependenciesSection() {
 
     return {
       backgroundColor: 'transparent',
+      // 마우스를 올렸을 때 나타나는 정보 팝업창
       tooltip: {
         trigger: 'item',
         formatter: (params: ChartParams) => {
@@ -186,11 +187,13 @@ export default function DependenciesSection() {
       },
       animationDuration: 1000,
       animationEasing: 'cubicOut',
+      // 차트에 표시할 데이터 시리즈(계열) 정의 부분(= 차트 핵심 설정)
       series: [
         {
           type: 'graph',
           layout: 'none',
           roam: true,
+          // 노드 이름 라벨 스타일
           label: {
             show: true,
             position: 'bottom',
@@ -199,16 +202,19 @@ export default function DependenciesSection() {
             color: '#1f2937',
             fontWeight: 'bold',
           },
+          // 선(엣지) 기본 스타일
           lineStyle: {
             color: '#9ca3af',
             width: 2,
             curveness: 0.3,
           },
+          // 마우스 올렸을 때 강조 스타일
           emphasis: {
             lineStyle: {
-              width: 3,
+              width: 4,
               color: '#1f2937',
             },
+            // 노드 강조 스타일
             itemStyle: {
               color: '#1e40af',
               borderWidth: 3,
@@ -216,6 +222,7 @@ export default function DependenciesSection() {
           },
           edgeSymbol: ['none', 'arrow'],
           edgeSymbolSize: [0, 12],
+          // 그래프의 노드들(서비스 원)
           nodes: nodes.map((node) => ({
             name: node.name,
             x: (node.x ?? 0) * 50,
@@ -229,19 +236,27 @@ export default function DependenciesSection() {
                   ? '#8b5cf6'
                   : '#10b981',
               borderColor: '#fff',
-              borderWidth: 2,
+              borderWidth: 1,
             },
           })),
-          links: links.map((link) => ({
-            source: link.source,
-            target: link.target,
-            value: link.value,
-            error_rate: link.error_rate,
-            lineStyle: {
-              color: getErrorColor(link.error_rate),
-              width: Math.min(link.value / 20000 + 1, 4),
-            },
-          })),
+          // 노드 간 연결선(화살표)
+          links: links.map((link) => {
+            const lineWidth = Math.min(link.value / 20000 + 1, 300);
+            const arrowSize = Math.max(lineWidth * 2, 16); // 선 굵기보다 충분히 큰 화살표
+            return {
+              source: link.source,
+              target: link.target,
+              value: link.value,
+              error_rate: link.error_rate,
+              symbol: ['none', 'arrow'],
+              symbolSize: [0, arrowSize], // 동적 화살표 크기 (선보다 큼)
+              lineStyle: {
+                color: getErrorColor(link.error_rate),
+                width: lineWidth, // 요청량에 따라 선 굵기 조절
+                cap: 'butt', // 선 끝을 각지게
+              },
+            };
+          }),
         },
       ],
     };
@@ -312,7 +327,10 @@ export default function DependenciesSection() {
               <h3 className="text-md font-semibold text-gray-800 mb-3">Incoming Requests</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {dependencies.incoming_requests.map((req) => (
-                  <div key={req.service_name} className="p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={req.service_name}
+                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer"
+                  >
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-700">{req.service_name}</span>
                       <span
@@ -349,7 +367,10 @@ export default function DependenciesSection() {
               <h3 className="text-md font-semibold text-gray-800 mb-3">Outgoing Requests</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {dependencies.outgoing_requests.map((req) => (
-                  <div key={req.service_name} className="p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={req.service_name}
+                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer"
+                  >
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-700">{req.service_name}</span>
                       <span
