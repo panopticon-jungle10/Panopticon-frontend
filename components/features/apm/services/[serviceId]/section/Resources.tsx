@@ -137,6 +137,23 @@ function transformResourceToTableRow(resource: Resource): ResourceTableRow {
   };
 }
 
+// 차트 색상 팔레트
+const CHART_COLORS = [
+  '#3b82f6', // blue
+  '#8b5cf6', // purple
+  '#ec4899', // pink
+  '#f59e0b', // amber
+  '#10b981', // emerald
+  '#06b6d4', // cyan
+  '#f97316', // orange
+  '#84cc16', // lime
+];
+
+// 색상 선택 함수
+function getChartColor(index: number): string {
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
+
 export default function ResourcesSection() {
   const [resources, setResources] = useState<ResourceTableRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -159,7 +176,7 @@ export default function ResourcesSection() {
     { label: 'Top 5', value: 5 as const },
   ];
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
 
   // API 호출 함수
   const fetchResources = useCallback(async () => {
@@ -199,7 +216,7 @@ export default function ResourcesSection() {
         }),
         total: 45,
         page: 1,
-        limit: 20,
+        limit: itemsPerPage,
       };
 
       const data = mockResponse;
@@ -216,8 +233,7 @@ export default function ResourcesSection() {
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, searchQuery]);
+  }, [itemsPerPage]);
 
   useEffect(() => {
     fetchResources();
@@ -271,7 +287,7 @@ export default function ResourcesSection() {
       stack: 'total',
       data: timeLabels.map(() => Math.floor(Math.random() * 1000) + 100),
       itemStyle: {
-        color: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'][idx % 5],
+        color: getChartColor(idx),
       },
     }));
 
@@ -311,10 +327,10 @@ export default function ResourcesSection() {
       smooth: true,
       lineStyle: {
         width: 2,
-        color: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'][idx % 5],
+        color: getChartColor(idx),
       },
       itemStyle: {
-        color: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'][idx % 5],
+        color: getChartColor(idx),
       },
     }));
 
@@ -352,7 +368,7 @@ export default function ResourcesSection() {
       stack: 'total',
       data: timeLabels.map(() => Math.floor(Math.random() * 50)),
       itemStyle: {
-        color: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16'][idx % 5],
+        color: getChartColor(idx),
       },
     }));
 
