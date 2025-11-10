@@ -3,7 +3,7 @@ import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apm/services/Pagination';
 import PageSizeSelect from '@/components/features/apm/services/PageSizeSelect';
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -144,21 +144,25 @@ export default function TracesSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(30); // 한 페이지에 보여줄 항목 수
 
-  // API 호출 함수
-  const fetchTraces = async () => {
+  // API 호출 함수 (페이지네이션 반영)
+  const fetchTraces = useCallback(async () => {
+    setIsLoading(true);
     try {
       // TODO: 실제 API 엔드포인트로 교체 필요
       // const serviceId = window.location.pathname.split('/').pop();
-      // const response = await fetch(`/api/apm/services/${serviceId}/traces?page=1&limit=50`);
+      // const response = await fetch(`/api/apm/services/${serviceId}/traces?page=${currentPage}&limit=${itemsPerPage}`);
 
-      // 임시: 더미 데이터 생성 (실제 API 연동 시 제거)
+      // 임시: 더미 데이터 생성 (페이지네이션 반영)
+      const startIndex = (currentPage - 1) * itemsPerPage;
       const mockResponse: TraceResponse = {
-        traces: Array.from({ length: 30 }, (_, i) => ({
-          trace_id: `trace_${Date.now()}_${i}`,
+        traces: Array.from({ length: itemsPerPage }, (_, i) => ({
+          trace_id: `trace_${startIndex + i}_${Date.now()}`,
           date: new Date(Date.now() - Math.random() * 300000).toISOString(),
-          resource: [`GET /api/users/${i}`, `POST /api/orders`, `GET /api/products/${i}`][
-            Math.floor(Math.random() * 3)
-          ],
+          resource: [
+            `GET /api/users/${startIndex + i}`,
+            `POST /api/orders`,
+            `GET /api/products/${startIndex + i}`,
+          ][Math.floor(Math.random() * 3)],
           service: ['user-service', 'order-service', 'product-service'][
             Math.floor(Math.random() * 3)
           ],
@@ -169,8 +173,8 @@ export default function TracesSection() {
           error: Math.random() > 0.8,
         })),
         total: 1234,
-        page: 1,
-        limit: 50,
+        page: currentPage,
+        limit: itemsPerPage,
       };
 
       // 실제 API 사용 시:
@@ -191,12 +195,12 @@ export default function TracesSection() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
-    // 초기 데이터 로드 (1회만)
+    // currentPage, itemsPerPage 변경 시마다 데이터 로드
     fetchTraces();
-  }, []);
+  }, [fetchTraces]);
 
   // 상태별 색상 매핑
   const getColorByStatus = (status: string) => {
@@ -327,7 +331,7 @@ export default function TracesSection() {
   };
 
   // 페이지 계산
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
 
   // 페이지 크기 변경 핸들러
   const handlePageSizeChange = (newSize: number) => {
