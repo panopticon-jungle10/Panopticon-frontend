@@ -205,6 +205,8 @@ export default function ResourcesSection() {
       const data = mockResponse;
 
       const transformedResources = data.resources.map(transformResourceToTableRow);
+      // 요청 수 기준 내림차순 정렬
+      transformedResources.sort((a, b) => b.requests - a.requests);
       setResources(transformedResources);
       setTotalCount(data.total);
       setError(null);

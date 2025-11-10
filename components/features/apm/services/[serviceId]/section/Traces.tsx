@@ -185,7 +185,12 @@ export default function TracesSection() {
 
       const data = mockResponse;
 
-      const transformedTraces = data.traces.map(transformTraceToPoint);
+      let transformedTraces = data.traces.map(transformTraceToPoint);
+      // error=true가 먼저 오도록 정렬
+      transformedTraces = transformedTraces.sort((a, b) => {
+        if (a.status === b.status) return 0;
+        return a.status === 'error' ? -1 : 1;
+      });
       setTraces(transformedTraces);
       setTotalCount(data.total);
       setError(null);
