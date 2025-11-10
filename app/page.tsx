@@ -2,28 +2,38 @@
 
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/icons/Logo';
+import { useEffect } from 'react';
 
 export default function LandingPage() {
   const router = useRouter();
+
+  // // ✅ Galmuri 폰트 동적 로드 (Landing 전용)
+  // useEffect(() => {
+  //   const link = document.createElement('link');
+  //   link.href = 'https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css';
+  //   link.rel = 'stylesheet';
+  //   document.head.appendChild(link);
+  // }, []);
+
   const handleNavigate = () => {
     router.push('/auth');
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden font-[Galmuri11]">
       {/* Header */}
       <header className="relative z-50">
         <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
           <Logo textSize="text-lg" iconSize="w-7 h-7" />
 
-          <nav className="flex items-center gap-10">
-            <a href="#introduction" className="text-gray-700 hover:text-gray-900 transition">
+          <nav className="flex items-center gap-10 text-gray-700">
+            <a href="#introduction" className="hover:text-gray-900 transition">
               Introduction
             </a>
-            <a href="#pricing" className="text-gray-700 hover:text-gray-900 transition">
+            <a href="#pricing" className="hover:text-gray-900 transition">
               Pricing
             </a>
-            <a href="#docs" className="text-gray-700 hover:text-gray-900 transition">
+            <a href="#docs" className="hover:text-gray-900 transition">
               Docs
             </a>
           </nav>
@@ -40,21 +50,32 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative z-10 max-w-7xl mx-auto px-8 pt-16 pb-20 text-center">
         <h1
-          className="text-gray-900 font-serif mb-20"
+          className="text-gray-900 mb-4"
           style={{
-            fontSize: '6rem',
-            lineHeight: '1.1',
+            fontSize: '2.75rem', // 🔹 글자 크기 축소
+            lineHeight: '1.3',
             letterSpacing: '-0.02em',
-            fontFamily: 'Georgia, serif',
+            fontFamily: `'Galmuri11', sans-serif`,
           }}
         >
-          Monitor everything.
+          쿠버네티스, 실시간으로 모니터링하세요.
         </h1>
+
+        <p
+          className="text-gray-600 mb-16"
+          style={{
+            fontSize: '1.1rem',
+            fontFamily: `'Galmuri11', sans-serif`,
+          }}
+        >
+          로그·에러·트레이스를 통합 분석하고, 한눈에 성능을 파악합니다.
+        </p>
 
         {/* 그래프형 대시보드 Mockup */}
         <div className="relative max-w-5xl mx-auto rounded-[2rem] border border-black overflow-hidden shadow-xl bg-[#f9f9f9]">
           <div className="p-8 text-left">
             <div className="text-sm text-gray-600 mb-4">Reports / Overview</div>
+
             <div className="mb-10">
               <div className="text-5xl text-gray-900 mb-1">78%</div>
               <div className="text-gray-600">Efficiency Improvements</div>
