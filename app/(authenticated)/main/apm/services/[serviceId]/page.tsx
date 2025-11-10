@@ -1,9 +1,10 @@
 'use client';
 import dynamic from 'next/dynamic';
-import LogsSection from './components/Logs';
+import LogsSection from '../../../../../../components/features/apm/services/[serviceId]/section/Logs';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
+import TracesSection from '@/components/features/apm/services/[serviceId]/section/Traces';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -21,11 +22,22 @@ export default function ServiceOverview() {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // latency의 초기값을 실제 사용하는 구조와 동일하게 맞춤
+  const initialLatency = {
+    p50: Array(10).fill(0),
+    p75: Array(10).fill(0),
+    p90: Array(10).fill(0),
+    p95: Array(10).fill(0),
+    p99: Array(10).fill(0),
+    p99_9: Array(10).fill(0),
+    max: Array(10).fill(0),
+  };
+
   const [chartData, setChartData] = useState({
     timestamps: generateTimestamps('5m'),
-    requests: [] as number[],
-    errors: [] as number[],
-    latency: {} as Record<string, number[]>,
+    requests: Array(10).fill(0),
+    errors: Array(10).fill(0),
+    latency: initialLatency,
   });
 
   /* ------- API 호출 => 현재 더미 데이터(변경 필요) -------- */
@@ -74,12 +86,16 @@ export default function ServiceOverview() {
           Math.floor(prev.requests.at(-1)! + (Math.random() - 0.5) * 8000),
         );
         const nextErr = Math.max(0, Math.floor(prev.errors.at(-1)! + (Math.random() - 0.5) * 10));
-        const nextLat = Object.fromEntries(
-          Object.entries(prev.latency).map(([k, v]) => [
-            k,
-            [...v.slice(-9), Math.max(100, Math.floor(v.at(-1)! + (Math.random() - 0.5) * 40))],
-          ]),
-        );
+        // latency의 각 key를 명시적으로 반환
+        const nextLat = {
+          p50: [...prev.latency.p50.slice(-9), Math.max(100, Math.floor(prev.latency.p50.at(-1)! + (Math.random() - 0.5) * 40))],
+          p75: [...prev.latency.p75.slice(-9), Math.max(100, Math.floor(prev.latency.p75.at(-1)! + (Math.random() - 0.5) * 40))],
+          p90: [...prev.latency.p90.slice(-9), Math.max(100, Math.floor(prev.latency.p90.at(-1)! + (Math.random() - 0.5) * 40))],
+          p95: [...prev.latency.p95.slice(-9), Math.max(100, Math.floor(prev.latency.p95.at(-1)! + (Math.random() - 0.5) * 40))],
+          p99: [...prev.latency.p99.slice(-9), Math.max(100, Math.floor(prev.latency.p99.at(-1)! + (Math.random() - 0.5) * 40))],
+          p99_9: [...prev.latency.p99_9.slice(-9), Math.max(100, Math.floor(prev.latency.p99_9.at(-1)! + (Math.random() - 0.5) * 40))],
+          max: [...prev.latency.max.slice(-9), Math.max(100, Math.floor(prev.latency.max.at(-1)! + (Math.random() - 0.5) * 40))],
+        };
 
         return {
           timestamps: [...prev.timestamps.slice(-9), nextLabel],
@@ -354,6 +370,12 @@ export default function ServiceOverview() {
           </div>
         </>
       )}
+
+      {/* Traces section */}
+      <div className='pt-4'>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Traces</h2>
+        <TracesSection />
+      </div>
 
       {/* Logs section */}
       <div className="pt-4">
