@@ -1,12 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Logo from '@/components/icons/Logo';
+import UnAuthenticatedHeader from '@/components/common/Header';
 
 export default function LandingPage() {
   const router = useRouter();
 
-  // // ✅ Galmuri 폰트 동적 로드 (Landing 전용)
+  // // Galmuri 폰트 동적 로드 (Landing 전용)
   // useEffect(() => {
   //   const link = document.createElement('link');
   //   link.href = 'https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css';
@@ -20,38 +20,15 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden font-[Galmuri11]">
-      {/* Header */}
-      <header className="relative z-50">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
-          <Logo textSize="text-lg" iconSize="w-7 h-7" />
-
-          <nav className="flex items-center gap-10 text-gray-700">
-            <a href="#introduction" className="hover:text-gray-900 transition">
-              Introduction
-            </a>
-            <a href="#pricing" className="hover:text-gray-900 transition">
-              Pricing
-            </a>
-            <a href="#docs" className="hover:text-gray-900 transition">
-              Docs
-            </a>
-          </nav>
-
-          <button
-            onClick={handleNavigate}
-            className="px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-lg transition"
-          >
-            회원가입 / 로그인
-          </button>
-        </div>
-      </header>
+      {/* ✅ 공통 헤더 재사용 */}
+      <UnAuthenticatedHeader handleNavigate={handleNavigate} />
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-7xl mx-auto px-8 pt-16 pb-20 text-center">
         <h1
           className="text-gray-900 mb-4"
           style={{
-            fontSize: '2.75rem', // 🔹 글자 크기 축소
+            fontSize: '2.5rem',
             lineHeight: '1.3',
             letterSpacing: '-0.02em',
             fontFamily: `'Galmuri11', sans-serif`,
@@ -63,7 +40,7 @@ export default function LandingPage() {
         <p
           className="text-gray-600 mb-16"
           style={{
-            fontSize: '1.1rem',
+            fontSize: '1.05rem',
             fontFamily: `'Galmuri11', sans-serif`,
           }}
         >
