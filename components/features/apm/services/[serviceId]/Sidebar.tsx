@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useParams } from 'next/navigation';
-import { IoEyeSharp, IoCubeSharp, IoPersonCircle, IoSettingsSharp } from 'react-icons/io5';
+import { IoEyeSharp, IoCubeSharp } from 'react-icons/io5';
 import { SiRelay } from 'react-icons/si';
 import { PiGraph } from 'react-icons/pi';
 import { BiBug } from 'react-icons/bi';
@@ -22,7 +22,7 @@ export default function Sidebar() {
   ] as const;
 
   return (
-    <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] flex flex-col border-r border-gray-200 bg-white">
+    <aside className="static w-64 flex flex-col border-r border-gray-200 bg-white">
       <nav className="flex-1 flex flex-col gap-1 p-4 pt-10 overflow-y-auto">
         <div className="flex flex-col gap-2">
           {apmItems.map(({ key, label, icon: Icon, href }) => {
@@ -46,7 +46,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+      {/* <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <div className="flex items-center gap-3">
           <IoPersonCircle className="w-6 h-6 text-gray-500" />
           <div>
@@ -57,7 +57,7 @@ export default function Sidebar() {
         <button className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition">
           <IoSettingsSharp className="w-4 h-4 text-gray-500" />
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 }
