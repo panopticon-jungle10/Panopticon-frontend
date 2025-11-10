@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Logo from '../icons/Logo';
 import Button from '../ui/Button';
 
@@ -12,15 +13,15 @@ export default function UnAuthenticatedHeader({ handleNavigate }: { handleNaviga
         </div>
 
         <nav className="ml-auto flex items-center gap-8 text-zinc-700">
-          <a href="#introduction" className="hover:text-zinc-900 transition">
+          <Link href="#introduction" className="hover:text-zinc-900 transition">
             소개
-          </a>
-          <a href="#pricing" className="hover:text-zinc-900 transition">
+          </Link>
+          <Link href="#pricing" className="hover:text-zinc-900 transition">
             가격
-          </a>
-          <a href="#docs" className="hover:text-zinc-900 transition">
+          </Link>
+          <Link href="#docs" className="hover:text-zinc-900 transition">
             문서
-          </a>
+          </Link>
 
           <Button
             onClick={handleNavigate}
