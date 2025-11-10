@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/icons/Logo';
-import { useEffect } from 'react';
 
 export default function LandingPage() {
   const router = useRouter();
