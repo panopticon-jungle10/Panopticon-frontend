@@ -1,5 +1,3 @@
-// Dynamic Scatter Overlay (ECharts)
-
 'use client';
 import dynamic from 'next/dynamic';
 import { mockErrorTrendData } from './mock';
@@ -40,8 +38,6 @@ export default function ErrorTrendChart() {
       textStyle: { color: '#6b7280' },
     },
     grid: { left: 60, right: 30, top: 40, bottom: 60 },
-
-    // xAxis를 'time' 타입으로
     xAxis: {
       type: 'time',
       axisLabel: {
@@ -56,23 +52,33 @@ export default function ErrorTrendChart() {
       },
       splitLine: { show: false },
     },
-
     yAxis: {
       type: 'value',
       name: 'Error Count',
       nameTextStyle: { color: '#6b7280' },
       splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
     },
-
     series: [
+      // ✅ 겹치는 반투명 영역형 그래프
       ...mockErrorTrendData.map((s) => ({
         name: s.service,
         type: 'line',
         smooth: true,
         symbol: 'none',
-        lineStyle: { color: s.color, width: 2 },
+        lineStyle: { width: 2, color: s.color },
+        areaStyle: {
+          opacity: 0.25,
+          color: new (require('echarts').graphic.LinearGradient)(0, 0, 0, 1, [
+            { offset: 0, color: s.color },
+            { offset: 1, color: 'rgba(255,255,255,0)' },
+          ]),
+        },
+        emphasis: { focus: 'series' },
         data: s.data.map((p) => [p.timestamp, p.count]),
+        z: 2,
       })),
+
+      // 🔴 Critical Spikes (그대로 유지)
       {
         name: 'Critical Spikes',
         type: 'effectScatter',
@@ -80,6 +86,7 @@ export default function ErrorTrendChart() {
         symbolSize: (val: any) => Math.min(val[1] / 30, 18),
         itemStyle: { color: '#ef4444' },
         rippleEffect: { scale: 3, brushType: 'stroke' },
+        z: 5,
       },
     ],
   };
