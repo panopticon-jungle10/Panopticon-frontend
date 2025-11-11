@@ -831,10 +831,22 @@ export const handlers = [
       },
     ];
 
+    // 다양한 서비스 목록
+    const services = [
+      'user-service',
+      'payment-service',
+      'order-service',
+      'notification-service',
+      'auth-service',
+      'inventory-service',
+    ];
+
     // 시간 범위에 비례한 에러 데이터 생성
     const errors = [];
     for (let i = 0; i < errorCount; i++) {
       const template = errorTemplates[i % errorTemplates.length];
+      const serviceName = services[i % services.length]; // 서비스 순환 할당
+
       const firstSeen = new Date(
         start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
       );
@@ -851,7 +863,7 @@ export const handlers = [
         error_message: template.error_message,
         resource: template.resource,
         stack_trace: template.stack_trace,
-        service_name: 'user-service',
+        service_name: serviceName,
         count: Math.max(scaledErrorCount, 1), // 최소 1개
         first_seen: firstSeen.toISOString(),
         last_seen: lastSeen.toISOString(),
