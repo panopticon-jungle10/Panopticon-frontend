@@ -326,11 +326,12 @@ export const handlers = [
   }),
 
   // 2.1 Service Summary - 메트릭 그래프 데이터
-  http.get('/api/services/:serviceName/metrics', ({ request }) => {
+  http.get('/api/services/:serviceName/metrics', ({ params, request }) => {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
     const interval = url.searchParams.get('interval') || '10m';
+    const serviceName = params.serviceName;
 
     // 시간 범위 계산
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
@@ -346,13 +347,68 @@ export const handlers = [
         '1h': 60 * 60 * 1000,
       }[interval] || 10 * 60 * 1000;
 
-    const dataPoints = [];
+    const dataPoints: string[] = [];
     for (let time = start.getTime(); time <= end.getTime(); time += intervalMs) {
       dataPoints.push(new Date(time).toISOString());
     }
 
+    // payment-service 시나리오: 오후 4시(16:00)부터 에러 급증, 현재(4:30) 근처에서 최고조
+    const now = new Date();
+    const errorStartTime = new Date(now);
+    errorStartTime.setHours(16, 0, 0, 0); // 오후 4시
+    const currentTime = new Date(now);
+    currentTime.setHours(16, 30, 0, 0); // 오후 4시 30분 (현재)
+
+    if (serviceName === 'payment-service') {
+      return HttpResponse.json({
+        service_name: 'payment-service',
+        start_time: start.toISOString(),
+        end_time: end.toISOString(),
+        interval,
+        data: {
+          requests_and_errors: dataPoints.map((timestamp, index) => {
+            const totalPoints = dataPoints.length;
+            const isLastFewPoints = index >= totalPoints - 5; // 마지막 4-5개 포인트
+
+            return {
+              timestamp,
+              hits: Math.floor(Math.random() * 200) + 1000,
+              // 대부분: 4~6 높이, 오른쪽 끝 4-5개: 8~9 높이
+              errors: isLastFewPoints
+                ? Math.floor(Math.random() * 2) + 8 // 8~9
+                : Math.floor(Math.random() * 3) + 4, // 4~6
+            };
+          }),
+          errors_by_status: dataPoints.map((timestamp, index) => {
+            const totalPoints = dataPoints.length;
+            const isLastFewPoints = index >= totalPoints - 5; // 마지막 4-5개 포인트
+
+            return {
+              timestamp,
+              // 대부분: 2~4 높이, 오른쪽 끝 4-5개: 5~6 높이
+              status_500: isLastFewPoints
+                ? Math.floor(Math.random() * 2) + 5 // 5~6
+                : Math.floor(Math.random() * 3) + 2, // 2~4
+              status_502: Math.floor(Math.random() * 2) + 1,
+              status_503: isLastFewPoints
+                ? Math.floor(Math.random() * 2) + 2 // 2~3
+                : Math.floor(Math.random() * 2) + 1, // 1~2
+              status_504: Math.floor(Math.random() * 2) + 1,
+            };
+          }),
+          latency: dataPoints.map((timestamp) => ({
+            timestamp,
+            // Latency는 평소와 비슷하게 유지 (~200ms)
+            p99_9: Math.floor(Math.random() * 50) + 250,
+            p95: Math.floor(Math.random() * 30) + 185,
+            p90: Math.floor(Math.random() * 20) + 170,
+          })),
+        },
+      });
+    }
+
     return HttpResponse.json({
-      service_name: 'user-service',
+      service_name: serviceName as string,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
       interval,
@@ -380,36 +436,55 @@ export const handlers = [
   }),
 
   // 2.2 Resources - 리소스 목록
-  http.get('/api/services/:serviceName/resources', ({ request }) => {
+  http.get('/api/services/:serviceName/resources', ({ params, request }) => {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
+    const serviceName = params.serviceName;
 
     // 150개의 resource 데이터 동적 생성
     const allResources = [];
     const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    const endpoints = [
-      '/api/users',
-      '/api/users/:id',
-      '/api/users/:id/profile',
-      '/api/users/:id/orders',
-      '/api/users/:id/avatar',
-      '/api/users/:id/settings',
-      '/api/users/:id/notifications',
-      '/api/users/search',
-      '/api/users/batch',
-      '/api/orders',
-      '/api/orders/:id',
-      '/api/orders/:id/items',
-      '/api/products',
-      '/api/products/:id',
-      '/api/products/search',
-      '/api/payments',
-      '/api/payments/:id',
-      '/api/cart',
-      '/api/cart/items',
-      '/api/reviews',
-    ];
+
+    // payment-service의 경우 결제/DB 관련 엔드포인트만
+    let endpoints: string[];
+    if (serviceName === 'payment-service') {
+      endpoints = [
+        '/api/payments/process',
+        '/api/payments/:id',
+        '/api/payments/refund',
+        '/api/payments/validate',
+        '/api/payments/history',
+        '/api/payments/create',
+        '/api/payments/:id/status',
+        '/api/payments/transactions',
+        '/api/payments/:id/details',
+        '/api/payments/search',
+      ];
+    } else {
+      endpoints = [
+        '/api/users',
+        '/api/users/:id',
+        '/api/users/:id/profile',
+        '/api/users/:id/orders',
+        '/api/users/:id/avatar',
+        '/api/users/:id/settings',
+        '/api/users/:id/notifications',
+        '/api/users/search',
+        '/api/users/batch',
+        '/api/orders',
+        '/api/orders/:id',
+        '/api/orders/:id/items',
+        '/api/products',
+        '/api/products/:id',
+        '/api/products/search',
+        '/api/payments',
+        '/api/payments/:id',
+        '/api/cart',
+        '/api/cart/items',
+        '/api/reviews',
+      ];
+    }
 
     const now = new Date();
 
@@ -458,10 +533,11 @@ export const handlers = [
   }),
 
   // 2.3 Dependencies - 서비스 의존성 맵
-  http.get('/api/services/:serviceName/dependencies', ({ request }) => {
+  http.get('/api/services/:serviceName/dependencies', ({ params, request }) => {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
+    const serviceName = params.serviceName;
 
     // 시간 범위 계산 (기본값: 지난 1시간)
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
@@ -471,8 +547,54 @@ export const handlers = [
     // 시간 범위에 비례한 요청 수 계산 (기준: 1시간 = 3600초)
     const baseMultiplier = timeRangeInSeconds / 3600;
 
+    // payment-service 시나리오
+    if (serviceName === 'payment-service') {
+      return HttpResponse.json({
+        service_name: 'payment-service',
+        incoming_requests: [
+          {
+            service_name: 'api-gateway',
+            total_requests: Math.floor(28000 * baseMultiplier),
+            error_rate: 0.3,
+          },
+          {
+            service_name: 'order-service',
+            total_requests: Math.floor(42000 * baseMultiplier),
+            error_rate: 0.4,
+          },
+          {
+            service_name: 'user-service',
+            total_requests: Math.floor(15000 * baseMultiplier),
+            error_rate: 0.2,
+          },
+        ],
+        outgoing_requests: [
+          {
+            service_name: 'auth-service',
+            total_requests: Math.floor(35000 * baseMultiplier),
+            error_rate: 0.2, // 정상 (초록색)
+          },
+          {
+            service_name: 'postgres',
+            total_requests: Math.floor(40000 * baseMultiplier),
+            error_rate: 0.78, // 심각한 에러 (빨간색) - 78%
+          },
+          {
+            service_name: 'redis-cache',
+            total_requests: Math.floor(22000 * baseMultiplier),
+            error_rate: 0.1,
+          },
+          {
+            service_name: 'notification-service',
+            total_requests: Math.floor(8000 * baseMultiplier),
+            error_rate: 0.5,
+          },
+        ],
+      });
+    }
+
     return HttpResponse.json({
-      service_name: 'user-service',
+      service_name: serviceName as string,
       incoming_requests: [
         {
           service_name: 'api-gateway',
@@ -531,49 +653,88 @@ export const handlers = [
   }),
 
   // 2.4 Traces - 트레이스 목록
-  http.get('/api/services/:serviceName/traces', ({ request }) => {
+  http.get('/api/services/:serviceName/traces', ({ params, request }) => {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '30');
     const page = parseInt(url.searchParams.get('page') || '1');
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
-
-    // 더 많은 trace 데이터 생성 (150개)
-    const allTraces = [];
-    const resources = [
-      'GET /api/users',
-      'POST /api/users',
-      'PUT /api/users/:id',
-      'DELETE /api/users/:id',
-      'GET /api/users/search',
-      'GET /api/users/profile',
-      'POST /api/users/batch',
-      'GET /api/users/notifications',
-      'GET /api/orders',
-      'POST /api/orders',
-    ];
-    const methods = ['GET', 'POST', 'PUT', 'DELETE'];
-    const statusCodes = [200, 200, 200, 200, 200, 400, 500, 502, 503, 504]; // 성공이 더 많도록
+    const serviceName = params.serviceName;
 
     const now = new Date();
+    const allTraces = [];
 
-    for (let i = 0; i < 150; i++) {
-      const statusCode = statusCodes[Math.floor(Math.random() * statusCodes.length)];
-      const isError = statusCode >= 400;
-      const resource = resources[Math.floor(Math.random() * resources.length)];
-      const traceDate = new Date(now.getTime() - i * 60000); // 1분씩 과거로
+    // payment-service 전용 traces (DB 에러 많이 포함)
+    if (serviceName === 'payment-service') {
+      const paymentResources = [
+        'POST /api/payments/process',
+        'GET /api/payments/:id',
+        'POST /api/payments/refund',
+        'POST /api/payments/validate',
+        'GET /api/payments/history',
+        'POST /api/payments/create',
+        'PUT /api/payments/:id/status',
+        'GET /api/payments/transactions',
+      ];
+      const methods = ['GET', 'POST', 'PUT'];
+      // DB 에러가 많으므로 500, 503 에러 비율 증가
+      const statusCodes = [200, 200, 200, 500, 500, 500, 503, 503, 504, 500];
 
-      allTraces.push({
-        trace_id: `trace_${i.toString().padStart(5, '0')}`,
-        date: traceDate.toISOString(),
-        resource,
-        service: 'user-service',
-        duration_ms: Math.floor(Math.random() * 900) + 50, // 50-950ms
-        method: methods[Math.floor(Math.random() * methods.length)],
-        status_code: statusCode,
-        span_count: Math.floor(Math.random() * 10) + 2,
-        error: isError,
-      });
+      for (let i = 0; i < 150; i++) {
+        const statusCode = statusCodes[Math.floor(Math.random() * statusCodes.length)];
+        const isError = statusCode >= 400;
+        const resource = paymentResources[Math.floor(Math.random() * paymentResources.length)];
+        const traceDate = new Date(now.getTime() - i * 60000); // 1분씩 과거로
+
+        allTraces.push({
+          trace_id: `trace_${i.toString().padStart(5, '0')}`,
+          date: traceDate.toISOString(),
+          resource,
+          service: 'payment-service',
+          duration_ms: isError
+            ? Math.floor(Math.random() * 3000) + 5000 // 에러 시 5~8초 (타임아웃)
+            : Math.floor(Math.random() * 300) + 100, // 정상 시 100~400ms
+          method: methods[Math.floor(Math.random() * methods.length)],
+          status_code: statusCode,
+          span_count: Math.floor(Math.random() * 8) + 3,
+          error: isError,
+        });
+      }
+    } else {
+      // 기본 서비스 traces
+      const resources = [
+        'GET /api/users',
+        'POST /api/users',
+        'PUT /api/users/:id',
+        'DELETE /api/users/:id',
+        'GET /api/users/search',
+        'GET /api/users/profile',
+        'POST /api/users/batch',
+        'GET /api/users/notifications',
+        'GET /api/orders',
+        'POST /api/orders',
+      ];
+      const methods = ['GET', 'POST', 'PUT', 'DELETE'];
+      const statusCodes = [200, 200, 200, 200, 200, 400, 500, 502, 503, 504]; // 성공이 더 많도록
+
+      for (let i = 0; i < 150; i++) {
+        const statusCode = statusCodes[Math.floor(Math.random() * statusCodes.length)];
+        const isError = statusCode >= 400;
+        const resource = resources[Math.floor(Math.random() * resources.length)];
+        const traceDate = new Date(now.getTime() - i * 60000); // 1분씩 과거로
+
+        allTraces.push({
+          trace_id: `trace_${i.toString().padStart(5, '0')}`,
+          date: traceDate.toISOString(),
+          resource,
+          service: 'user-service',
+          duration_ms: Math.floor(Math.random() * 900) + 50, // 50-950ms
+          method: methods[Math.floor(Math.random() * methods.length)],
+          status_code: statusCode,
+          span_count: Math.floor(Math.random() * 10) + 2,
+          error: isError,
+        });
+      }
     }
 
     // 시간 범위 필터링
@@ -606,7 +767,7 @@ export const handlers = [
       trace_id: 'trace_abc123',
       start_time: '2025-11-07T10:35:22.000Z',
       duration_ms: 234,
-      service_count: 3,
+      service_count: 2,
       spans: [
         {
           span_id: 'span_001',
@@ -630,62 +791,18 @@ export const handlers = [
           operation: 'database.query',
           resource: 'SELECT * FROM users WHERE id=?',
           start_time_offset_ms: 10,
-          duration_ms: 45,
+          duration_ms: 180,
           status: 'ok',
           error: false,
         },
         {
           span_id: 'span_003',
-          parent_span_id: 'span_002',
-          service: 'database',
-          operation: 'db.query',
-          resource: 'SELECT',
-          start_time_offset_ms: 15,
-          duration_ms: 30,
-          status: 'ok',
-          error: false,
-        },
-        {
-          span_id: 'span_004',
-          parent_span_id: 'span_001',
-          service: 'cache-service',
-          operation: 'cache.get',
-          resource: 'GET user:123',
-          start_time_offset_ms: 60,
-          duration_ms: 10,
-          status: 'ok',
-          error: false,
-        },
-        {
-          span_id: 'span_005',
-          parent_span_id: 'span_001',
-          service: 'user-service',
-          operation: 'http.request',
-          resource: 'GET /api/auth/verify',
-          start_time_offset_ms: 75,
-          duration_ms: 35,
-          status: 'ok',
-          error: false,
-        },
-        {
-          span_id: 'span_006',
-          parent_span_id: 'span_005',
-          service: 'auth-service',
-          operation: 'jwt.verify',
-          resource: 'JWT verification',
-          start_time_offset_ms: 80,
-          duration_ms: 20,
-          status: 'ok',
-          error: false,
-        },
-        {
-          span_id: 'span_007',
           parent_span_id: 'span_001',
           service: 'user-service',
           operation: 'serialize',
           resource: 'JSON serialization',
-          start_time_offset_ms: 115,
-          duration_ms: 8,
+          start_time_offset_ms: 200,
+          duration_ms: 25,
           status: 'ok',
           error: false,
         },
@@ -694,10 +811,11 @@ export const handlers = [
   }),
 
   // 2.6 Errors - 에러 목록
-  http.get('/api/services/:serviceName/errors', ({ request }) => {
+  http.get('/api/services/:serviceName/errors', ({ params, request }) => {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
+    const serviceName = params.serviceName;
 
     // 시간 범위 계산
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
@@ -707,6 +825,195 @@ export const handlers = [
     // 시간 범위에 비례한 데이터 개수 조정 (기준: 1시간 = 3600초, 기본 50개)
     const baseMultiplier = timeRangeInSeconds / 3600;
     const errorCount = Math.min(Math.floor(50 * baseMultiplier), 150); // 최대 150개
+
+    // payment-service 전용 에러 템플릿 (연관된 서비스들 포함)
+    if (serviceName === 'payment-service') {
+      const errors: Array<{
+        error_id: string;
+        error_message: string;
+        resource: string;
+        stack_trace: string;
+        service_name: string;
+        count: number;
+        first_seen: string;
+        last_seen: string;
+        sample_trace_ids: string[];
+      }> = [];
+
+      // 1. payment-service 에러 (주요 에러, 78%)
+      const paymentErrorTemplates = [
+        {
+          error_message: 'Database connection timeout',
+          resource: 'POST /api/payments/process',
+          stack_trace:
+            'Error: Connection timeout after 5000ms\n  at PostgresClient.connect (postgres.js:123)\n  at PaymentService.processPayment (payment.js:45)',
+          count: 324, // 1247 * 0.78 / 3 ≈ 324
+        },
+        {
+          error_message: 'Database connection timeout',
+          resource: 'GET /api/payments/:id',
+          stack_trace:
+            'Error: Connection timeout after 5000ms\n  at PostgresClient.connect (postgres.js:123)\n  at PaymentService.getPayment (payment.js:67)',
+          count: 324,
+        },
+        {
+          error_message: 'Database connection timeout',
+          resource: 'POST /api/payments/refund',
+          stack_trace:
+            'Error: Connection timeout after 5000ms\n  at PostgresClient.connect (postgres.js:123)\n  at PaymentService.refundPayment (payment.js:89)',
+          count: 324,
+        },
+        {
+          error_message: 'Failed to connect to database pool',
+          resource: 'POST /api/payments/validate',
+          stack_trace:
+            'Error: Connection pool exhausted\n  at PostgresPool.getConnection (pool.js:234)\n  at PaymentService.validatePayment (payment.js:156)',
+          count: 137, // 1247 * 0.22 / 2 ≈ 137
+        },
+        {
+          error_message: 'Database query timeout',
+          resource: 'GET /api/payments/history',
+          stack_trace:
+            'Error: Query timeout after 5000ms\n  at PostgresClient.query (postgres.js:345)\n  at PaymentService.getHistory (payment.js:201)',
+          count: 138,
+        },
+      ];
+
+      // 2. postgres 에러 (데이터베이스 측 문제) - payment-service와 비슷한 수준으로 증가
+      const postgresErrorTemplates = [
+        {
+          error_message: 'Connection pool exhausted',
+          resource: 'CONNECTION POOL',
+          stack_trace:
+            'Error: Maximum connection pool size reached\n  at ConnectionPool.acquire (pool.js:234)\n  at PostgresDB.connect (postgres.js:89)',
+          count: 520,
+        },
+        {
+          error_message: 'Too many connections',
+          resource: 'MAX CONNECTIONS',
+          stack_trace:
+            'Error: FATAL - too many connections for database\n  at PostgresDB.connect (postgres.js:45)\n  at ConnectionManager.getConnection (manager.js:123)',
+          count: 380,
+        },
+        {
+          error_message: 'Query execution timeout',
+          resource: 'SELECT payment_transactions',
+          stack_trace:
+            'Error: Query timeout after 5000ms\n  at QueryExecutor.execute (executor.js:156)\n  at PostgresDB.query (postgres.js:234)',
+          count: 340,
+        },
+        {
+          error_message: 'Deadlock detected',
+          resource: 'UPDATE payment_status',
+          stack_trace:
+            'Error: Deadlock detected in transaction\n  at Transaction.commit (transaction.js:345)\n  at PostgresDB.executeTransaction (postgres.js:456)',
+          count: 280,
+        },
+        {
+          error_message: 'Connection refused',
+          resource: 'TCP CONNECTION',
+          stack_trace:
+            'Error: Connection refused by server\n  at TCPConnection.connect (tcp.js:234)\n  at PostgresDB.connect (postgres.js:67)',
+          count: 195,
+        },
+      ];
+
+      // 3. order-service 에러 (상위 서비스에서도 영향 받음)
+      const orderServiceErrorTemplates = [
+        {
+          error_message: 'Payment service timeout',
+          resource: 'POST /api/orders/checkout',
+          stack_trace:
+            'Error: Timeout calling payment-service\n  at HttpClient.post (http.js:123)\n  at OrderService.processCheckout (order.js:234)',
+          count: 234,
+        },
+        {
+          error_message: 'Payment validation failed',
+          resource: 'POST /api/orders/validate',
+          stack_trace:
+            'Error: Payment validation failed\n  at PaymentClient.validate (client.js:89)\n  at OrderService.validateOrder (order.js:156)',
+          count: 156,
+        },
+      ];
+
+      let errorId = 456;
+
+      // payment-service 에러 추가
+      paymentErrorTemplates.forEach((template) => {
+        const firstSeen = new Date(
+          start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
+        );
+        const lastSeen = new Date(
+          end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1,
+        );
+
+        errors.push({
+          error_id: `err_${errorId.toString().padStart(5, '0')}`,
+          error_message: template.error_message,
+          resource: template.resource,
+          stack_trace: template.stack_trace,
+          service_name: 'payment-service',
+          count: template.count,
+          first_seen: firstSeen.toISOString(),
+          last_seen: lastSeen.toISOString(),
+          sample_trace_ids: [`trace_${errorId * 100}`, `trace_${errorId * 100 + 1}`],
+        });
+        errorId++;
+      });
+
+      // postgres 에러 추가
+      postgresErrorTemplates.forEach((template) => {
+        const firstSeen = new Date(
+          start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
+        );
+        const lastSeen = new Date(
+          end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1,
+        );
+
+        errors.push({
+          error_id: `err_${errorId.toString().padStart(5, '0')}`,
+          error_message: template.error_message,
+          resource: template.resource,
+          stack_trace: template.stack_trace,
+          service_name: 'postgres',
+          count: template.count,
+          first_seen: firstSeen.toISOString(),
+          last_seen: lastSeen.toISOString(),
+          sample_trace_ids: [`trace_${errorId * 100}`, `trace_${errorId * 100 + 1}`],
+        });
+        errorId++;
+      });
+
+      // order-service 에러 추가
+      orderServiceErrorTemplates.forEach((template) => {
+        const firstSeen = new Date(
+          start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
+        );
+        const lastSeen = new Date(
+          end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1,
+        );
+
+        errors.push({
+          error_id: `err_${errorId.toString().padStart(5, '0')}`,
+          error_message: template.error_message,
+          resource: template.resource,
+          stack_trace: template.stack_trace,
+          service_name: 'order-service',
+          count: template.count,
+          first_seen: firstSeen.toISOString(),
+          last_seen: lastSeen.toISOString(),
+          sample_trace_ids: [`trace_${errorId * 100}`, `trace_${errorId * 100 + 1}`],
+        });
+        errorId++;
+      });
+
+      return HttpResponse.json({
+        errors,
+        total: errors.length,
+        page: 1,
+        limit: errors.length,
+      });
+    }
 
     const errorTemplates = [
       {
@@ -880,10 +1187,11 @@ export const handlers = [
   }),
 
   // 2.7.1 로그 통계 조회
-  http.get('/api/services/:serviceName/logs/stats', ({ request }) => {
+  http.get('/api/services/:serviceName/logs/stats', ({ params, request }) => {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
+    const serviceName = params.serviceName;
 
     // 시간 범위 계산
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
@@ -893,13 +1201,48 @@ export const handlers = [
     // 시간 범위에 비례한 로그 수 계산 (기준: 1시간 = 3600초)
     const baseMultiplier = timeRangeInSeconds / 3600;
 
+    // payment-service 전용 로그 통계
+    if (serviceName === 'payment-service') {
+      const errorCount = Math.floor(1247 * baseMultiplier); // 1,247건의 에러
+      const warningCount = Math.floor(234 * baseMultiplier);
+      const infoCount = Math.floor(8956 * baseMultiplier);
+      const totalLogs = errorCount + warningCount + infoCount;
+
+      return HttpResponse.json({
+        service_name: 'payment-service',
+        start_time: start.toISOString(),
+        end_time: end.toISOString(),
+        total_logs: totalLogs,
+        error_count: errorCount,
+        warning_count: warningCount,
+        info_count: infoCount,
+        breakdown: [
+          {
+            level: 'error',
+            count: errorCount,
+            percentage: parseFloat(((errorCount / totalLogs) * 100).toFixed(2)),
+          },
+          {
+            level: 'warning',
+            count: warningCount,
+            percentage: parseFloat(((warningCount / totalLogs) * 100).toFixed(2)),
+          },
+          {
+            level: 'info',
+            count: infoCount,
+            percentage: parseFloat(((infoCount / totalLogs) * 100).toFixed(2)),
+          },
+        ],
+      });
+    }
+
     const errorCount = Math.floor(567 * baseMultiplier);
     const warningCount = Math.floor(1234 * baseMultiplier);
     const infoCount = Math.floor(13433 * baseMultiplier);
     const totalLogs = errorCount + warningCount + infoCount;
 
     return HttpResponse.json({
-      service_name: 'user-service',
+      service_name: serviceName as string,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
       total_logs: totalLogs,
@@ -927,15 +1270,96 @@ export const handlers = [
   }),
 
   // 2.7.2 로그 목록 조회
-  http.get('/api/services/:serviceName/logs', ({ request }) => {
+  http.get('/api/services/:serviceName/logs', ({ params, request }) => {
     const url = new URL(request.url);
     const level = url.searchParams.get('level') || 'error';
     const startTime = url.searchParams.get('start_time');
     const endTime = url.searchParams.get('end_time');
+    const serviceName = params.serviceName;
 
     // 시간 범위 계산
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
     const end = endTime ? new Date(endTime) : new Date();
+
+    // payment-service 전용 로그
+    if (serviceName === 'payment-service' && level === 'error') {
+      const paymentErrorLogs = [
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'Database connection pool exhausted',
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'Database query timeout after 5000ms',
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'Failed to connect to database: Connection timeout after 5000ms',
+        'PostgreSQL connection refused',
+        'Failed to connect to database: Connection timeout after 5000ms',
+      ];
+
+      const paymentErrorTypes = [
+        'DatabaseConnectionError',
+        'DatabaseConnectionError',
+        'DatabaseConnectionError',
+        'ConnectionPoolError',
+        'DatabaseConnectionError',
+        'QueryTimeoutError',
+        'DatabaseConnectionError',
+        'DatabaseConnectionError',
+        'ConnectionRefusedError',
+        'DatabaseConnectionError',
+      ];
+
+      const paymentPaths = [
+        '/api/payments/process',
+        '/api/payments/process',
+        '/api/payments/:id',
+        '/api/payments/validate',
+        '/api/payments/refund',
+        '/api/payments/history',
+        '/api/payments/process',
+        '/api/payments/:id',
+        '/api/payments/status',
+        '/api/payments/process',
+      ];
+
+      const logs = [];
+      const logCount = 150;
+
+      for (let i = 0; i < logCount; i++) {
+        const randomTime = new Date(
+          start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+        );
+
+        logs.push({
+          log_id: `log_${Date.now()}_${i.toString().padStart(5, '0')}`,
+          timestamp: randomTime.toISOString(),
+          level: 'error',
+          service: 'payment-service',
+          message: paymentErrorLogs[i % paymentErrorLogs.length],
+          trace_id: `trace_${Math.random().toString(36).substring(7)}`,
+          span_id: `span_${Math.random().toString(36).substring(7)}`,
+          attributes: {
+            'error.type': paymentErrorTypes[i % paymentErrorTypes.length],
+            'request.path': paymentPaths[i % paymentPaths.length],
+            'user.id': Math.floor(Math.random() * 10000),
+            'request.duration_ms': Math.floor(Math.random() * 5500) + 5000,
+            'database.host': 'postgres.internal',
+            'database.port': 5432,
+          },
+        });
+      }
+
+      // 시간 역순으로 정렬 (최신 로그가 먼저)
+      logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      return HttpResponse.json({
+        logs,
+        total: logs.length,
+        page: 1,
+        limit: 150,
+        filtered_level: level,
+      });
+    }
 
     const logMessages = {
       error: [
