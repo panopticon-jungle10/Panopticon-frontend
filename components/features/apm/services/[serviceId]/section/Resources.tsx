@@ -169,15 +169,20 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     queryFn: () => getServiceResources(serviceName),
   });
 
-  // 데이터 변환
-  const resources = useMemo(() => {
+  // 전체 데이터 변환
+  const allResources = useMemo(() => {
     if (!data?.resources) return [];
-    const transformed = data.resources.map((resource: Resource) => transformResourceToTableRow(resource));
-    transformed.sort((a: ResourceTableRow, b: ResourceTableRow) => b.requests - a.requests);
-    return transformed;
+    return data.resources.map((resource: Resource) => transformResourceToTableRow(resource));
   }, [data]);
 
-  const totalCount = data?.total || 0;
+  const totalCount = allResources.length;
+
+  // 현재 페이지의 데이터만 추출
+  const resources = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return allResources.slice(startIndex, endIndex);
+  }, [allResources, currentPage, itemsPerPage]);
 
   // 페이지 계산
   const totalPages = Math.ceil(totalCount / itemsPerPage);

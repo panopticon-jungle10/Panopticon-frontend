@@ -1,7 +1,6 @@
 'use client';
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apm/services/Pagination';
-import PageSizeSelect from '@/components/features/apm/services/PageSizeSelect';
 import dynamic from 'next/dynamic';
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -124,32 +123,16 @@ function transformTraceToPoint(trace: Trace): TracePoint {
 
 export default function TracesSection({ serviceName }: TracesSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(30); // 한 페이지에 보여줄 항목 수
+  const itemsPerPage = 15; // 페이지당 15개 고정
 
-  // 그래프용: 모든 트레이스 데이터 가져오기
-  const {
-    data: allData,
-    isLoading: isAllLoading,
-    error: allError,
-  } = useQuery({
-    queryKey: ['serviceTracesAll', serviceName],
+  // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['serviceTraces', serviceName],
     queryFn: () => getServiceTraces(serviceName, { page: 1, limit: 1000 }), // 충분히 큰 limit으로 모든 데이터 가져오기
   });
 
-  // 테이블용: 페이지네이션된 트레이스 데이터 가져오기
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['serviceTraces', serviceName, currentPage, itemsPerPage],
-    queryFn: () => getServiceTraces(serviceName, { page: currentPage, limit: itemsPerPage }),
-  });
-
-  // 그래프용 데이터 변환 (모든 트레이스)
+  // 전체 트레이스 데이터 변환 (최신순 정렬)
   const allTraces = useMemo(() => {
-    if (!allData?.traces) return [];
-    return allData.traces.map(transformTraceToPoint);
-  }, [allData]);
-
-  // 테이블용 데이터 변환 (페이지네이션된 트레이스, 최신순 정렬)
-  const traces = useMemo(() => {
     if (!data?.traces) return [];
     const sortedTraces = [...data.traces].sort(
       (a: Trace, b: Trace) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -157,7 +140,14 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     return sortedTraces.map(transformTraceToPoint);
   }, [data]);
 
-  const totalCount = data?.total || 0;
+  const totalCount = allTraces.length;
+
+  // 현재 페이지의 데이터만 추출 (테이블용)
+  const traces = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return allTraces.slice(startIndex, endIndex);
+  }, [allTraces, currentPage, itemsPerPage]);
 
   // 상태별 색상 매핑
   const getColorByStatus = (status: string) => {
@@ -298,12 +288,6 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   // 페이지 계산
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
 
-  // 페이지 크기 변경 핸들러
-  const handlePageSizeChange = (newSize: number) => {
-    setItemsPerPage(newSize);
-    setCurrentPage(1); // 페이지 크기 변경 시 첫 페이지로 리셋
-  };
-
   // 페이지네이션 핸들러
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -317,24 +301,18 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     }
   };
 
-  if (error || allError) {
+  if (error) {
     return (
       <div className="bg-white p-5 rounded-lg border border-gray-200">
         <div className="text-center text-red-500 py-8">
           <p className="font-semibold mb-2">Error loading traces</p>
-          <p className="text-sm">
-            {error instanceof Error
-              ? error.message
-              : allError instanceof Error
-              ? allError.message
-              : 'Unknown error'}
-          </p>
+          <p className="text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
         </div>
       </div>
     );
   }
 
-  if ((isLoading && traces.length === 0) || (isAllLoading && allTraces.length === 0)) {
+  if (isLoading && allTraces.length === 0) {
     return (
       <div className="bg-white p-5 rounded-lg border border-gray-200">
         <div className="text-center text-gray-500 py-8">Loading traces...</div>
@@ -346,13 +324,6 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     <div className="bg-white p-5 rounded-lg border border-gray-200">
       {/* 차트 */}
       <ReactECharts option={option} style={{ height: 400 }} />
-      <div className="mt-4 flex justify-between items-center text-sm text-gray-600">
-        <PageSizeSelect
-          value={itemsPerPage}
-          onChange={handlePageSizeChange}
-          options={[10, 30, 50]}
-        />
-      </div>
 
       {/* 테이블 */}
       <div className="mt-6">
