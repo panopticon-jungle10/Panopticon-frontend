@@ -337,13 +337,14 @@ export const handlers = [
     const end = endTime ? new Date(endTime) : new Date();
 
     // interval에 따른 데이터 포인트 생성
-    const intervalMs = {
-      '1m': 60 * 1000,
-      '5m': 5 * 60 * 1000,
-      '10m': 10 * 60 * 1000,
-      '30m': 30 * 60 * 1000,
-      '1h': 60 * 60 * 1000,
-    }[interval] || 10 * 60 * 1000;
+    const intervalMs =
+      {
+        '1m': 60 * 1000,
+        '5m': 5 * 60 * 1000,
+        '10m': 10 * 60 * 1000,
+        '30m': 30 * 60 * 1000,
+        '1h': 60 * 60 * 1000,
+      }[interval] || 10 * 60 * 1000;
 
     const dataPoints = [];
     for (let time = start.getTime(); time <= end.getTime(); time += intervalMs) {
@@ -829,8 +830,12 @@ export const handlers = [
     const errors = [];
     for (let i = 0; i < 150; i++) {
       const template = errorTemplates[i % errorTemplates.length];
-      const firstSeen = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3);
-      const lastSeen = new Date(end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1);
+      const firstSeen = new Date(
+        start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
+      );
+      const lastSeen = new Date(
+        end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1,
+      );
 
       errors.push({
         error_id: `err_${(456 + i).toString().padStart(5, '0')}`,
@@ -1047,7 +1052,9 @@ export const handlers = [
     const logCount = 150;
 
     for (let i = 0; i < logCount; i++) {
-      const randomTime = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      const randomTime = new Date(
+        start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+      );
       const messages = logMessages[level as keyof typeof logMessages] || logMessages.error;
       const types = errorTypes[level as keyof typeof errorTypes] || errorTypes.error;
 

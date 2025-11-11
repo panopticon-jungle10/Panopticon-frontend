@@ -117,7 +117,11 @@ export default function DependenciesSection({ serviceName }: DependenciesSection
   const timeRangeInSeconds = 3600;
 
   // API 데이터 가져오기
-  const { data: dependencies, isLoading, error } = useQuery({
+  const {
+    data: dependencies,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['serviceDependencies', serviceName, startTime, endTime],
     queryFn: () =>
       getServiceDependencies(serviceName, {
@@ -257,7 +261,9 @@ export default function DependenciesSection({ serviceName }: DependenciesSection
               color:
                 node.name === currentService
                   ? COLORS.node.current
-                  : incomingRequests.some((req: DependencyRequest) => req.service_name === node.name)
+                  : incomingRequests.some(
+                      (req: DependencyRequest) => req.service_name === node.name,
+                    )
                   ? COLORS.node.incoming
                   : COLORS.node.outgoing,
               borderColor: COLORS.border,

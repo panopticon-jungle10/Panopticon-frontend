@@ -65,21 +65,18 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return logs.filter((l: {
-      message: string;
-      service: string;
-      traceId: string;
-      level: string;
-    }) => {
-      const matchQuery =
-        q === '' ||
-        l.message.toLowerCase().includes(q) ||
-        l.service.toLowerCase().includes(q) ||
-        l.traceId.toLowerCase().includes(q);
-      const matchLevel = level === '' || l.level.toLowerCase() === level.toLowerCase();
-      const matchService = service === '' || l.service === service;
-      return matchQuery && matchLevel && matchService;
-    });
+    return logs.filter(
+      (l: { message: string; service: string; traceId: string; level: string }) => {
+        const matchQuery =
+          q === '' ||
+          l.message.toLowerCase().includes(q) ||
+          l.service.toLowerCase().includes(q) ||
+          l.traceId.toLowerCase().includes(q);
+        const matchLevel = level === '' || l.level.toLowerCase() === level.toLowerCase();
+        const matchService = service === '' || l.service === service;
+        return matchQuery && matchLevel && matchService;
+      },
+    );
   }, [query, level, service, logs]);
 
   return (

@@ -114,7 +114,11 @@ function transformResourceToTableRow(resource: Resource): ResourceTableRow {
 
   // updated_at 날짜 포맷팅 (ISO 8601 -> "12/31 00:00:00" 형식)
   const date = new Date(resource.updated_at);
-  const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${String(
+    date.getHours(),
+  ).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(
+    date.getSeconds(),
+  ).padStart(2, '0')}`;
 
   return {
     resourceName: resource.resource_name,
