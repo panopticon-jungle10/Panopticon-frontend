@@ -21,7 +21,7 @@ export default function MswProvider({ children }: { children: React.ReactNode })
     }
 
     // 동적 import로 개발 환경에서만 MSW 로드
-    import('../mocks/browser')
+    import('./browser')
       .then(({ worker }) => {
         worker.start({
           onUnhandledRequest: 'bypass', // 핸들러가 없는 요청은 실제 API로 전달

@@ -13,5 +13,5 @@ npm-debug.log*
 *.local
 
 # MSW 관련 파일 (개발 전용)
-src/mocks
+mocks
 public/mockServiceWorker.js
