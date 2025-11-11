@@ -3,7 +3,7 @@
 'use client';
 
 import StatGrid from '@/components/ui/StatGrid';
-import type { StatItem } from '@/components/features/apm/services/[serviceId]/logs/types';
+import type { StatItem } from '@/types/LogsTypes';
 import { mockErrorSummary } from './mock';
 
 export default function ErrorSummary() {

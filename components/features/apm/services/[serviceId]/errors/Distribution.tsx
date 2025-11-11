@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { EChartsOption } from 'echarts';
 import { mockErrorResponse } from './mock';
-import { ErrorItem } from './types';
+import { ErrorItem } from '../../../../../../types/ErrorsTypes';
 import Table from '@/components/ui/Table';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });

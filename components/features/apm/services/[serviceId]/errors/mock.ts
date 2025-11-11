@@ -1,7 +1,7 @@
 // 더미 데이터
 
-import { ErrorResponse, ErrorTrendSeries } from './types';
-import type { StatItem } from '@/components/features/apm/services/[serviceId]/logs/types';
+import { ErrorResponse, ErrorTrendSeries } from '../../../../../../types/ErrorsTypes';
+import type { StatItem } from '@/types/LogsTypes';
 
 /* 상단 Summary 카드 */
 export const mockErrorSummary: StatItem[] = [
