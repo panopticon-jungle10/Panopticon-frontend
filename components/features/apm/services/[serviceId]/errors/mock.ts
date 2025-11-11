@@ -3,13 +3,13 @@
 import { ErrorResponse, ErrorTrendSeries } from './types';
 import type { StatItem } from '@/components/features/apm/services/[serviceId]/logs/types';
 
-// 상단 Summary 카드
+/* 상단 Summary 카드 */
 export const mockErrorSummary: StatItem[] = [
   { id: 'error_rate', label: 'Error Rate', value: '2.3%', tone: 'info' },
   { id: 'error_count', label: 'Error Count', value: '1,243', tone: 'danger' },
 ];
 
-// 테이블
+/* 테이블 */
 export const mockErrorResponse: ErrorResponse = {
   errors: [
     {
@@ -52,7 +52,7 @@ export const mockErrorResponse: ErrorResponse = {
   limit: 20,
 };
 
-// 트렌드 그래프 (현재 시각 기준 직전 24시간)
+/* 트렌드 그래프 (현재 시각 기준 직전 24시간) */
 export const mockErrorTrendData: ErrorTrendSeries[] = [
   {
     service: 'user-service',

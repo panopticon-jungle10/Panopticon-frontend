@@ -5,10 +5,10 @@ import { mockErrorTrendData } from './mock';
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 export default function ErrorTrendChart() {
-  // 급격한 에러 증가 감지 포인트
+  /* 급격한 에러 증가 감지 포인트 */
   const criticalPoints = mockErrorTrendData.flatMap((s) =>
     s.data
-      .filter((p, i) => i > 1 && p.count > s.data[i - 1].count * 1.4)
+      .filter((p, i) => i > 1 && p.count > s.data[i - 1].count * 1.4) //  에러 수 이전 지점보다 1.4배 이상 증가
       .map((p) => ({
         service: s.service,
         color: s.color,
@@ -17,6 +17,7 @@ export default function ErrorTrendChart() {
       })),
   );
 
+  /* ECharts의 그래프 전체 설정 */
   const option = {
     backgroundColor: 'transparent',
     tooltip: {
@@ -58,8 +59,9 @@ export default function ErrorTrendChart() {
       nameTextStyle: { color: '#6b7280' },
       splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
     },
+
+    /* 데이터 그래프 본체 */
     series: [
-      // ✅ 겹치는 반투명 영역형 그래프
       ...mockErrorTrendData.map((s) => ({
         name: s.service,
         type: 'line',
@@ -78,7 +80,7 @@ export default function ErrorTrendChart() {
         z: 2,
       })),
 
-      // 🔴 Critical Spikes (그대로 유지)
+      /* Critical Spikes */
       {
         name: 'Critical Spikes',
         type: 'effectScatter',
