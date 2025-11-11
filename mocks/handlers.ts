@@ -490,6 +490,7 @@ export const handlers = [
           p95_latency_ms: 320,
           errors: 234,
           error_rate: 1.88,
+          updated_at: '2025-01-11T14:32:15Z',
         },
         {
           resource_name: 'POST /api/users',
@@ -499,6 +500,7 @@ export const handlers = [
           p95_latency_ms: 340,
           errors: 87,
           error_rate: 0.99,
+          updated_at: '2025-01-11T14:28:42Z',
         },
         {
           resource_name: 'GET /api/users',
@@ -508,6 +510,7 @@ export const handlers = [
           p95_latency_ms: 280,
           errors: 45,
           error_rate: 0.59,
+          updated_at: '2025-01-11T14:25:33Z',
         },
         {
           resource_name: 'PUT /api/users/:id',
@@ -517,6 +520,7 @@ export const handlers = [
           p95_latency_ms: 380,
           errors: 123,
           error_rate: 2.26,
+          updated_at: '2025-01-11T14:20:08Z',
         },
         {
           resource_name: 'DELETE /api/users/:id',
@@ -526,6 +530,7 @@ export const handlers = [
           p95_latency_ms: 350,
           errors: 67,
           error_rate: 2.09,
+          updated_at: '2025-01-11T14:15:52Z',
         },
         {
           resource_name: 'GET /api/users/:id/profile',
@@ -535,6 +540,7 @@ export const handlers = [
           p95_latency_ms: 310,
           errors: 102,
           error_rate: 1.5,
+          updated_at: '2025-01-11T14:12:27Z',
         },
         {
           resource_name: 'PATCH /api/users/:id/settings',
@@ -544,6 +550,7 @@ export const handlers = [
           p95_latency_ms: 370,
           errors: 91,
           error_rate: 1.99,
+          updated_at: '2025-01-11T14:08:19Z',
         },
         {
           resource_name: 'GET /api/users/:id/orders',
@@ -553,6 +560,7 @@ export const handlers = [
           p95_latency_ms: 320,
           errors: 68,
           error_rate: 1.2,
+          updated_at: '2025-01-11T14:05:44Z',
         },
         {
           resource_name: 'POST /api/users/:id/avatar',
@@ -562,6 +570,7 @@ export const handlers = [
           p95_latency_ms: 580,
           errors: 58,
           error_rate: 2.47,
+          updated_at: '2025-01-11T14:02:11Z',
         },
         {
           resource_name: 'GET /api/users/search',
@@ -571,6 +580,7 @@ export const handlers = [
           p95_latency_ms: 330,
           errors: 52,
           error_rate: 1.2,
+          updated_at: '2025-01-11T13:58:36Z',
         },
         {
           resource_name: 'POST /api/users/batch',
@@ -580,6 +590,7 @@ export const handlers = [
           p95_latency_ms: 720,
           errors: 37,
           error_rate: 3.0,
+          updated_at: '2025-01-11T13:55:03Z',
         },
         {
           resource_name: 'GET /api/users/:id/notifications',
@@ -589,6 +600,7 @@ export const handlers = [
           p95_latency_ms: 280,
           errors: 35,
           error_rate: 1.01,
+          updated_at: '2025-01-11T13:51:28Z',
         },
       ],
       total: 45,

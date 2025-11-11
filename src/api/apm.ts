@@ -3,7 +3,16 @@
  * React Query의 queryFn에서 사용됩니다.
  */
 
-import { ServicesResponse, IssuesResponse, ServiceMapResponse } from '@/types/apm';
+import {
+  ServicesResponse,
+  IssuesResponse,
+  ServiceMapResponse,
+  ResourceResponse,
+  ServiceDependenciesResponse,
+  ServiceTracesResponse,
+  ServiceLogStatsResponse,
+  ServiceLogsResponse,
+} from '@/types/apm';
 
 /**
  * 공통 Fetch 헬퍼
@@ -76,15 +85,17 @@ export const getServiceMetrics = async (
 /**
  * 2.2 서비스 리소스 목록 조회
  */
-export const getServiceResources = async (serviceName: string) => {
-  return fetchJson(`/api/services/${serviceName}/resources`);
+export const getServiceResources = async (serviceName: string): Promise<ResourceResponse> => {
+  return fetchJson<ResourceResponse>(`/api/services/${serviceName}/resources`);
 };
 
 /**
  * 2.3 서비스 의존성 조회
  */
-export const getServiceDependencies = async (serviceName: string) => {
-  return fetchJson(`/api/services/${serviceName}/dependencies`);
+export const getServiceDependencies = async (
+  serviceName: string,
+): Promise<ServiceDependenciesResponse> => {
+  return fetchJson<ServiceDependenciesResponse>(`/api/services/${serviceName}/dependencies`);
 };
 
 /**
@@ -97,7 +108,7 @@ export const getServiceTraces = async (
     limit?: number;
     error_only?: boolean;
   },
-) => {
+): Promise<ServiceTracesResponse> => {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
@@ -106,7 +117,7 @@ export const getServiceTraces = async (
   const url = `/api/services/${serviceName}/traces${
     searchParams.toString() ? `?${searchParams}` : ''
   }`;
-  return fetchJson(url);
+  return fetchJson<ServiceTracesResponse>(url);
 };
 
 /**
@@ -132,7 +143,7 @@ export const getServiceLogStats = async (
     start_time?: string;
     end_time?: string;
   },
-) => {
+): Promise<ServiceLogStatsResponse> => {
   const searchParams = new URLSearchParams();
   if (params?.start_time) searchParams.append('start_time', params.start_time);
   if (params?.end_time) searchParams.append('end_time', params.end_time);
@@ -140,7 +151,7 @@ export const getServiceLogStats = async (
   const url = `/api/services/${serviceName}/logs/stats${
     searchParams.toString() ? `?${searchParams}` : ''
   }`;
-  return fetchJson(url);
+  return fetchJson<ServiceLogStatsResponse>(url);
 };
 
 /**
@@ -153,7 +164,7 @@ export const getServiceLogs = async (
     page?: number;
     limit?: number;
   },
-) => {
+): Promise<ServiceLogsResponse> => {
   const searchParams = new URLSearchParams();
   if (params?.level) searchParams.append('level', params.level);
   if (params?.page) searchParams.append('page', params.page.toString());
@@ -162,5 +173,5 @@ export const getServiceLogs = async (
   const url = `/api/services/${serviceName}/logs${
     searchParams.toString() ? `?${searchParams}` : ''
   }`;
-  return fetchJson(url);
+  return fetchJson<ServiceLogsResponse>(url);
 };
