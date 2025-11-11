@@ -5,6 +5,7 @@ import { SelectDate } from '@/components/features/apm/services/SelectDate';
 import TracesSection from '@/components/features/apm/services/[serviceId]/section/Traces';
 import ChartsSection from '@/components/features/apm/services/[serviceId]/section/Charts';
 import { TimeRange } from '@/types/time';
+import ErrorsSection from '@/components/features/apm/services/[serviceId]/section/Errors';
 import ResourcesSection from '@/components/features/apm/services/[serviceId]/section/Resources';
 import DependenciesSection from '@/components/features/apm/services/[serviceId]/section/Dependencies';
 
@@ -46,12 +47,10 @@ export default function ServiceOverview() {
         <TracesSection />
       </div>
 
-      {/* Errors section - 준비중 */}
+      {/* 에러 영역 */}
       <div id="errors" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Errors</h2>
-        <div className="bg-white p-8 rounded-lg border border-gray-200 text-center text-gray-500">
-          Coming soon...
-        </div>
+        <ErrorsSection />
       </div>
 
       {/* 로그 영역 */}
