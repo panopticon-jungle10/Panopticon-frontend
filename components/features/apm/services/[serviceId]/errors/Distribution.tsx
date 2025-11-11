@@ -29,11 +29,15 @@ export default function ErrorDistribution() {
         return `<b>${service}</b><br/>${resource}<br/>Count: ${count}`;
       },
     },
-    grid: { top: 60, right: 30, bottom: 70, left: 120 },
+    grid: { top: 60, right: 30, bottom: 130, left: 120 },
     xAxis: {
       type: 'category',
       data: resources,
-      axisLabel: { color: '#6b7280', rotate: 30, fontSize: 11 },
+      axisLabel: {
+        color: '#6b7280',
+        fontSize: 11,
+        rotate: 0, // ← 회전 제거 (0도, 일자)
+      },
     },
     yAxis: {
       type: 'category',
@@ -44,11 +48,11 @@ export default function ErrorDistribution() {
       min: 0,
       max: maxCount,
       calculable: true,
-      orient: 'vertical',
-      right: 10,
-      top: 'center',
+      orient: 'horizontal', // 아래쪽 가로 표시
+      bottom: 10,
+      left: 'center',
       inRange: {
-        color: ['#2563eb', '#60a5fa', '#facc15', '#ef4444'],
+        color: ['#bfdbfe', '#3b82f6', '#1e3a8a'], // 밝은→중간→진한 파랑
       },
     },
     series: [
@@ -61,6 +65,12 @@ export default function ErrorDistribution() {
           formatter: (p: any) => (p.value[2] > 0 ? p.value[2] : ''),
           color: '#111827',
           fontSize: 10,
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 8,
+            shadowColor: 'rgba(0,0,0,0.3)',
+          },
         },
       },
     ],
