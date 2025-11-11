@@ -106,7 +106,10 @@ const TRACE_TABLE_COLUMNS: Array<{
 // Trace를 TracePoint로 변환
 function transformTraceToPoint(trace: Trace): TracePoint {
   const date = new Date(trace.date);
-  const timestamp = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  const timestamp = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(
+    2,
+    '0',
+  )}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
   return {
     timestamp,
     duration: trace.duration_ms,
@@ -123,22 +126,35 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(30); // 한 페이지에 보여줄 항목 수
 
-  // API 데이터 가져오기
+  // 그래프용: 모든 트레이스 데이터 가져오기
+  const {
+    data: allData,
+    isLoading: isAllLoading,
+    error: allError,
+  } = useQuery({
+    queryKey: ['serviceTracesAll', serviceName],
+    queryFn: () => getServiceTraces(serviceName, { page: 1, limit: 1000 }), // 충분히 큰 limit으로 모든 데이터 가져오기
+  });
+
+  // 테이블용: 페이지네이션된 트레이스 데이터 가져오기
   const { data, isLoading, error } = useQuery({
     queryKey: ['serviceTraces', serviceName, currentPage, itemsPerPage],
     queryFn: () => getServiceTraces(serviceName, { page: currentPage, limit: itemsPerPage }),
   });
 
-  // 데이터 변환
+  // 그래프용 데이터 변환 (모든 트레이스)
+  const allTraces = useMemo(() => {
+    if (!allData?.traces) return [];
+    return allData.traces.map(transformTraceToPoint);
+  }, [allData]);
+
+  // 테이블용 데이터 변환 (페이지네이션된 트레이스, 최신순 정렬)
   const traces = useMemo(() => {
     if (!data?.traces) return [];
-    let transformedTraces = data.traces.map(transformTraceToPoint);
-    // error=true가 먼저 오도록 정렬
-    transformedTraces = transformedTraces.sort((a: TracePoint, b: TracePoint) => {
-      if (a.status === b.status) return 0;
-      return a.status === 'error' ? -1 : 1;
-    });
-    return transformedTraces;
+    const sortedTraces = [...data.traces].sort(
+      (a: Trace, b: Trace) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+    return sortedTraces.map(transformTraceToPoint);
   }, [data]);
 
   const totalCount = data?.total || 0;
@@ -155,13 +171,19 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     }
   };
 
-  // 상태별로 데이터 분리
-  const successTraces = traces
+  // 상태별로 데이터 분리 (그래프는 모든 트레이스 사용, x축은 시간만 표시)
+  const successTraces = allTraces
     .filter((t: TracePoint) => t.status === 'success')
-    .map((t: TracePoint) => [t.timestamp, t.duration]);
-  const errorTraces = traces
+    .map((t: TracePoint) => {
+      const timeOnly = t.timestamp.split(' ')[1]; // "12/31 00:00:00" -> "00:00:00"
+      return [timeOnly, t.duration];
+    });
+  const errorTraces = allTraces
     .filter((t: TracePoint) => t.status === 'error')
-    .map((t: TracePoint) => [t.timestamp, t.duration]);
+    .map((t: TracePoint) => {
+      const timeOnly = t.timestamp.split(' ')[1]; // "12/31 00:00:00" -> "00:00:00"
+      return [timeOnly, t.duration];
+    });
 
   const option = {
     backgroundColor: 'transparent',
@@ -203,7 +225,9 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
       formatter: (params: { value: [string, number]; seriesName: string; dataIndex: number }) => {
         const [time, duration] = params.value;
         const status = params.seriesName;
-        const trace = traces.filter((t: TracePoint) => t.status === status.toLowerCase())[params.dataIndex];
+        const trace = allTraces.filter((t: TracePoint) => t.status === status.toLowerCase())[
+          params.dataIndex
+        ];
 
         if (!trace) return '';
 
@@ -293,18 +317,24 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     }
   };
 
-  if (error) {
+  if (error || allError) {
     return (
       <div className="bg-white p-5 rounded-lg border border-gray-200">
         <div className="text-center text-red-500 py-8">
           <p className="font-semibold mb-2">Error loading traces</p>
-          <p className="text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          <p className="text-sm">
+            {error instanceof Error
+              ? error.message
+              : allError instanceof Error
+              ? allError.message
+              : 'Unknown error'}
+          </p>
         </div>
       </div>
     );
   }
 
-  if (isLoading && traces.length === 0) {
+  if ((isLoading && traces.length === 0) || (isAllLoading && allTraces.length === 0)) {
     return (
       <div className="bg-white p-5 rounded-lg border border-gray-200">
         <div className="text-center text-gray-500 py-8">Loading traces...</div>
