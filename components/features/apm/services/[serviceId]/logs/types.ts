@@ -12,6 +12,6 @@ export type LogEntry = {
 export type StatItem = {
   id: string;
   label: string;
-  value: number;
+  value: string | number;
   tone?: 'neutral' | 'danger' | 'warning' | 'info';
 };

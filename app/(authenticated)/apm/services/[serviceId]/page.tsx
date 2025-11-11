@@ -48,10 +48,10 @@ export default function ServiceOverview() {
         <TracesSection />
       </div>
 
-      {/* Errors section - 준비중 */}
+      {/* 에러 영역 */}
       <div id="errors" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Errors</h2>
-        <ErrorsSection /> 
+        <ErrorsSection />
       </div>
 
       {/* 로그 영역 */}
