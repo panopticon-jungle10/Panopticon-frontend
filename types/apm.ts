@@ -56,3 +56,120 @@ export interface ServiceMapResponse {
   nodes: ServiceNode[];
   edges: ServiceEdge[];
 }
+
+// 2.2 서비스 리소스
+export interface Resource {
+  resource_name: string;
+  requests: number;
+  total_time_ms: number;
+  avg_time_ms: number;
+  p95_latency_ms: number;
+  errors: number;
+  error_rate: number;
+  updated_at: string;
+}
+
+export interface ResourceResponse {
+  resources: Resource[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface ResourceTableRow {
+  resourceName: string;
+  requests: number;
+  totalTime: string;
+  p95Latency: number;
+  errors: number;
+  errorRate: string;
+  date: string;
+}
+
+// 2.3 서비스 의존성
+export interface DependencyRequest {
+  service_name: string;
+  total_requests: number;
+  error_rate: number;
+}
+
+export interface ServiceDependenciesResponse {
+  service_name: string;
+  incoming_requests: DependencyRequest[];
+  outgoing_requests: DependencyRequest[];
+}
+
+// 2.7 로그
+export type LogLevel = 'ERROR' | 'WARNING' | 'INFO';
+
+export type LogEntry = {
+  id: string;
+  level: LogLevel;
+  service: string;
+  traceId: string;
+  message: string;
+  timestamp: string;
+};
+
+export type StatItem = {
+  id: string;
+  label: string;
+  value: number;
+  tone?: 'neutral' | 'danger' | 'warning' | 'info';
+};
+
+export interface LogStatsBreakdown {
+  level: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ServiceLogStatsResponse {
+  service_name: string;
+  start_time: string;
+  end_time: string;
+  total_logs: number;
+  error_count: number;
+  warning_count: number;
+  info_count: number;
+  breakdown: LogStatsBreakdown[];
+}
+
+export interface ServiceLog {
+  log_id: string;
+  timestamp: string;
+  level: string;
+  service: string;
+  message: string;
+  trace_id?: string;
+  span_id?: string;
+  attributes?: Record<string, string>;
+}
+
+export interface ServiceLogsResponse {
+  logs: ServiceLog[];
+  total: number;
+  page: number;
+  limit: number;
+  filtered_level?: string;
+}
+
+// 2.4 트레이스
+export interface Trace {
+  trace_id: string;
+  date: string;
+  resource: string;
+  service: string;
+  duration_ms: number;
+  method: string;
+  status_code: number;
+  span_count: number;
+  error: boolean;
+}
+
+export interface ServiceTracesResponse {
+  traces: Trace[];
+  total: number;
+  page: number;
+  limit: number;
+}
