@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { mockLogs, mockStats } from '../logs/mock';
 import FilterBar from '../logs/FilterBar';
-import StatGrid from '../common/StatGrid';
+import StatGrid from '../../../../../ui/StatGrid';
 import LogList from '../logs/LogList';
 
 export default function LogsSection() {

@@ -18,6 +18,7 @@ interface TableProps<T> {
   className?: string;
   showFavorite?: boolean; // 즐겨찾기 열 표시 여부
   onFavoriteClick?: (row: T, index: number) => void; // 즐겨찾기 클릭 핸들러
+  getRowId?: (row: T, index: number) => string; // Errors List 하이라이트
 }
 
 export default function Table<T>({
@@ -26,6 +27,7 @@ export default function Table<T>({
   className = 'w-full',
   showFavorite = false,
   onFavoriteClick,
+  getRowId, // Errors List 하이라이트
 }: TableProps<T>) {
   const [sortField, setSortField] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -123,6 +125,7 @@ export default function Table<T>({
             sortedData.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
+                id={getRowId ? getRowId(row, rowIndex) : undefined} // 여기서 id 부여
                 className="border-b border-gray-200 hover:bg-gray-50 hover:cursor-pointer transition-colors"
               >
                 {/* 즐겨찾기 셀 */}

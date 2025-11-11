@@ -4,7 +4,6 @@
 import ErrorSummary from '../errors/Summary';
 import ErrorTrendChart from '../errors/TrendChart';
 import ErrorDistribution from '../errors/Distribution';
-import ErrorTable from '../errors/Table';
 
 export default function ErrorsSection() {
   return (
@@ -12,7 +11,6 @@ export default function ErrorsSection() {
       <ErrorSummary />
       <ErrorTrendChart />
       <ErrorDistribution />
-      <ErrorTable />
     </div>
   );
 }
