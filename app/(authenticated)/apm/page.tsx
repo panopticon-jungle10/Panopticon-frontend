@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { FiAlertOctagon } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
@@ -74,6 +75,11 @@ const columns = [
     key: 'service' as keyof ApmService,
     header: 'Service',
     width: '25%',
+    render: (_v: ApmService[keyof ApmService], row: ApmService) => (
+      <Link href="/apm/services" className="text-blue-600 hover:underline">
+        {row.service}
+      </Link>
+    ),
   },
   {
     key: 'requests' as keyof ApmService,
