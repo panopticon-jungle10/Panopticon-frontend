@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceDependencies } from '@/src/api/apm';
 import { DependencyRequest } from '@/types/apm';
+import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -109,13 +110,20 @@ const getErrorColor = (errorRate: number): string => {
 };
 
 export default function DependenciesSection({ serviceName }: DependenciesSectionProps) {
+  // Zustand store에서 시간 정보 가져오기
+  const { startTime, endTime } = useTimeRangeStore();
+
   // 시간 범위 (1시간 = 3600초)
   const timeRangeInSeconds = 3600;
 
   // API 데이터 가져오기
   const { data: dependencies, isLoading, error } = useQuery({
-    queryKey: ['serviceDependencies', serviceName],
-    queryFn: () => getServiceDependencies(serviceName),
+    queryKey: ['serviceDependencies', serviceName, startTime, endTime],
+    queryFn: () =>
+      getServiceDependencies(serviceName, {
+        start_time: startTime,
+        end_time: endTime,
+      }),
   });
 
   // ECharts 옵션 생성

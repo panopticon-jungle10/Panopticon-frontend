@@ -326,160 +326,64 @@ export const handlers = [
   }),
 
   // 2.1 Service Summary - 메트릭 그래프 데이터
-  http.get('/api/services/:serviceName/metrics', () => {
+  http.get('/api/services/:serviceName/metrics', ({ request }) => {
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+    const interval = url.searchParams.get('interval') || '10m';
+
+    // 시간 범위 계산
+    const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
+    const end = endTime ? new Date(endTime) : new Date();
+
+    // interval에 따른 데이터 포인트 생성
+    const intervalMs = {
+      '1m': 60 * 1000,
+      '5m': 5 * 60 * 1000,
+      '10m': 10 * 60 * 1000,
+      '30m': 30 * 60 * 1000,
+      '1h': 60 * 60 * 1000,
+    }[interval] || 10 * 60 * 1000;
+
+    const dataPoints = [];
+    for (let time = start.getTime(); time <= end.getTime(); time += intervalMs) {
+      dataPoints.push(new Date(time).toISOString());
+    }
+
     return HttpResponse.json({
       service_name: 'user-service',
-      start_time: '2025-11-06T10:00:00Z',
-      end_time: '2025-11-07T10:00:00Z',
-      interval: '10m',
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      interval,
       data: {
-        requests_and_errors: [
-          { timestamp: '2025-11-07T10:00:00Z', hits: 1234, errors: 23 },
-          { timestamp: '2025-11-07T10:10:00Z', hits: 1256, errors: 18 },
-          { timestamp: '2025-11-07T10:20:00Z', hits: 1198, errors: 31 },
-          { timestamp: '2025-11-07T10:30:00Z', hits: 1302, errors: 15 },
-          { timestamp: '2025-11-07T10:40:00Z', hits: 1278, errors: 22 },
-          { timestamp: '2025-11-07T10:50:00Z', hits: 1345, errors: 19 },
-          { timestamp: '2025-11-07T11:00:00Z', hits: 1289, errors: 25 },
-          { timestamp: '2025-11-07T11:10:00Z', hits: 1367, errors: 17 },
-          { timestamp: '2025-11-07T11:20:00Z', hits: 1245, errors: 28 },
-          { timestamp: '2025-11-07T11:30:00Z', hits: 1312, errors: 20 },
-          { timestamp: '2025-11-07T11:40:00Z', hits: 1298, errors: 24 },
-          { timestamp: '2025-11-07T11:50:00Z', hits: 1356, errors: 16 },
-          { timestamp: '2025-11-07T12:00:00Z', hits: 1423, errors: 21 },
-          { timestamp: '2025-11-07T12:10:00Z', hits: 1387, errors: 19 },
-          { timestamp: '2025-11-07T12:20:00Z', hits: 1401, errors: 27 },
-        ],
-        errors_by_status: [
-          {
-            timestamp: '2025-11-07T10:00:00Z',
-            status_500: 15,
-            status_502: 3,
-            status_503: 2,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T10:10:00Z',
-            status_500: 12,
-            status_502: 2,
-            status_503: 1,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T10:20:00Z',
-            status_500: 20,
-            status_502: 5,
-            status_503: 3,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T10:30:00Z',
-            status_500: 10,
-            status_502: 2,
-            status_503: 1,
-            status_504: 2,
-          },
-          {
-            timestamp: '2025-11-07T10:40:00Z',
-            status_500: 14,
-            status_502: 3,
-            status_503: 2,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T10:50:00Z',
-            status_500: 13,
-            status_502: 2,
-            status_503: 2,
-            status_504: 2,
-          },
-          {
-            timestamp: '2025-11-07T11:00:00Z',
-            status_500: 16,
-            status_502: 4,
-            status_503: 2,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T11:10:00Z',
-            status_500: 11,
-            status_502: 2,
-            status_503: 1,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T11:20:00Z',
-            status_500: 18,
-            status_502: 5,
-            status_503: 3,
-            status_504: 2,
-          },
-          {
-            timestamp: '2025-11-07T11:30:00Z',
-            status_500: 13,
-            status_502: 3,
-            status_503: 2,
-            status_504: 2,
-          },
-          {
-            timestamp: '2025-11-07T11:40:00Z',
-            status_500: 15,
-            status_502: 4,
-            status_503: 2,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T11:50:00Z',
-            status_500: 10,
-            status_502: 2,
-            status_503: 1,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T12:00:00Z',
-            status_500: 14,
-            status_502: 3,
-            status_503: 2,
-            status_504: 2,
-          },
-          {
-            timestamp: '2025-11-07T12:10:00Z',
-            status_500: 12,
-            status_502: 3,
-            status_503: 1,
-            status_504: 3,
-          },
-          {
-            timestamp: '2025-11-07T12:20:00Z',
-            status_500: 17,
-            status_502: 5,
-            status_503: 3,
-            status_504: 2,
-          },
-        ],
-        latency: [
-          { timestamp: '2025-11-07T10:00:00Z', p99_9: 450, p95: 234, p90: 156 },
-          { timestamp: '2025-11-07T10:10:00Z', p99_9: 438, p95: 228, p90: 152 },
-          { timestamp: '2025-11-07T10:20:00Z', p99_9: 475, p95: 256, p90: 168 },
-          { timestamp: '2025-11-07T10:30:00Z', p99_9: 420, p95: 220, p90: 145 },
-          { timestamp: '2025-11-07T10:40:00Z', p99_9: 465, p95: 242, p90: 160 },
-          { timestamp: '2025-11-07T10:50:00Z', p99_9: 442, p95: 235, p90: 158 },
-          { timestamp: '2025-11-07T11:00:00Z', p99_9: 458, p95: 245, p90: 162 },
-          { timestamp: '2025-11-07T11:10:00Z', p99_9: 432, p95: 225, p90: 148 },
-          { timestamp: '2025-11-07T11:20:00Z', p99_9: 482, p95: 260, p90: 172 },
-          { timestamp: '2025-11-07T11:30:00Z', p99_9: 445, p95: 238, p90: 155 },
-          { timestamp: '2025-11-07T11:40:00Z', p99_9: 468, p95: 248, p90: 165 },
-          { timestamp: '2025-11-07T11:50:00Z', p99_9: 425, p95: 222, p90: 150 },
-          { timestamp: '2025-11-07T12:00:00Z', p99_9: 452, p95: 240, p90: 159 },
-          { timestamp: '2025-11-07T12:10:00Z', p99_9: 448, p95: 237, p90: 157 },
-          { timestamp: '2025-11-07T12:20:00Z', p99_9: 478, p95: 258, p90: 170 },
-        ],
+        requests_and_errors: dataPoints.map((timestamp) => ({
+          timestamp,
+          hits: Math.floor(Math.random() * 300) + 1200,
+          errors: Math.floor(Math.random() * 20) + 10,
+        })),
+        errors_by_status: dataPoints.map((timestamp) => ({
+          timestamp,
+          status_500: Math.floor(Math.random() * 10) + 8,
+          status_502: Math.floor(Math.random() * 5) + 1,
+          status_503: Math.floor(Math.random() * 4) + 1,
+          status_504: Math.floor(Math.random() * 4) + 1,
+        })),
+        latency: dataPoints.map((timestamp) => ({
+          timestamp,
+          p99_9: Math.floor(Math.random() * 100) + 400,
+          p95: Math.floor(Math.random() * 50) + 220,
+          p90: Math.floor(Math.random() * 30) + 145,
+        })),
       },
     });
   }),
 
   // 2.2 Resources - 리소스 목록
-  http.get('/api/services/:serviceName/resources', () => {
+  http.get('/api/services/:serviceName/resources', ({ request }) => {
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+
     // 150개의 resource 데이터 동적 생성
     const allResources = [];
     const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -506,7 +410,7 @@ export const handlers = [
       '/api/reviews',
     ];
 
-    const now = new Date('2025-01-11T15:00:00Z');
+    const now = new Date();
 
     for (let i = 0; i < 150; i++) {
       const method = methods[i % methods.length];
@@ -533,69 +437,92 @@ export const handlers = [
       });
     }
 
+    // 시간 범위 필터링
+    let filteredResources = allResources;
+    if (startTime && endTime) {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      filteredResources = allResources.filter((resource) => {
+        const resourceTime = new Date(resource.updated_at);
+        return resourceTime >= start && resourceTime <= end;
+      });
+    }
+
     return HttpResponse.json({
-      resources: allResources,
-      total: allResources.length,
+      resources: filteredResources,
+      total: filteredResources.length,
       page: 1,
       limit: 150,
     });
   }),
 
   // 2.3 Dependencies - 서비스 의존성 맵
-  http.get('/api/services/:serviceName/dependencies', () => {
+  http.get('/api/services/:serviceName/dependencies', ({ request }) => {
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+
+    // 시간 범위 계산 (기본값: 지난 1시간)
+    const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
+    const end = endTime ? new Date(endTime) : new Date();
+    const timeRangeInSeconds = (end.getTime() - start.getTime()) / 1000;
+
+    // 시간 범위에 비례한 요청 수 계산 (기준: 1시간 = 3600초)
+    const baseMultiplier = timeRangeInSeconds / 3600;
+
     return HttpResponse.json({
       service_name: 'user-service',
       incoming_requests: [
         {
           service_name: 'api-gateway',
-          total_requests: 54000,
+          total_requests: Math.floor(54000 * baseMultiplier),
           error_rate: 0.5,
         },
         {
           service_name: 'admin-service',
-          total_requests: 12000,
+          total_requests: Math.floor(12000 * baseMultiplier),
           error_rate: 0.3,
         },
         {
           service_name: 'order-service',
-          total_requests: 8500,
+          total_requests: Math.floor(8500 * baseMultiplier),
           error_rate: 0.4,
         },
         {
           service_name: 'notification-service',
-          total_requests: 6200,
+          total_requests: Math.floor(6200 * baseMultiplier),
           error_rate: 0.2,
         },
       ],
       outgoing_requests: [
         {
           service_name: 'database',
-          total_requests: 162000,
+          total_requests: Math.floor(162000 * baseMultiplier),
           error_rate: 0.1,
         },
         {
           service_name: 'cache-service',
-          total_requests: 108000,
+          total_requests: Math.floor(108000 * baseMultiplier),
           error_rate: 0.05,
         },
         {
           service_name: 'payment-service',
-          total_requests: 45000,
+          total_requests: Math.floor(45000 * baseMultiplier),
           error_rate: 0.8,
         },
         {
           service_name: 'auth-service',
-          total_requests: 32000,
+          total_requests: Math.floor(32000 * baseMultiplier),
           error_rate: 0.3,
         },
         {
           service_name: 'analytics-service',
-          total_requests: 18500,
+          total_requests: Math.floor(18500 * baseMultiplier),
           error_rate: 0.6,
         },
         {
           service_name: 'email-service',
-          total_requests: 12300,
+          total_requests: Math.floor(12300 * baseMultiplier),
           error_rate: 0.4,
         },
       ],
@@ -607,8 +534,10 @@ export const handlers = [
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '30');
     const page = parseInt(url.searchParams.get('page') || '1');
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
 
-    // 더 많은 trace 데이터 생성 (100개)
+    // 더 많은 trace 데이터 생성 (150개)
     const allTraces = [];
     const resources = [
       'GET /api/users',
@@ -625,7 +554,7 @@ export const handlers = [
     const methods = ['GET', 'POST', 'PUT', 'DELETE'];
     const statusCodes = [200, 200, 200, 200, 200, 400, 500, 502, 503, 504]; // 성공이 더 많도록
 
-    const now = new Date('2025-11-11T10:00:00Z');
+    const now = new Date();
 
     for (let i = 0; i < 150; i++) {
       const statusCode = statusCodes[Math.floor(Math.random() * statusCodes.length)];
@@ -646,14 +575,25 @@ export const handlers = [
       });
     }
 
+    // 시간 범위 필터링
+    let filteredTraces = allTraces;
+    if (startTime && endTime) {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      filteredTraces = allTraces.filter((trace) => {
+        const traceTime = new Date(trace.date);
+        return traceTime >= start && traceTime <= end;
+      });
+    }
+
     // 페이지네이션 적용
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedTraces = allTraces.slice(startIndex, endIndex);
+    const paginatedTraces = filteredTraces.slice(startIndex, endIndex);
 
     return HttpResponse.json({
       traces: paginatedTraces,
-      total: allTraces.length,
+      total: filteredTraces.length,
       page,
       limit,
     });
@@ -753,113 +693,208 @@ export const handlers = [
   }),
 
   // 2.6 Errors - 에러 목록
-  http.get('/api/services/:serviceName/errors', () => {
+  http.get('/api/services/:serviceName/errors', ({ request }) => {
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+
+    // 시간 범위 계산
+    const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
+    const end = endTime ? new Date(endTime) : new Date();
+
+    const errorTemplates = [
+      {
+        error_message: 'Failed to connect to database',
+        resource: 'GET /api/users/:id',
+        stack_trace:
+          'Error: Connection timeout\n  at Database.connect (db.js:45)\n  at UserService.getUser (service.js:23)',
+      },
+      {
+        error_message: 'Validation error: Invalid user ID format',
+        resource: 'GET /api/users/:id',
+        stack_trace:
+          'ValidationError: ID must be numeric\n  at validateId (validator.js:12)\n  at UserController.getUser (controller.js:34)',
+      },
+      {
+        error_message: 'Service unavailable',
+        resource: 'POST /api/users',
+        stack_trace:
+          'Error: Service temporarily unavailable\n  at ServiceRegistry.getService (registry.js:67)',
+      },
+      {
+        error_message: 'Authentication failed',
+        resource: 'POST /api/users/login',
+        stack_trace:
+          'AuthError: Invalid credentials\n  at AuthService.authenticate (auth.js:89)\n  at LoginController.handleLogin (login.js:45)',
+      },
+      {
+        error_message: 'Rate limit exceeded',
+        resource: 'GET /api/users/search',
+        stack_trace:
+          'RateLimitError: Too many requests\n  at RateLimiter.check (limiter.js:34)\n  at Middleware.rateLimitCheck (middleware.js:56)',
+      },
+      {
+        error_message: 'Resource not found',
+        resource: 'GET /api/users/:id/profile',
+        stack_trace:
+          'NotFoundError: User profile not found\n  at ProfileService.getProfile (profile.js:78)\n  at ProfileController.get (controller.js:23)',
+      },
+      {
+        error_message: 'Memory allocation failed',
+        resource: 'POST /api/users/batch',
+        stack_trace:
+          'MemoryError: Out of memory\n  at MemoryManager.allocate (memory.js:156)\n  at BatchProcessor.process (batch.js:89)',
+      },
+      {
+        error_message: 'Network timeout',
+        resource: 'GET /api/users/notifications',
+        stack_trace:
+          'TimeoutError: Request timeout after 30000ms\n  at HttpClient.request (http.js:234)\n  at NotificationService.fetch (notification.js:67)',
+      },
+      {
+        error_message: 'SQL syntax error',
+        resource: 'GET /api/users/search',
+        stack_trace:
+          'SQLError: Invalid SQL syntax\n  at QueryBuilder.build (query.js:123)\n  at SearchService.execute (search.js:45)',
+      },
+      {
+        error_message: 'Permission denied',
+        resource: 'DELETE /api/users/:id',
+        stack_trace:
+          'PermissionError: Insufficient permissions\n  at AuthMiddleware.checkPermission (auth.js:178)\n  at UserController.delete (controller.js:89)',
+      },
+      {
+        error_message: 'Invalid JSON format',
+        resource: 'POST /api/users',
+        stack_trace:
+          'JSONParseError: Unexpected token\n  at JSON.parse (native)\n  at RequestParser.parse (parser.js:34)',
+      },
+      {
+        error_message: 'Cache connection lost',
+        resource: 'GET /api/users/:id/profile',
+        stack_trace:
+          'CacheError: Redis connection lost\n  at RedisClient.get (redis.js:92)\n  at CacheService.fetch (cache.js:45)',
+      },
+      {
+        error_message: 'File system error',
+        resource: 'POST /api/users/:id/avatar',
+        stack_trace:
+          'FSError: Failed to write file\n  at FileSystem.write (fs.js:234)\n  at AvatarService.save (avatar.js:78)',
+      },
+      {
+        error_message: 'Circular dependency detected',
+        resource: 'GET /api/users/:id/orders',
+        stack_trace:
+          'DependencyError: Circular reference\n  at DependencyResolver.resolve (resolver.js:156)\n  at OrderService.load (order.js:34)',
+      },
+      {
+        error_message: 'Token expired',
+        resource: 'GET /api/users/:id/settings',
+        stack_trace:
+          'TokenError: JWT token expired\n  at TokenValidator.validate (token.js:89)\n  at AuthMiddleware.verify (auth.js:123)',
+      },
+      {
+        error_message: 'Database deadlock',
+        resource: 'PUT /api/users/:id',
+        stack_trace:
+          'DeadlockError: Transaction deadlock detected\n  at Transaction.commit (transaction.js:234)\n  at UserService.update (service.js:156)',
+      },
+      {
+        error_message: 'Invalid email format',
+        resource: 'POST /api/users',
+        stack_trace:
+          'ValidationError: Email format invalid\n  at EmailValidator.validate (validator.js:45)\n  at UserController.create (controller.js:78)',
+      },
+      {
+        error_message: 'Service circuit breaker open',
+        resource: 'GET /api/users/:id/orders',
+        stack_trace:
+          'CircuitBreakerError: Circuit breaker is open\n  at CircuitBreaker.call (breaker.js:123)\n  at OrderService.fetch (order.js:67)',
+      },
+      {
+        error_message: 'Request body too large',
+        resource: 'POST /api/users/batch',
+        stack_trace:
+          'PayloadError: Request entity too large\n  at BodyParser.parse (parser.js:89)\n  at Middleware.parseBody (middleware.js:45)',
+      },
+      {
+        error_message: 'Concurrent modification error',
+        resource: 'PUT /api/users/:id',
+        stack_trace:
+          'ConcurrencyError: Resource modified by another request\n  at OptimisticLock.check (lock.js:156)\n  at UserService.update (service.js:89)',
+      },
+    ];
+
+    // 150개의 에러 데이터 생성
+    const errors = [];
+    for (let i = 0; i < 150; i++) {
+      const template = errorTemplates[i % errorTemplates.length];
+      const firstSeen = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3);
+      const lastSeen = new Date(end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1);
+
+      errors.push({
+        error_id: `err_${(456 + i).toString().padStart(5, '0')}`,
+        error_message: template.error_message,
+        resource: template.resource,
+        stack_trace: template.stack_trace,
+        service_name: 'user-service',
+        count: Math.floor(Math.random() * 200) + 50,
+        first_seen: firstSeen.toISOString(),
+        last_seen: lastSeen.toISOString(),
+        sample_trace_ids: [`trace_${i * 100}`, `trace_${i * 100 + 1}`],
+      });
+    }
+
     return HttpResponse.json({
-      errors: [
-        {
-          error_id: 'err_456',
-          service_name: 'user-service',
-          error_message: 'Failed to connect to database',
-          resource: 'GET /api/users/:id',
-          count: 234,
-          first_seen: '2025-11-07T09:00:00Z',
-          last_seen: '2025-11-07T10:45:00Z',
-          stack_trace:
-            'Error: Connection timeout\n  at Database.connect (db.js:45)\n  at UserService.getUser (service.js:23)',
-          sample_trace_ids: ['trace_123', 'trace_456'],
-        },
-        {
-          error_id: 'err_457',
-          service_name: 'user-service',
-          error_message: 'Validation error: Invalid user ID format',
-          resource: 'GET /api/users/:id',
-          count: 156,
-          first_seen: '2025-11-07T09:30:00Z',
-          last_seen: '2025-11-07T10:40:00Z',
-          stack_trace:
-            'ValidationError: ID must be numeric\n  at validateId (validator.js:12)\n  at UserController.getUser (controller.js:34)',
-          sample_trace_ids: ['trace_789', 'trace_012'],
-        },
-        {
-          error_id: 'err_458',
-          service_name: 'user-service',
-          error_message: 'Service unavailable',
-          resource: 'POST /api/users',
-          count: 89,
-          first_seen: '2025-11-07T10:00:00Z',
-          last_seen: '2025-11-07T10:35:00Z',
-          stack_trace:
-            'Error: Service temporarily unavailable\n  at ServiceRegistry.getService (registry.js:67)',
-          sample_trace_ids: ['trace_345', 'trace_678'],
-        },
-        {
-          error_id: 'err_459',
-          service_name: 'user-service',
-          error_message: 'Authentication failed',
-          resource: 'POST /api/users/login',
-          count: 78,
-          first_seen: '2025-11-07T09:15:00Z',
-          last_seen: '2025-11-07T10:30:00Z',
-          stack_trace:
-            'AuthError: Invalid credentials\n  at AuthService.authenticate (auth.js:89)\n  at LoginController.handleLogin (login.js:45)',
-          sample_trace_ids: ['trace_901', 'trace_234'],
-        },
-        {
-          error_id: 'err_460',
-          service_name: 'user-service',
-          error_message: 'Rate limit exceeded',
-          resource: 'GET /api/users/search',
-          count: 67,
-          first_seen: '2025-11-07T09:45:00Z',
-          last_seen: '2025-11-07T10:38:00Z',
-          stack_trace:
-            'RateLimitError: Too many requests\n  at RateLimiter.check (limiter.js:34)\n  at Middleware.rateLimitCheck (middleware.js:56)',
-          sample_trace_ids: ['trace_567', 'trace_890'],
-        },
-        {
-          error_id: 'err_461',
-          service_name: 'user-service',
-          error_message: 'Resource not found',
-          resource: 'GET /api/users/:id/profile',
-          count: 54,
-          first_seen: '2025-11-07T09:20:00Z',
-          last_seen: '2025-11-07T10:25:00Z',
-          stack_trace:
-            'NotFoundError: User profile not found\n  at ProfileService.getProfile (profile.js:78)\n  at ProfileController.get (controller.js:23)',
-          sample_trace_ids: ['trace_123', 'trace_456'],
-        },
-      ],
-      total: 45,
+      errors,
+      total: errors.length,
       page: 1,
-      limit: 20,
+      limit: 150,
     });
   }),
 
   // 2.7.1 로그 통계 조회
-  http.get('/api/services/:serviceName/logs/stats', () => {
+  http.get('/api/services/:serviceName/logs/stats', ({ request }) => {
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+
+    // 시간 범위 계산
+    const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
+    const end = endTime ? new Date(endTime) : new Date();
+    const timeRangeInSeconds = (end.getTime() - start.getTime()) / 1000;
+
+    // 시간 범위에 비례한 로그 수 계산 (기준: 1시간 = 3600초)
+    const baseMultiplier = timeRangeInSeconds / 3600;
+
+    const errorCount = Math.floor(567 * baseMultiplier);
+    const warningCount = Math.floor(1234 * baseMultiplier);
+    const infoCount = Math.floor(13433 * baseMultiplier);
+    const totalLogs = errorCount + warningCount + infoCount;
+
     return HttpResponse.json({
       service_name: 'user-service',
-      start_time: '2025-11-06T10:00:00Z',
-      end_time: '2025-11-07T10:00:00Z',
-      total_logs: 15234,
-      error_count: 567,
-      warning_count: 1234,
-      info_count: 13433,
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      total_logs: totalLogs,
+      error_count: errorCount,
+      warning_count: warningCount,
+      info_count: infoCount,
       breakdown: [
         {
           level: 'error',
-          count: 567,
-          percentage: 3.72,
+          count: errorCount,
+          percentage: parseFloat(((errorCount / totalLogs) * 100).toFixed(2)),
         },
         {
           level: 'warning',
-          count: 1234,
-          percentage: 8.1,
+          count: warningCount,
+          percentage: parseFloat(((warningCount / totalLogs) * 100).toFixed(2)),
         },
         {
           level: 'info',
-          count: 13433,
-          percentage: 88.18,
+          count: infoCount,
+          percentage: parseFloat(((infoCount / totalLogs) * 100).toFixed(2)),
         },
       ],
     });
@@ -869,52 +904,178 @@ export const handlers = [
   http.get('/api/services/:serviceName/logs', ({ request }) => {
     const url = new URL(request.url);
     const level = url.searchParams.get('level') || 'error';
+    const startTime = url.searchParams.get('start_time');
+    const endTime = url.searchParams.get('end_time');
+
+    // 시간 범위 계산
+    const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
+    const end = endTime ? new Date(endTime) : new Date();
+
+    const logMessages = {
+      error: [
+        'Database connection timeout',
+        'Failed to process user request',
+        'Invalid input parameters',
+        'Service temporarily unavailable',
+        'Authentication failed',
+        'Memory allocation failed',
+        'Network request timeout',
+        'SQL syntax error in query',
+        'Permission denied for resource',
+        'Invalid JSON format received',
+        'Cache connection lost',
+        'File system write error',
+        'Circular dependency detected',
+        'JWT token expired',
+        'Database transaction deadlock',
+        'Invalid email format',
+        'Circuit breaker opened',
+        'Request body too large',
+        'Concurrent modification detected',
+        'Redis connection refused',
+      ],
+      warning: [
+        'High memory usage detected',
+        'Slow query performance',
+        'Deprecated API endpoint used',
+        'Rate limit approaching',
+        'Cache miss rate high',
+        'Database connection pool low',
+        'CPU usage above threshold',
+        'Disk space running low',
+        'Response time degradation',
+        'Unusual traffic pattern',
+        'Old client version detected',
+        'Legacy code path executed',
+        'Retry count increasing',
+        'Queue length growing',
+        'Session timeout approaching',
+      ],
+      info: [
+        'User request processed successfully',
+        'Database query completed',
+        'Cache hit',
+        'API endpoint called',
+        'Request handled',
+        'User authenticated',
+        'Data validation passed',
+        'Resource created',
+        'Resource updated',
+        'Resource deleted',
+        'Email sent successfully',
+        'File uploaded',
+        'Batch job started',
+        'Batch job completed',
+        'Health check passed',
+      ],
+    };
+
+    const errorTypes = {
+      error: [
+        'TimeoutError',
+        'ProcessingError',
+        'ValidationError',
+        'ServiceError',
+        'AuthError',
+        'MemoryError',
+        'NetworkError',
+        'SQLError',
+        'PermissionError',
+        'JSONParseError',
+        'CacheError',
+        'FileSystemError',
+        'DependencyError',
+        'TokenError',
+        'DeadlockError',
+        'CircuitBreakerError',
+        'PayloadError',
+        'ConcurrencyError',
+        'ConnectionError',
+        'DataError',
+      ],
+      warning: [
+        'PerformanceWarning',
+        'DeprecationWarning',
+        'ResourceWarning',
+        'ThresholdWarning',
+        'PatternWarning',
+        'VersionWarning',
+        'ConfigWarning',
+        'CapacityWarning',
+        'TimeoutWarning',
+        'QueueWarning',
+      ],
+      info: [
+        'Info',
+        'Success',
+        'Processed',
+        'Authenticated',
+        'Validated',
+        'Created',
+        'Updated',
+        'Deleted',
+        'Sent',
+        'Uploaded',
+      ],
+    };
+
+    const requestPaths = [
+      '/api/users',
+      '/api/users/:id',
+      '/api/users/:id/profile',
+      '/api/users/:id/orders',
+      '/api/users/:id/avatar',
+      '/api/users/:id/settings',
+      '/api/users/:id/notifications',
+      '/api/users/search',
+      '/api/users/batch',
+      '/api/users/login',
+      '/api/orders',
+      '/api/orders/:id',
+      '/api/products',
+      '/api/products/:id',
+      '/api/payments',
+      '/api/cart',
+      '/api/reviews',
+      '/api/analytics',
+      '/api/reports',
+      '/api/admin',
+    ];
+
+    // 150개의 로그 동적 생성
+    const logs = [];
+    const logCount = 150;
+
+    for (let i = 0; i < logCount; i++) {
+      const randomTime = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      const messages = logMessages[level as keyof typeof logMessages] || logMessages.error;
+      const types = errorTypes[level as keyof typeof errorTypes] || errorTypes.error;
+
+      logs.push({
+        log_id: `log_${Date.now()}_${i.toString().padStart(5, '0')}`,
+        timestamp: randomTime.toISOString(),
+        level: level,
+        service: 'user-service',
+        message: messages[i % messages.length],
+        trace_id: `trace_${Math.random().toString(36).substring(7)}`,
+        span_id: `span_${Math.random().toString(36).substring(7)}`,
+        attributes: {
+          'error.type': types[i % types.length],
+          'request.path': requestPaths[i % requestPaths.length],
+          'user.id': Math.floor(Math.random() * 10000),
+          'request.duration_ms': Math.floor(Math.random() * 1000),
+        },
+      });
+    }
+
+    // 시간 역순으로 정렬 (최신 로그가 먼저)
+    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return HttpResponse.json({
-      logs: [
-        {
-          log_id: 'log_789',
-          timestamp: '2025-11-07T10:45:30.123Z',
-          level: level,
-          service: 'user-service',
-          message: 'Database connection timeout',
-          trace_id: 'trace_abc123',
-          span_id: 'span_002',
-          attributes: {
-            'error.type': 'TimeoutError',
-            'database.host': 'db-primary',
-          },
-        },
-        {
-          log_id: 'log_790',
-          timestamp: '2025-11-07T10:44:15.456Z',
-          level: level,
-          service: 'user-service',
-          message: 'Failed to process user request',
-          trace_id: 'trace_def456',
-          span_id: 'span_003',
-          attributes: {
-            'error.type': 'ProcessingError',
-            'user.id': '12345',
-          },
-        },
-        {
-          log_id: 'log_791',
-          timestamp: '2025-11-07T10:43:22.789Z',
-          level: level,
-          service: 'user-service',
-          message: 'Invalid input parameters',
-          trace_id: 'trace_ghi789',
-          span_id: 'span_004',
-          attributes: {
-            'error.type': 'ValidationError',
-            'request.path': '/api/users/invalid',
-          },
-        },
-      ],
-      total: 567,
+      logs,
+      total: logs.length,
       page: 1,
-      limit: 50,
+      limit: 150,
       filtered_level: level,
     });
   }),

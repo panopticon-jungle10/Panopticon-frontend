@@ -1,6 +1,5 @@
 'use client';
 import LogsSection from '../../../../../components/features/apm/services/[serviceId]/section/Logs';
-import { useState } from 'react';
 import { SelectDate } from '@/components/features/apm/services/SelectDate';
 import TracesSection from '@/components/features/apm/services/[serviceId]/section/Traces';
 import ChartsSection from '@/components/features/apm/services/[serviceId]/section/Charts';
@@ -8,14 +7,24 @@ import { TimeRange } from '@/types/time';
 import ResourcesSection from '@/components/features/apm/services/[serviceId]/section/Resources';
 import DependenciesSection from '@/components/features/apm/services/[serviceId]/section/Dependencies';
 import { useParams } from 'next/navigation';
+import { useTimeRangeStore } from '@/src/store/timeRangeStore';
+import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
 
 export default function ServiceOverview() {
   const params = useParams();
   const serviceId = params.serviceId as string;
-  const [timeRange, setTimeRange] = useState<TimeRange | null>(null);
+
+  // Zustand store 사용
+  const { timeRange, setTimeRange } = useTimeRangeStore();
 
   const handleTimeRangeChange = (range: TimeRange) => {
-    setTimeRange(range);
+    setTimeRange(range.value as TimeRangeType);
+  };
+
+  // timeRange를 TimeRange 타입으로 변환 (SelectDate 컴포넌트용)
+  const selectedTimeRange: TimeRange = {
+    label: timeRange === '1h' ? '1 hour' : timeRange,
+    value: timeRange,
   };
 
   return (
@@ -25,19 +34,19 @@ export default function ServiceOverview() {
         <h1 className="text-2xl font-semibold text-gray-800">Overview</h1>
 
         {/* 날짜(기간) 선택 컴포넌트 */}
-        <SelectDate value={timeRange || undefined} onChange={handleTimeRangeChange} />
+        <SelectDate value={selectedTimeRange} onChange={handleTimeRangeChange} />
       </div>
 
       {/* 차트 영역 */}
-      <ChartsSection serviceName={serviceId} timeRange={timeRange?.value || '5m'} />
+      <ChartsSection serviceName={serviceId} />
 
-      {/* Resources section - 준비중 */}
+      {/* Resources section */}
       <div id="resources" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Resources</h2>
         <ResourcesSection serviceName={serviceId} />
       </div>
 
-      {/* Dependencies section - 준비중 */}
+      {/* Dependencies section */}
       <div id="dependencies" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Dependencies</h2>
         <DependenciesSection serviceName={serviceId} />

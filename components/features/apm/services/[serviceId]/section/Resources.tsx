@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceResources } from '@/src/api/apm';
 import { Resource, ResourceTableRow } from '@/types/apm';
+import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -147,6 +148,9 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Zustand store에서 시간 정보 가져오기
+  const { startTime, endTime } = useTimeRangeStore();
+
   // Top N 상태 (각 차트별로 독립적으로 관리)
   const [requestsTopN, setRequestsTopN] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [latencyTopN, setLatencyTopN] = useState<1 | 2 | 3 | 4 | 5>(3);
@@ -165,8 +169,13 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
 
   // API 데이터 가져오기
   const { data, isLoading, error } = useQuery({
-    queryKey: ['serviceResources', serviceName],
-    queryFn: () => getServiceResources(serviceName),
+    queryKey: ['serviceResources', serviceName, startTime, endTime],
+    queryFn: () =>
+      getServiceResources(serviceName, {
+        start_time: startTime,
+        end_time: endTime,
+        sort_by: 'requests',
+      }),
   });
 
   // 전체 데이터 변환

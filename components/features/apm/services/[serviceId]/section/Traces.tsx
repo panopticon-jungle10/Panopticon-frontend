@@ -6,6 +6,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceTraces } from '@/src/api/apm';
 import { Trace } from '@/types/apm';
+import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -125,10 +126,19 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15; // 페이지당 15개 고정
 
+  // Zustand store에서 시간 정보 가져오기
+  const { startTime, endTime } = useTimeRangeStore();
+
   // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용)
   const { data, isLoading, error } = useQuery({
-    queryKey: ['serviceTraces', serviceName],
-    queryFn: () => getServiceTraces(serviceName, { page: 1, limit: 1000 }), // 충분히 큰 limit으로 모든 데이터 가져오기
+    queryKey: ['serviceTraces', serviceName, startTime, endTime],
+    queryFn: () =>
+      getServiceTraces(serviceName, {
+        start_time: startTime,
+        end_time: endTime,
+        page: 1,
+        limit: 1000,
+      }), // 충분히 큰 limit으로 모든 데이터 가져오기
   });
 
   // 전체 트레이스 데이터 변환 (최신순 정렬)

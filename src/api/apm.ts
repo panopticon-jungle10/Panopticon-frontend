@@ -86,8 +86,27 @@ export const getServiceMetrics = async (
 /**
  * 2.2 서비스 리소스 목록 조회
  */
-export const getServiceResources = async (serviceName: string): Promise<ResourceResponse> => {
-  return fetchJson<ResourceResponse>(`/api/services/${serviceName}/resources`);
+export const getServiceResources = async (
+  serviceName: string,
+  params?: {
+    start_time?: string;
+    end_time?: string;
+    sort_by?: string;
+    page?: number;
+    limit?: number;
+  },
+): Promise<ResourceResponse> => {
+  const searchParams = new URLSearchParams();
+  if (params?.start_time) searchParams.append('start_time', params.start_time);
+  if (params?.end_time) searchParams.append('end_time', params.end_time);
+  if (params?.sort_by) searchParams.append('sort_by', params.sort_by);
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+  const url = `/api/services/${serviceName}/resources${
+    searchParams.toString() ? `?${searchParams}` : ''
+  }`;
+  return fetchJson<ResourceResponse>(url);
 };
 
 /**
@@ -95,8 +114,19 @@ export const getServiceResources = async (serviceName: string): Promise<Resource
  */
 export const getServiceDependencies = async (
   serviceName: string,
+  params?: {
+    start_time?: string;
+    end_time?: string;
+  },
 ): Promise<ServiceDependenciesResponse> => {
-  return fetchJson<ServiceDependenciesResponse>(`/api/services/${serviceName}/dependencies`);
+  const searchParams = new URLSearchParams();
+  if (params?.start_time) searchParams.append('start_time', params.start_time);
+  if (params?.end_time) searchParams.append('end_time', params.end_time);
+
+  const url = `/api/services/${serviceName}/dependencies${
+    searchParams.toString() ? `?${searchParams}` : ''
+  }`;
+  return fetchJson<ServiceDependenciesResponse>(url);
 };
 
 /**
@@ -105,15 +135,21 @@ export const getServiceDependencies = async (
 export const getServiceTraces = async (
   serviceName: string,
   params?: {
+    start_time?: string;
+    end_time?: string;
+    status?: string;
+    resource?: string;
     page?: number;
     limit?: number;
-    error_only?: boolean;
   },
 ): Promise<ServiceTracesResponse> => {
   const searchParams = new URLSearchParams();
+  if (params?.start_time) searchParams.append('start_time', params.start_time);
+  if (params?.end_time) searchParams.append('end_time', params.end_time);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.resource) searchParams.append('resource', params.resource);
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.error_only) searchParams.append('error_only', 'true');
 
   const url = `/api/services/${serviceName}/traces${
     searchParams.toString() ? `?${searchParams}` : ''

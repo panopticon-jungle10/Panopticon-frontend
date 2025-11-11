@@ -2,25 +2,33 @@
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceMetrics } from '@/src/api/apm';
+import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface ChartsProps {
   serviceName: string;
-  timeRange: string;
 }
 
-export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
+export default function ChartsSection({ serviceName }: ChartsProps) {
+  // Zustand store에서 시간 정보 가져오기
+  const { startTime, endTime, interval } = useTimeRangeStore();
+
   // API 데이터 가져오기
   const { data, isLoading } = useQuery({
-    queryKey: ['serviceMetrics', serviceName, timeRange],
-    queryFn: () => getServiceMetrics(serviceName, { interval: timeRange }),
+    queryKey: ['serviceMetrics', serviceName, startTime, endTime, interval],
+    queryFn: () =>
+      getServiceMetrics(serviceName, {
+        start_time: startTime,
+        end_time: endTime,
+        interval: interval,
+      }),
   });
 
   // 차트 데이터 변환
   const chartData = {
     timestamps:
-      data?.data.latency.map((item) => formatDateLabel(new Date(item.timestamp), timeRange)) || [],
+      data?.data.latency.map((item) => formatDateLabel(new Date(item.timestamp), interval)) || [],
     requests: data?.data.requests_and_errors.map((item) => item.hits) || [],
     errors: data?.data.requests_and_errors.map((item) => item.errors) || [],
     latency: {
