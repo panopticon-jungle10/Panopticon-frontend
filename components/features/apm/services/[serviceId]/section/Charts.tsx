@@ -1,69 +1,40 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getServiceMetrics } from '@/src/api/apm';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface ChartsProps {
+  serviceName: string;
   timeRange: string;
 }
 
-export default function ChartsSection({ timeRange }: ChartsProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  // latency의 초기값을 실제 사용하는 구조와 동일하게 맞춤
-  const initialLatency = {
-    p50: Array(10).fill(0),
-    p75: Array(10).fill(0),
-    p90: Array(10).fill(0),
-    p95: Array(10).fill(0),
-    p99: Array(10).fill(0),
-    p99_9: Array(10).fill(0),
-    max: Array(10).fill(0),
-  };
-
-  const [chartData, setChartData] = useState({
-    timestamps: generateTimestamps('5m'),
-    requests: Array(10).fill(0),
-    errors: Array(10).fill(0),
-    latency: initialLatency,
+export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
+  // API 데이터 가져오기
+  const { data, isLoading } = useQuery({
+    queryKey: ['serviceMetrics', serviceName, timeRange],
+    queryFn: () => getServiceMetrics(serviceName, { interval: timeRange }),
   });
 
-  /* ------- API 호출 => 현재 더미 데이터(변경 필요) -------- */
-  const fetchChartData = useCallback(async (range: string) => {
-    setIsLoading(true);
-
-    await new Promise((res) => setTimeout(res, 400)); // 로딩 딜레이 시뮬레이션
-
-    const timestamps = generateTimestamps(range);
-    const rand = (base: number, amp = 2000) =>
-      timestamps.map(() => Math.max(0, base + Math.floor((Math.random() - 0.5) * amp)));
-
-    setChartData({
-      timestamps,
-      requests: rand(25000, 15000),
-      errors: rand(10, 10),
-      latency: {
-        p50: rand(120, 40),
-        p75: rand(160, 50),
-        p90: rand(220, 60),
-        p95: rand(280, 70),
-        p99: rand(350, 80),
-        p99_9: rand(400, 90),
-        max: rand(450, 100),
-      },
-    });
-
-    setIsLoading(false);
-  }, []);
-
-  // 기간 변경 시 데이터 다시 불러오기 (1회만)
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchChartData(timeRange);
-    };
-    loadData();
-  }, [timeRange, fetchChartData]);
+  // 차트 데이터 변환
+  const chartData = {
+    timestamps: data?.data.latency.map((item: { timestamp: string }) =>
+      formatDateLabel(new Date(item.timestamp), timeRange)
+    ) || [],
+    requests: data?.data.requests_and_errors.map((item: { hits: number }) => item.hits) || [],
+    errors: data?.data.requests_and_errors.map((item: { errors: number }) => item.errors) || [],
+    latency: {
+      p50: data?.data.latency.map(() => 0) || [], // p50 데이터는 API에 없음
+      p75: data?.data.latency.map(() => 0) || [], // p75 데이터는 API에 없음
+      p90: data?.data.latency.map((item: { p90: number }) => item.p90) || [],
+      p95: data?.data.latency.map((item: { p95: number }) => item.p95) || [],
+      p99: data?.data.latency.map(() => 0) || [], // p99 데이터는 API에 없음
+      p99_9: data?.data.latency.map((item: { p99_9: number }) => item.p99_9) || [],
+      max: data?.data.latency.map(() => 0) || [], // max 데이터는 API에 없음
+    },
+  };
 
   /* -------------------- 차트 공통 스타일 ------------------ */
   const baseStyle = {
@@ -288,19 +259,6 @@ export default function ChartsSection({ timeRange }: ChartsProps) {
 /* -------------------------------
    헬퍼 함수
 --------------------------------*/
-function generateTimestamps(range: string): string[] {
-  const now = new Date();
-  const ts: string[] = [];
-  for (let i = 9; i >= 0; i--) {
-    const t = new Date(now);
-    if (['5m', '30m', '1h'].includes(range)) t.setSeconds(now.getSeconds() - i * 10);
-    else if (['1d', '1w'].includes(range)) t.setHours(now.getHours() - i * 3);
-    else t.setDate(now.getDate() - i * 4);
-    ts.push(formatDateLabel(t, range));
-  }
-  return ts;
-}
-
 function formatDateLabel(date: Date, range: string): string {
   if (['5m', '30m', '1h'].includes(range)) {
     return date.toLocaleTimeString('en-US', {

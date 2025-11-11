@@ -1,40 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Table from '@/components/ui/Table';
 import SearchInput from '@/components/ui/SearchInput';
 import Pagination from '@/components/features/apm/services/Pagination';
 import Dropdown from '@/components/ui/Dropdown';
 import dynamic from 'next/dynamic';
+import { useQuery } from '@tanstack/react-query';
+import { getServiceResources } from '@/src/api/apm';
+import { Resource, ResourceTableRow } from '@/types/apm';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
-// API 응답 타입
-interface ResourceResponse {
-  resources: Resource[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-interface Resource {
-  resource_name: string;
-  requests: number;
-  total_time_ms: number;
-  avg_time_ms: number;
-  p95_latency_ms: number;
-  errors: number;
-  error_rate: number;
-}
-
-// 테이블용 데이터 타입
-interface ResourceTableRow {
-  resourceName: string;
-  requests: number;
-  totalTime: string;
-  p95Latency: number;
-  errors: number;
-  errorRate: string;
+interface ResourcesSectionProps {
+  serviceName: string;
 }
 
 // 테이블 컬럼 정의
@@ -49,14 +28,19 @@ const RESOURCE_TABLE_COLUMNS: Array<{
   ) => React.ReactNode;
 }> = [
   {
+    key: 'date',
+    header: 'DATE',
+    width: '13%',
+  },
+  {
     key: 'resourceName',
     header: 'RESOURCE NAME',
-    width: '30%',
+    width: '27%',
   },
   {
     key: 'requests',
     header: 'REQUESTS',
-    width: '15%',
+    width: '12%',
     render: (value: ResourceTableRow[keyof ResourceTableRow]) => {
       const num = Number(value);
       if (num >= 1000) {
@@ -68,12 +52,12 @@ const RESOURCE_TABLE_COLUMNS: Array<{
   {
     key: 'totalTime',
     header: 'TOTAL TIME',
-    width: '15%',
+    width: '12%',
   },
   {
     key: 'p95Latency',
     header: 'P95 LATENCY',
-    width: '15%',
+    width: '12%',
     render: (value: ResourceTableRow[keyof ResourceTableRow]) => {
       const ms = Number(value);
       if (ms >= 1000) {
@@ -90,7 +74,7 @@ const RESOURCE_TABLE_COLUMNS: Array<{
   {
     key: 'errorRate',
     header: 'ERROR RATE',
-    width: '15%',
+    width: '14%',
     render: (value: ResourceTableRow[keyof ResourceTableRow]) => {
       const rate = parseFloat(String(value));
       return (
@@ -127,6 +111,16 @@ function transformResourceToTableRow(resource: Resource): ResourceTableRow {
     totalTimeStr = `${totalTimeSeconds.toFixed(1)}s`;
   }
 
+  // updated_at 날짜 포맷팅 (ISO 8601 -> 로케일 형식)
+  const formattedDate = new Date(resource.updated_at).toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
   return {
     resourceName: resource.resource_name,
     requests: resource.requests,
@@ -134,6 +128,7 @@ function transformResourceToTableRow(resource: Resource): ResourceTableRow {
     p95Latency: resource.p95_latency_ms,
     errors: resource.errors,
     errorRate: `${resource.error_rate.toFixed(2)}%`,
+    date: formattedDate,
   };
 }
 
@@ -154,11 +149,7 @@ function getChartColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
-export default function ResourcesSection() {
-  const [resources, setResources] = useState<ResourceTableRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
+export default function ResourcesSection({ serviceName }: ResourcesSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -178,66 +169,21 @@ export default function ResourcesSection() {
 
   const itemsPerPage = 15;
 
-  // API 호출 함수
-  const fetchResources = useCallback(async () => {
-    try {
-      // TODO: 실제 API 엔드포인트로 교체 필요
-      // const serviceId = window.location.pathname.split('/').pop();
-      // const response = await fetch(`/api/apm/services/${serviceId}/resources?page=${currentPage}&limit=${itemsPerPage}&search=${searchQuery}`);
+  // API 데이터 가져오기
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['serviceResources', serviceName],
+    queryFn: () => getServiceResources(serviceName),
+  });
 
-      // 임시: 더미 데이터 생성 (실제 API 연동 시 제거)
-      const mockResponse: ResourceResponse = {
-        resources: Array.from({ length: 18 }, (_, i) => {
-          const endpoints = [
-            'GET /api/users/:id',
-            'POST /api/orders',
-            'GET /api/products',
-            'PUT /api/users/:id',
-            'DELETE /api/orders/:id',
-            'GET /api/cart',
-            'POST /api/checkout',
-            'GET /api/search',
-            'GET /api/categories',
-            'POST /api/reviews',
-            'GET /api/dashboard',
-            'PATCH /api/settings',
-          ];
-          return {
-            resource_name:
-              endpoints[i % endpoints.length] +
-              (i >= endpoints.length ? ` #${Math.floor(i / endpoints.length) + 1}` : ''),
-            requests: Math.floor(Math.random() * 50000) + 100,
-            total_time_ms: Math.floor(Math.random() * 10000000) + 10000,
-            avg_time_ms: Math.floor(Math.random() * 500) + 50,
-            p95_latency_ms: Math.floor(Math.random() * 1000) + 100,
-            errors: Math.floor(Math.random() * 500),
-            error_rate: Math.random() * 10,
-          };
-        }),
-        total: 45,
-        page: 1,
-        limit: itemsPerPage,
-      };
+  // 데이터 변환
+  const resources = useMemo(() => {
+    if (!data?.resources) return [];
+    const transformed = data.resources.map((resource: Resource) => transformResourceToTableRow(resource));
+    transformed.sort((a: ResourceTableRow, b: ResourceTableRow) => b.requests - a.requests);
+    return transformed;
+  }, [data]);
 
-      const data = mockResponse;
-
-      const transformedResources = data.resources.map(transformResourceToTableRow);
-      // 요청 수 기준 내림차순 정렬
-      transformedResources.sort((a, b) => b.requests - a.requests);
-      setResources(transformedResources);
-      setTotalCount(data.total);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch resources');
-      console.error('Error fetching resources:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [itemsPerPage]);
-
-  useEffect(() => {
-    fetchResources();
-  }, [fetchResources]);
+  const totalCount = data?.total || 0;
 
   // 페이지 계산
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -281,7 +227,7 @@ export default function ResourcesSection() {
   // Requests 차트 옵션 (독립적인 Top N 적용)
   const requestsChartOption = useMemo(() => {
     const topResources = resources.slice(0, requestsTopN);
-    const seriesData = topResources.map((resource, idx) => ({
+    const seriesData = topResources.map((resource: ResourceTableRow, idx: number) => ({
       name: resource.resourceName,
       type: 'bar' as const,
       stack: 'total',
@@ -320,7 +266,7 @@ export default function ResourcesSection() {
   // p95 Latency 차트 옵션 (독립적인 Top N 적용)
   const latencyChartOption = useMemo(() => {
     const topResources = resources.slice(0, latencyTopN);
-    const seriesData = topResources.map((resource, idx) => ({
+    const seriesData = topResources.map((resource: ResourceTableRow, idx: number) => ({
       name: resource.resourceName,
       type: 'line' as const,
       data: timeLabels.map(() => Math.floor(Math.random() * 500) + 50),
@@ -362,7 +308,7 @@ export default function ResourcesSection() {
   // Errors 차트 옵션 (독립적인 Top N 적용)
   const errorsChartOption = useMemo(() => {
     const topResources = resources.slice(0, errorsTopN);
-    const seriesData = topResources.map((resource, idx) => ({
+    const seriesData = topResources.map((resource: ResourceTableRow, idx: number) => ({
       name: resource.resourceName,
       type: 'bar' as const,
       stack: 'total',
@@ -403,7 +349,7 @@ export default function ResourcesSection() {
       <div className="bg-white p-5 rounded-lg border border-gray-200">
         <div className="text-center text-red-500 py-8">
           <p className="font-semibold mb-2">Error loading resources</p>
-          <p className="text-sm">{error}</p>
+          <p className="text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
         </div>
       </div>
     );
