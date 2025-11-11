@@ -29,6 +29,54 @@ interface ChartParams {
   };
 }
 
+// HTML 특수문자 이스케이프 (XSS 방지)
+const escapeHtml = (str: string): string => {
+  return str.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[c] || c),
+  );
+};
+
+// 툴팁: 노드(서비스) 정보 HTML 생성
+const createNodeTooltipHtml = (nodeName: string): string => {
+  return `<div style="font-weight:600;">${escapeHtml(nodeName)}</div>`;
+};
+
+// 툴팁: 엣지(연결선) 정보 HTML 생성
+const createEdgeTooltipHtml = (
+  source: string,
+  target: string,
+  totalRequests: number,
+  errorRate: number,
+  timeRangeInSeconds: number,
+): string => {
+  const rps = (totalRequests / timeRangeInSeconds).toFixed(0);
+  const errorRatePercent = (errorRate * 100).toFixed(1);
+
+  return `
+    <div style="font-weight:600;">${escapeHtml(source)} → ${escapeHtml(target)}</div>
+    <div style="margin-top:4px;">
+      <div>Total Requests: ${totalRequests.toLocaleString()}</div>
+      <div>RPS: ${rps}</div>
+      <div>Error Rate: ${errorRatePercent}%</div>
+    </div>
+  `;
+};
+
+// 에러율에 따른 색상
+const getErrorColor = (errorRate: number): string => {
+  if (errorRate > 0.5) return '#ef4444'; // red (높은 에러율)
+  if (errorRate > 0.2) return '#f97316'; // orange (중간 에러율)
+  return '#10b981'; // green (낮은 에러율)
+};
+
 export default function DependenciesSection() {
   const [dependencies, setDependencies] = useState<DependencyResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,13 +145,6 @@ export default function DependenciesSection() {
     fetchDependencies();
   }, [fetchDependencies]);
 
-  // 에러율에 따른 색상
-  const getErrorColor = (errorRate: number): string => {
-    if (errorRate > 0.5) return '#ef4444'; // red (높은 에러율)
-    if (errorRate > 0.2) return '#f97316'; // orange (중간 에러율)
-    return '#10b981'; // green (낮은 에러율)
-  };
-
   // ECharts 옵션 생성
   const chartOption = useMemo(() => {
     if (!dependencies) return {};
@@ -168,21 +209,24 @@ export default function DependenciesSection() {
       tooltip: {
         trigger: 'item',
         formatter: (params: ChartParams) => {
+          // 데이터 타입이 node인 경우 (서비스 원)
           if (params.dataType === 'node') {
-            return `<div style="font-weight:600;">${params.name}</div>`;
+            return createNodeTooltipHtml(params.name ?? '');
           }
+
+          // 데이터 타입이 edge인 경우 (서비스 간 연결선)
           if (params.dataType === 'edge' && params.data) {
-            const rps = (params.data.value / timeRangeInSeconds).toFixed(0);
-            const errorRate = (params.data.error_rate * 100).toFixed(1);
-            return `
-              <div style="font-weight:600;">${params.data.source} → ${params.data.target}</div>
-              <div style="margin-top:4px;">
-                <div>Total Requests: ${params.data.value.toLocaleString()}</div>
-                <div>RPS: ${rps}</div>
-                <div>Error Rate: ${errorRate}%</div>
-              </div>
-            `;
+            return createEdgeTooltipHtml(
+              params.data.source,
+              params.data.target,
+              params.data.value,
+              params.data.error_rate,
+              timeRangeInSeconds,
+            );
           }
+
+          // 기본적으로 빈 문자열 반환
+          return '';
         },
       },
       animationDuration: 1000,
@@ -222,7 +266,7 @@ export default function DependenciesSection() {
           },
           edgeSymbol: ['none', 'arrow'],
           edgeSymbolSize: [0, 12],
-          // 그래프의 노드들(서비스 원)
+          // 그래프의 노드들(원 = 서비스)
           nodes: nodes.map((node) => ({
             name: node.name,
             x: (node.x ?? 0) * 50,
@@ -241,8 +285,8 @@ export default function DependenciesSection() {
           })),
           // 노드 간 연결선(화살표)
           links: links.map((link) => {
-            const lineWidth = Math.min(link.value / 20000 + 1, 300);
-            const arrowSize = Math.max(lineWidth * 2, 16); // 선 굵기보다 충분히 큰 화살표
+            const lineWidth = Math.min(link.value / 20000 + 1, 20);
+            const arrowSize = Math.max(lineWidth * 2, 20);
             return {
               source: link.source,
               target: link.target,
@@ -329,7 +373,7 @@ export default function DependenciesSection() {
                 {dependencies.incoming_requests.map((req) => (
                   <div
                     key={req.service_name}
-                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer"
+                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer" // TODO: 추후 클릭 시 상세 정보 표시 기능 추가 예정
                   >
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-700">{req.service_name}</span>
@@ -369,7 +413,7 @@ export default function DependenciesSection() {
                 {dependencies.outgoing_requests.map((req) => (
                   <div
                     key={req.service_name}
-                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer"
+                    className="p-3 bg-gray-50 rounded-lg hover:cursor-pointer" // TODO: 추후 클릭 시 상세 정보 표시 기능 추가 예정
                   >
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-700">{req.service_name}</span>
