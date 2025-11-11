@@ -29,6 +29,43 @@ interface ChartParams {
   };
 }
 
+// 색상 상수
+const COLORS = {
+  // 노드 색상
+  node: {
+    current: '#3b82f6', // 현재 서비스 (파란색)
+    incoming: '#8b5cf6', // 들어오는 요청 (보라색)
+    outgoing: '#10b981', // 나가는 요청 (초록색)
+  },
+  // 에러율에 따른 색상
+  errorRate: {
+    high: '#ef4444', // 높은 에러율 (빨간색)
+    medium: '#f97316', // 중간 에러율 (오렌지색)
+    low: '#10b981', // 낮은 에러율 (초록색)
+  },
+  // 에러율 배지 배경색
+  errorBadge: {
+    high: {
+      bg: '#fee2e2',
+      text: '#991b1b',
+    },
+    medium: {
+      bg: '#fed7aa',
+      text: '#92400e',
+    },
+    low: {
+      bg: '#d1fae5',
+      text: '#065f46',
+    },
+  },
+  // 기타
+  border: '#fff',
+  emphasis: '#1e40af',
+  line: '#9ca3af',
+  lineEmphasis: '#1f2937',
+  label: '#1f2937',
+} as const;
+
 // HTML 특수문자 이스케이프 (XSS 방지)
 const escapeHtml = (str: string): string => {
   return str.replace(
@@ -72,9 +109,9 @@ const createEdgeTooltipHtml = (
 
 // 에러율에 따른 색상
 const getErrorColor = (errorRate: number): string => {
-  if (errorRate > 0.5) return '#ef4444'; // red (높은 에러율)
-  if (errorRate > 0.2) return '#f97316'; // orange (중간 에러율)
-  return '#10b981'; // green (낮은 에러율)
+  if (errorRate > 0.5) return COLORS.errorRate.high;
+  if (errorRate > 0.2) return COLORS.errorRate.medium;
+  return COLORS.errorRate.low;
 };
 
 export default function DependenciesSection() {
@@ -160,7 +197,7 @@ export default function DependenciesSection() {
     // 중앙: 현재 서비스
     nodes.push({
       name: currentService,
-      symbolSize: 60,
+      symbolSize: 80,
       x: 50,
       y: 50,
     });
@@ -243,12 +280,12 @@ export default function DependenciesSection() {
             position: 'bottom',
             distance: 10,
             fontSize: 11,
-            color: '#1f2937',
+            color: COLORS.label,
             fontWeight: 'bold',
           },
           // 선(엣지) 기본 스타일
           lineStyle: {
-            color: '#9ca3af',
+            color: COLORS.line,
             width: 2,
             curveness: 0.3,
           },
@@ -256,11 +293,11 @@ export default function DependenciesSection() {
           emphasis: {
             lineStyle: {
               width: 4,
-              color: '#1f2937',
+              color: COLORS.lineEmphasis,
             },
             // 노드 강조 스타일
             itemStyle: {
-              color: '#1e40af',
+              color: COLORS.emphasis,
               borderWidth: 3,
             },
           },
@@ -275,11 +312,11 @@ export default function DependenciesSection() {
             itemStyle: {
               color:
                 node.name === currentService
-                  ? '#3b82f6'
+                  ? COLORS.node.current
                   : incomingRequests.some((req) => req.service_name === node.name)
-                  ? '#8b5cf6'
-                  : '#10b981',
-              borderColor: '#fff',
+                  ? COLORS.node.incoming
+                  : COLORS.node.outgoing,
+              borderColor: COLORS.border,
               borderWidth: 1,
             },
           })),
@@ -332,15 +369,24 @@ export default function DependenciesSection() {
       {/* 범례 */}
       <div className="mb-4 flex gap-6 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: COLORS.node.current }}
+          ></div>
           <span className="text-gray-700">Current Service</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#8b5cf6' }}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: COLORS.node.incoming }}
+          ></div>
           <span className="text-gray-700">Incoming</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: COLORS.node.outgoing }}
+          ></div>
           <span className="text-gray-700">Outgoing</span>
         </div>
       </div>
@@ -348,15 +394,15 @@ export default function DependenciesSection() {
       {/* 에러율 범례 */}
       <div className="mb-6 flex gap-6 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-1" style={{ backgroundColor: '#ef4444' }}></div>
+          <div className="w-8 h-1" style={{ backgroundColor: COLORS.errorRate.high }}></div>
           <span className="text-gray-700">High Error Rate (&gt;50%)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-1" style={{ backgroundColor: '#f97316' }}></div>
+          <div className="w-8 h-1" style={{ backgroundColor: COLORS.errorRate.medium }}></div>
           <span className="text-gray-700">Medium Error Rate (20-50%)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-1" style={{ backgroundColor: '#10b981' }}></div>
+          <div className="w-8 h-1" style={{ backgroundColor: COLORS.errorRate.low }}></div>
           <span className="text-gray-700">Low Error Rate (&lt;20%)</span>
         </div>
       </div>
@@ -382,16 +428,16 @@ export default function DependenciesSection() {
                         style={{
                           backgroundColor:
                             req.error_rate > 0.5
-                              ? '#fee2e2'
+                              ? COLORS.errorBadge.high.bg
                               : req.error_rate > 0.2
-                              ? '#fed7aa'
-                              : '#d1fae5',
+                              ? COLORS.errorBadge.medium.bg
+                              : COLORS.errorBadge.low.bg,
                           color:
                             req.error_rate > 0.5
-                              ? '#991b1b'
+                              ? COLORS.errorBadge.high.text
                               : req.error_rate > 0.2
-                              ? '#92400e'
-                              : '#065f46',
+                              ? COLORS.errorBadge.medium.text
+                              : COLORS.errorBadge.low.text,
                         }}
                       >
                         {(req.error_rate * 100).toFixed(1)}% error
@@ -422,16 +468,16 @@ export default function DependenciesSection() {
                         style={{
                           backgroundColor:
                             req.error_rate > 0.5
-                              ? '#fee2e2'
+                              ? COLORS.errorBadge.high.bg
                               : req.error_rate > 0.2
-                              ? '#fed7aa'
-                              : '#d1fae5',
+                              ? COLORS.errorBadge.medium.bg
+                              : COLORS.errorBadge.low.bg,
                           color:
                             req.error_rate > 0.5
-                              ? '#991b1b'
+                              ? COLORS.errorBadge.high.text
                               : req.error_rate > 0.2
-                              ? '#92400e'
-                              : '#065f46',
+                              ? COLORS.errorBadge.medium.text
+                              : COLORS.errorBadge.low.text,
                         }}
                       >
                         {(req.error_rate * 100).toFixed(1)}% error
