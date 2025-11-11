@@ -15,6 +15,7 @@
     "check:all": "npm run lint:ci && npm run format:check:ci && npm run typecheck"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.7",
     "echarts-for-react": "^3.0.5",
     "framer-motion": "^12.23.24",
     "next": "16.0.1",
