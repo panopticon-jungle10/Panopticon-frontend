@@ -10,6 +10,7 @@ import Pagination from '../../../../components/features/apm/services/Pagination'
 import { useState } from 'react';
 import SearchInput from '@/components/ui/SearchInput';
 import { SelectDate } from '@/components/features/apm/services/SelectDate';
+import Link from 'next/link';
 
 type ServiceType = 'DB' | 'Frontend' | 'API';
 
@@ -88,7 +89,16 @@ const columns = [
     key: 'name' as keyof Service,
     header: 'Name',
     width: '40%',
+    render: (_value: Service[keyof Service], row: Service) => (
+      <Link href={`/apm/services/${encodeURIComponent(row.name)}`}>{row.name}</Link>
+    ),
   },
+//   {
+//     key: 'name' as keyof Service,
+//     header: 'Name',
+//     width: '40%',
+//   },
+
   {
     key: 'requests' as keyof Service,
     header: 'Requests',

@@ -1,7 +1,8 @@
 import Sidebar from '@/components/features/apm/services/[serviceId]/Sidebar';
 
 export async function generateStaticParams() {
-  const services = ['auth', 'user', 'frontend', 'backend', 'payment'];
+  // Align with the service names used in the list page
+  const services = ['user-service', 'payment-db', 'web-app', 'notification-service'];
   return services.map((id) => ({ serviceId: id }));
 }
 
