@@ -480,132 +480,64 @@ export const handlers = [
 
   // 2.2 Resources - 리소스 목록
   http.get('/api/services/:serviceName/resources', () => {
+    // 150개의 resource 데이터 동적 생성
+    const allResources = [];
+    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const endpoints = [
+      '/api/users',
+      '/api/users/:id',
+      '/api/users/:id/profile',
+      '/api/users/:id/orders',
+      '/api/users/:id/avatar',
+      '/api/users/:id/settings',
+      '/api/users/:id/notifications',
+      '/api/users/search',
+      '/api/users/batch',
+      '/api/orders',
+      '/api/orders/:id',
+      '/api/orders/:id/items',
+      '/api/products',
+      '/api/products/:id',
+      '/api/products/search',
+      '/api/payments',
+      '/api/payments/:id',
+      '/api/cart',
+      '/api/cart/items',
+      '/api/reviews',
+    ];
+
+    const now = new Date('2025-01-11T15:00:00Z');
+
+    for (let i = 0; i < 150; i++) {
+      const method = methods[i % methods.length];
+      const endpoint = endpoints[i % endpoints.length];
+      const resourceName = `${method} ${endpoint}`;
+
+      const requests = Math.floor(Math.random() * 15000) + 1000; // 1000-16000
+      const avgTimeMs = Math.floor(Math.random() * 300) + 50; // 50-350ms
+      const totalTimeMs = requests * avgTimeMs;
+      const p95LatencyMs = avgTimeMs + Math.floor(Math.random() * 200) + 50; // avg + 50-250ms
+      const errors = Math.floor(requests * (Math.random() * 0.05)); // 0-5% error
+      const errorRate = (errors / requests) * 100;
+      const updatedAt = new Date(now.getTime() - i * 60000); // 1분씩 과거로
+
+      allResources.push({
+        resource_name: resourceName,
+        requests,
+        total_time_ms: totalTimeMs,
+        avg_time_ms: avgTimeMs,
+        p95_latency_ms: p95LatencyMs,
+        errors,
+        error_rate: parseFloat(errorRate.toFixed(2)),
+        updated_at: updatedAt.toISOString(),
+      });
+    }
+
     return HttpResponse.json({
-      resources: [
-        {
-          resource_name: 'GET /api/users/:id',
-          requests: 12450,
-          total_time_ms: 1823400,
-          avg_time_ms: 146,
-          p95_latency_ms: 320,
-          errors: 234,
-          error_rate: 1.88,
-          updated_at: '2025-01-11T14:32:15Z',
-        },
-        {
-          resource_name: 'POST /api/users',
-          requests: 8765,
-          total_time_ms: 1315475,
-          avg_time_ms: 150,
-          p95_latency_ms: 340,
-          errors: 87,
-          error_rate: 0.99,
-          updated_at: '2025-01-11T14:28:42Z',
-        },
-        {
-          resource_name: 'GET /api/users',
-          requests: 7654,
-          total_time_ms: 918480,
-          avg_time_ms: 120,
-          p95_latency_ms: 280,
-          errors: 45,
-          error_rate: 0.59,
-          updated_at: '2025-01-11T14:25:33Z',
-        },
-        {
-          resource_name: 'PUT /api/users/:id',
-          requests: 5432,
-          total_time_ms: 869120,
-          avg_time_ms: 160,
-          p95_latency_ms: 380,
-          errors: 123,
-          error_rate: 2.26,
-          updated_at: '2025-01-11T14:20:08Z',
-        },
-        {
-          resource_name: 'DELETE /api/users/:id',
-          requests: 3210,
-          total_time_ms: 481500,
-          avg_time_ms: 150,
-          p95_latency_ms: 350,
-          errors: 67,
-          error_rate: 2.09,
-          updated_at: '2025-01-11T14:15:52Z',
-        },
-        {
-          resource_name: 'GET /api/users/:id/profile',
-          requests: 6789,
-          total_time_ms: 948460,
-          avg_time_ms: 140,
-          p95_latency_ms: 310,
-          errors: 102,
-          error_rate: 1.5,
-          updated_at: '2025-01-11T14:12:27Z',
-        },
-        {
-          resource_name: 'PATCH /api/users/:id/settings',
-          requests: 4567,
-          total_time_ms: 730720,
-          avg_time_ms: 160,
-          p95_latency_ms: 370,
-          errors: 91,
-          error_rate: 1.99,
-          updated_at: '2025-01-11T14:08:19Z',
-        },
-        {
-          resource_name: 'GET /api/users/:id/orders',
-          requests: 5678,
-          total_time_ms: 795920,
-          avg_time_ms: 140,
-          p95_latency_ms: 320,
-          errors: 68,
-          error_rate: 1.2,
-          updated_at: '2025-01-11T14:05:44Z',
-        },
-        {
-          resource_name: 'POST /api/users/:id/avatar',
-          requests: 2345,
-          total_time_ms: 563760,
-          avg_time_ms: 240,
-          p95_latency_ms: 580,
-          errors: 58,
-          error_rate: 2.47,
-          updated_at: '2025-01-11T14:02:11Z',
-        },
-        {
-          resource_name: 'GET /api/users/search',
-          requests: 4321,
-          total_time_ms: 604940,
-          avg_time_ms: 140,
-          p95_latency_ms: 330,
-          errors: 52,
-          error_rate: 1.2,
-          updated_at: '2025-01-11T13:58:36Z',
-        },
-        {
-          resource_name: 'POST /api/users/batch',
-          requests: 1234,
-          total_time_ms: 370200,
-          avg_time_ms: 300,
-          p95_latency_ms: 720,
-          errors: 37,
-          error_rate: 3.0,
-          updated_at: '2025-01-11T13:55:03Z',
-        },
-        {
-          resource_name: 'GET /api/users/:id/notifications',
-          requests: 3456,
-          total_time_ms: 414720,
-          avg_time_ms: 120,
-          p95_latency_ms: 280,
-          errors: 35,
-          error_rate: 1.01,
-          updated_at: '2025-01-11T13:51:28Z',
-        },
-      ],
-      total: 45,
+      resources: allResources,
+      total: allResources.length,
       page: 1,
-      limit: 20,
+      limit: 150,
     });
   }),
 
@@ -671,123 +603,59 @@ export const handlers = [
   }),
 
   // 2.4 Traces - 트레이스 목록
-  http.get('/api/services/:serviceName/traces', () => {
+  http.get('/api/services/:serviceName/traces', ({ request }) => {
+    const url = new URL(request.url);
+    const limit = parseInt(url.searchParams.get('limit') || '30');
+    const page = parseInt(url.searchParams.get('page') || '1');
+
+    // 더 많은 trace 데이터 생성 (100개)
+    const allTraces = [];
+    const resources = [
+      'GET /api/users',
+      'POST /api/users',
+      'PUT /api/users/:id',
+      'DELETE /api/users/:id',
+      'GET /api/users/search',
+      'GET /api/users/profile',
+      'POST /api/users/batch',
+      'GET /api/users/notifications',
+      'GET /api/orders',
+      'POST /api/orders',
+    ];
+    const methods = ['GET', 'POST', 'PUT', 'DELETE'];
+    const statusCodes = [200, 200, 200, 200, 200, 400, 500, 502, 503, 504]; // 성공이 더 많도록
+
+    const now = new Date('2025-11-11T10:00:00Z');
+
+    for (let i = 0; i < 150; i++) {
+      const statusCode = statusCodes[Math.floor(Math.random() * statusCodes.length)];
+      const isError = statusCode >= 400;
+      const resource = resources[Math.floor(Math.random() * resources.length)];
+      const traceDate = new Date(now.getTime() - i * 60000); // 1분씩 과거로
+
+      allTraces.push({
+        trace_id: `trace_${i.toString().padStart(5, '0')}`,
+        date: traceDate.toISOString(),
+        resource,
+        service: 'user-service',
+        duration_ms: Math.floor(Math.random() * 900) + 50, // 50-950ms
+        method: methods[Math.floor(Math.random() * methods.length)],
+        status_code: statusCode,
+        span_count: Math.floor(Math.random() * 10) + 2,
+        error: isError,
+      });
+    }
+
+    // 페이지네이션 적용
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedTraces = allTraces.slice(startIndex, endIndex);
+
     return HttpResponse.json({
-      traces: [
-        {
-          trace_id: 'trace_abc123',
-          date: '2025-11-07T10:35:22Z',
-          resource: 'GET /api/users/123',
-          service: 'user-service',
-          duration_ms: 234,
-          method: 'GET',
-          status_code: 500,
-          span_count: 5,
-          error: true,
-        },
-        {
-          trace_id: 'trace_def456',
-          date: '2025-11-07T10:34:15Z',
-          resource: 'POST /api/users',
-          service: 'user-service',
-          duration_ms: 156,
-          method: 'POST',
-          status_code: 502,
-          span_count: 3,
-          error: true,
-        },
-        {
-          trace_id: 'trace_xyz789',
-          date: '2025-11-07T10:33:45Z',
-          resource: 'PUT /api/users/456',
-          service: 'user-service',
-          duration_ms: 389,
-          method: 'PUT',
-          status_code: 503,
-          span_count: 6,
-          error: true,
-        },
-        {
-          trace_id: 'trace_mno234',
-          date: '2025-11-07T10:32:50Z',
-          resource: 'DELETE /api/users/789',
-          service: 'user-service',
-          duration_ms: 267,
-          method: 'DELETE',
-          status_code: 500,
-          span_count: 4,
-          error: true,
-        },
-        {
-          trace_id: 'trace_pqr567',
-          date: '2025-11-07T10:31:28Z',
-          resource: 'GET /api/users/search',
-          service: 'user-service',
-          duration_ms: 445,
-          method: 'GET',
-          status_code: 504,
-          span_count: 8,
-          error: true,
-        },
-        {
-          trace_id: 'trace_ghi789',
-          date: '2025-11-07T10:33:08Z',
-          resource: 'GET /api/users',
-          service: 'user-service',
-          duration_ms: 89,
-          method: 'GET',
-          status_code: 200,
-          span_count: 2,
-          error: false,
-        },
-        {
-          trace_id: 'trace_jkl012',
-          date: '2025-11-07T10:32:45Z',
-          resource: 'PUT /api/users/456',
-          service: 'user-service',
-          duration_ms: 312,
-          method: 'PUT',
-          status_code: 200,
-          span_count: 7,
-          error: false,
-        },
-        {
-          trace_id: 'trace_stu890',
-          date: '2025-11-07T10:30:12Z',
-          resource: 'GET /api/users/profile',
-          service: 'user-service',
-          duration_ms: 178,
-          method: 'GET',
-          status_code: 200,
-          span_count: 3,
-          error: false,
-        },
-        {
-          trace_id: 'trace_vwx123',
-          date: '2025-11-07T10:29:35Z',
-          resource: 'POST /api/users/batch',
-          service: 'user-service',
-          duration_ms: 892,
-          method: 'POST',
-          status_code: 200,
-          span_count: 12,
-          error: false,
-        },
-        {
-          trace_id: 'trace_yza456',
-          date: '2025-11-07T10:28:58Z',
-          resource: 'GET /api/users/notifications',
-          service: 'user-service',
-          duration_ms: 145,
-          method: 'GET',
-          status_code: 200,
-          span_count: 4,
-          error: false,
-        },
-      ],
-      total: 1234,
-      page: 1,
-      limit: 50,
+      traces: paginatedTraces,
+      total: allTraces.length,
+      page,
+      limit,
     });
   }),
 
