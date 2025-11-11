@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import FilterBar from '../logs/FilterBar';
-import StatGrid from '../logs/StatGrid';
+import StatGrid from '../../../../../ui/StatGrid';
 import LogList from '../logs/LogList';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceLogs, getServiceLogStats } from '@/src/api/apm';
