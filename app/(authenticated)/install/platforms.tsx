@@ -6,7 +6,7 @@ export const platformsData: Record<PlatformType, PlatformData> = {
   kubernetes: {
     icon: <SiKubernetes className="w-12 h-12 text-blue-600" />,
     iconLarge: <SiKubernetes className="w-8 h-8 text-blue-600" />,
-    title: 'Kubernetes에서 OpenTelemetry Collector 배포',
+    title: 'Install the Panopticon Agent on Kubernetes',
     description:
       'K8s 클러스터에서 OTel Collector를 DaemonSet으로 배포하여 애플리케이션 데이터를 수집',
     steps: [
@@ -17,8 +17,9 @@ export const platformsData: Record<PlatformType, PlatformData> = {
         language: 'bash',
       },
       {
-        title: '2. ConfigMap으로 Collector 설정',
-        description: 'OTel Collector의 수집, 처리, 전송 파이프라인을 ConfigMap으로 정의합니다.',
+        title: '2. Collector 배포',
+        description:
+          'OTel Collector와 Fluent-bit의 수집, 처리, 전송 파이프라인을 ConfigMap으로 정의합니다.',
         code: `kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
