@@ -1,5 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
+import * as echarts from 'echarts';
 import { mockErrorTrendData } from './mock';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
@@ -76,7 +77,7 @@ export default function ErrorTrendChart() {
         lineStyle: { width: 2, color: s.color },
         areaStyle: {
           opacity: 0.25,
-          color: new (require('echarts').graphic.LinearGradient)(0, 0, 0, 1, [
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: s.color },
             { offset: 1, color: 'rgba(255,255,255,0)' },
           ]),
