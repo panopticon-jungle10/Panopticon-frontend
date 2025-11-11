@@ -2,7 +2,7 @@
 
 'use client';
 
-import StatGrid from '@/components/features/apm/services/[serviceId]/logs/StatGrid';
+import StatGrid from '@/components/features/apm/services/[serviceId]/common/StatGrid';
 import type { StatItem } from '@/components/features/apm/services/[serviceId]/logs/types';
 import { mockErrorSummary } from './mock';
 

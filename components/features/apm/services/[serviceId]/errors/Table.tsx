@@ -31,20 +31,17 @@ const COLUMNS: {
     key: 'count',
     header: 'Count',
     width: '10%',
-    render: (v: number) => (
-      <span className="text-red-600 font-semibold">{v}</span>
-    ),
+    render: (v: number) => <span className="text-red-600 font-semibold">{v}</span>,
   },
   {
     key: 'last_seen',
     header: 'Last Seen',
     width: '10%',
-    render: (v: string) =>
-      new Date(v).toLocaleTimeString('en-US', { hour12: false }),
+    render: (v: string) => new Date(v).toLocaleTimeString('en-US', { hour12: false }),
   },
 ];
 
-// 실제 테이블 컴포넌트
+// 🔹 실제 테이블 컴포넌트
 export default function ErrorTable() {
   const { errors } = mockErrorResponse;
 
