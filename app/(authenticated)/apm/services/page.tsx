@@ -93,11 +93,11 @@ const columns = [
       <Link href={`/apm/services/${encodeURIComponent(row.name)}`}>{row.name}</Link>
     ),
   },
-//   {
-//     key: 'name' as keyof Service,
-//     header: 'Name',
-//     width: '40%',
-//   },
+  //   {
+  //     key: 'name' as keyof Service,
+  //     header: 'Name',
+  //     width: '40%',
+  //   },
 
   {
     key: 'requests' as keyof Service,
