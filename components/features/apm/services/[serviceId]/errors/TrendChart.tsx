@@ -1,6 +1,5 @@
 'use client';
 import dynamic from 'next/dynamic';
-import * as echarts from 'echarts';
 import { mockErrorTrendData } from './mock';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
