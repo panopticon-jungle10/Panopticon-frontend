@@ -702,6 +702,11 @@ export const handlers = [
     // 시간 범위 계산
     const start = startTime ? new Date(startTime) : new Date(Date.now() - 60 * 60 * 1000);
     const end = endTime ? new Date(endTime) : new Date();
+    const timeRangeInSeconds = (end.getTime() - start.getTime()) / 1000;
+
+    // 시간 범위에 비례한 데이터 개수 조정 (기준: 1시간 = 3600초, 기본 50개)
+    const baseMultiplier = timeRangeInSeconds / 3600;
+    const errorCount = Math.min(Math.floor(50 * baseMultiplier), 150); // 최대 150개
 
     const errorTemplates = [
       {
@@ -826,9 +831,9 @@ export const handlers = [
       },
     ];
 
-    // 150개의 에러 데이터 생성
+    // 시간 범위에 비례한 에러 데이터 생성
     const errors = [];
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < errorCount; i++) {
       const template = errorTemplates[i % errorTemplates.length];
       const firstSeen = new Date(
         start.getTime() + Math.random() * (end.getTime() - start.getTime()) * 0.3,
@@ -837,13 +842,17 @@ export const handlers = [
         end.getTime() - Math.random() * (end.getTime() - start.getTime()) * 0.1,
       );
 
+      // 에러 카운트도 시간 범위에 비례
+      const baseErrorCount = Math.floor(Math.random() * 200) + 50;
+      const scaledErrorCount = Math.floor(baseErrorCount * baseMultiplier);
+
       errors.push({
         error_id: `err_${(456 + i).toString().padStart(5, '0')}`,
         error_message: template.error_message,
         resource: template.resource,
         stack_trace: template.stack_trace,
         service_name: 'user-service',
-        count: Math.floor(Math.random() * 200) + 50,
+        count: Math.max(scaledErrorCount, 1), // 최소 1개
         first_seen: firstSeen.toISOString(),
         last_seen: lastSeen.toISOString(),
         sample_trace_ids: [`trace_${i * 100}`, `trace_${i * 100 + 1}`],
@@ -854,7 +863,7 @@ export const handlers = [
       errors,
       total: errors.length,
       page: 1,
-      limit: 150,
+      limit: errorCount,
     });
   }),
 

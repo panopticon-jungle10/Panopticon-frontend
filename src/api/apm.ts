@@ -13,6 +13,7 @@ import {
   ServiceTracesResponse,
   ServiceLogStatsResponse,
   ServiceLogsResponse,
+  ServiceErrorsResponse,
 } from '@/types/apm';
 
 /**
@@ -167,8 +168,21 @@ export const getTraceDetail = async (traceId: string) => {
 /**
  * 2.6 서비스 에러 목록 조회
  */
-export const getServiceErrors = async (serviceName: string) => {
-  return fetchJson(`/api/services/${serviceName}/errors`);
+export const getServiceErrors = async (
+  serviceName: string,
+  params?: {
+    start_time?: string;
+    end_time?: string;
+  },
+): Promise<ServiceErrorsResponse> => {
+  const searchParams = new URLSearchParams();
+  if (params?.start_time) searchParams.append('start_time', params.start_time);
+  if (params?.end_time) searchParams.append('end_time', params.end_time);
+
+  const url = `/api/services/${serviceName}/errors${
+    searchParams.toString() ? `?${searchParams}` : ''
+  }`;
+  return fetchJson<ServiceErrorsResponse>(url);
 };
 
 /**
