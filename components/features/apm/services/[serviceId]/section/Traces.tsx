@@ -106,13 +106,9 @@ const TRACE_TABLE_COLUMNS: Array<{
 // Trace를 TracePoint로 변환
 function transformTraceToPoint(trace: Trace): TracePoint {
   const date = new Date(trace.date);
+  const timestamp = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
   return {
-    timestamp: date.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }),
+    timestamp,
     duration: trace.duration_ms,
     latencyBreakdown: trace.duration_ms, // duration과 동일한 값
     status: trace.error || trace.status_code >= 400 ? 'error' : 'success',

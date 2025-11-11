@@ -1,6 +1,5 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceMetrics } from '@/src/api/apm';
 
@@ -20,19 +19,14 @@ export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
 
   // 차트 데이터 변환
   const chartData = {
-    timestamps: data?.data.latency.map((item: { timestamp: string }) =>
-      formatDateLabel(new Date(item.timestamp), timeRange)
-    ) || [],
-    requests: data?.data.requests_and_errors.map((item: { hits: number }) => item.hits) || [],
-    errors: data?.data.requests_and_errors.map((item: { errors: number }) => item.errors) || [],
+    timestamps:
+      data?.data.latency.map((item) => formatDateLabel(new Date(item.timestamp), timeRange)) || [],
+    requests: data?.data.requests_and_errors.map((item) => item.hits) || [],
+    errors: data?.data.requests_and_errors.map((item) => item.errors) || [],
     latency: {
-      p50: data?.data.latency.map(() => 0) || [], // p50 데이터는 API에 없음
-      p75: data?.data.latency.map(() => 0) || [], // p75 데이터는 API에 없음
-      p90: data?.data.latency.map((item: { p90: number }) => item.p90) || [],
-      p95: data?.data.latency.map((item: { p95: number }) => item.p95) || [],
-      p99: data?.data.latency.map(() => 0) || [], // p99 데이터는 API에 없음
-      p99_9: data?.data.latency.map((item: { p99_9: number }) => item.p99_9) || [],
-      max: data?.data.latency.map(() => 0) || [], // max 데이터는 API에 없음
+      p90: data?.data.latency.map((item) => item.p90) || [],
+      p95: data?.data.latency.map((item) => item.p95) || [],
+      p99_9: data?.data.latency.map((item) => item.p99_9) || [],
     },
   };
 
@@ -157,12 +151,13 @@ export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
       textStyle: { color: '#f9fafb', fontSize: 12 },
       padding: 6,
       formatter: (params: unknown) => {
-        const list = params as {
+        interface TooltipParam {
           axisValue: string;
           color: string;
           seriesName: string;
           value: number;
-        }[];
+        }
+        const list = params as TooltipParam[];
         if (!list?.length) return '';
         const header = `<div style="margin-bottom:4px;"><b>${list[0].axisValue}</b></div>`;
         const lines = list
@@ -175,22 +170,6 @@ export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
       },
     },
     series: [
-      {
-        name: 'p50',
-        type: 'line',
-        data: chartData.latency.p50,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color: '#2563eb' },
-      },
-      {
-        name: 'p75',
-        type: 'line',
-        data: chartData.latency.p75,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color: '#7c3aed' },
-      },
       {
         name: 'p90',
         type: 'line',
@@ -208,25 +187,9 @@ export default function ChartsSection({ serviceName, timeRange }: ChartsProps) {
         lineStyle: { width: 2, color: '#facc15' },
       },
       {
-        name: 'p99',
-        type: 'line',
-        data: chartData.latency.p99,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color: '#f97316' },
-      },
-      {
         name: 'p99.9',
         type: 'line',
         data: chartData.latency.p99_9,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color: '#eab308' },
-      },
-      {
-        name: 'Max',
-        type: 'line',
-        data: chartData.latency.max,
         smooth: true,
         symbol: 'none',
         lineStyle: { width: 2, color: '#ef4444' },

@@ -7,6 +7,7 @@ import {
   ServicesResponse,
   IssuesResponse,
   ServiceMapResponse,
+  ServiceMetricsResponse,
   ResourceResponse,
   ServiceDependenciesResponse,
   ServiceTracesResponse,
@@ -70,7 +71,7 @@ export const getServiceMetrics = async (
     end_time?: string;
     interval?: string;
   },
-) => {
+): Promise<ServiceMetricsResponse> => {
   const searchParams = new URLSearchParams();
   if (params?.start_time) searchParams.append('start_time', params.start_time);
   if (params?.end_time) searchParams.append('end_time', params.end_time);
@@ -79,7 +80,7 @@ export const getServiceMetrics = async (
   const url = `/api/services/${serviceName}/metrics${
     searchParams.toString() ? `?${searchParams}` : ''
   }`;
-  return fetchJson(url);
+  return fetchJson<ServiceMetricsResponse>(url);
 };
 
 /**

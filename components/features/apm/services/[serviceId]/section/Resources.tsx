@@ -111,15 +111,9 @@ function transformResourceToTableRow(resource: Resource): ResourceTableRow {
     totalTimeStr = `${totalTimeSeconds.toFixed(1)}s`;
   }
 
-  // updated_at 날짜 포맷팅 (ISO 8601 -> 로케일 형식)
-  const formattedDate = new Date(resource.updated_at).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  // updated_at 날짜 포맷팅 (ISO 8601 -> "12/31 00:00:00" 형식)
+  const date = new Date(resource.updated_at);
+  const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 
   return {
     resourceName: resource.resource_name,

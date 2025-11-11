@@ -57,6 +57,40 @@ export interface ServiceMapResponse {
   edges: ServiceEdge[];
 }
 
+// 2.1 서비스 메트릭
+export interface LatencyDataPoint {
+  timestamp: string;
+  p90: number;
+  p95: number;
+  p99_9: number;
+}
+
+export interface RequestsErrorsDataPoint {
+  timestamp: string;
+  hits: number;
+  errors: number;
+}
+
+export interface ErrorsByStatusDataPoint {
+  timestamp: string;
+  status_500: number;
+  status_502: number;
+  status_503: number;
+  status_504: number;
+}
+
+export interface ServiceMetricsResponse {
+  service_name: string;
+  start_time: string;
+  end_time: string;
+  interval: string;
+  data: {
+    requests_and_errors: RequestsErrorsDataPoint[];
+    errors_by_status: ErrorsByStatusDataPoint[];
+    latency: LatencyDataPoint[];
+  };
+}
+
 // 2.2 서비스 리소스
 export interface Resource {
   resource_name: string;
