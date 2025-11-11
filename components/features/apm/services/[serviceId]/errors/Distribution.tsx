@@ -3,6 +3,7 @@
 
 import dynamic from 'next/dynamic';
 import React from 'react';
+import { EChartsOption } from 'echarts';
 import { mockErrorResponse } from './mock';
 import { ErrorItem } from './types';
 import Table from '@/components/ui/Table';
@@ -15,7 +16,7 @@ export default function ErrorDistribution() {
   const services = [...new Set(errors.map((e) => e.service_name))];
 
   // Heatmap 데이터
-  const data = errors.map((e) => [
+  const data: [number, number, number][] = errors.map((e) => [
     resources.indexOf(e.resource),
     services.indexOf(e.service_name),
     e.count,
@@ -23,15 +24,17 @@ export default function ErrorDistribution() {
   const maxCount = Math.max(...errors.map((e) => e.count));
 
   // Heatmap 옵션
-  const option = {
+  const option: EChartsOption = {
     tooltip: {
       position: 'top',
       backgroundColor: 'rgba(0,0,0,0.8)',
       textStyle: { color: '#fff', fontSize: 12 },
-      formatter: (params: any) => {
-        const service = services[params.value[1]];
-        const resource = resources[params.value[0]];
-        const count = params.value[2];
+      formatter: (params) => {
+        if (!Array.isArray(params) || !params[0]?.value) return '';
+        const value = params[0].value as [number, number, number];
+        const service = services[value[1]];
+        const resource = resources[value[0]];
+        const count = value[2];
         return `<b>${service}</b><br/>${resource}<br/>Count: ${count}`;
       },
     },
@@ -62,7 +65,10 @@ export default function ErrorDistribution() {
         data,
         label: {
           show: true,
-          formatter: (p: any) => (p.value[2] > 0 ? p.value[2] : ''),
+          formatter: (p) => {
+            const value = p.value as [number, number, number];
+            return value[2] > 0 ? `${value[2]}` : '';
+          },
           color: '#111827',
           fontSize: 10,
         },
@@ -72,9 +78,10 @@ export default function ErrorDistribution() {
 
   // Heatmap 클릭 → 테이블 행 스크롤 & 하이라이트
   const onEvents = {
-    click: (params: any) => {
-      const service = services[params.value[1]];
-      const resource = resources[params.value[0]];
+    click: (params: { value: [number, number, number] }) => {
+      const value = params.value as [number, number, number];
+      const service = services[value[1]];
+      const resource = resources[value[0]];
       const rowId = `row-${service}-${resource}`;
       const target = document.getElementById(rowId);
       if (target) {
@@ -91,7 +98,7 @@ export default function ErrorDistribution() {
     header: string;
     width?: string;
     sortable?: boolean;
-    render?: (value: any, row: ErrorItem) => React.ReactNode;
+    render?: (value: unknown, row: ErrorItem) => React.ReactNode;
   }[] = [
     { key: 'error_message', header: 'Error Message', width: '40%', sortable: true },
     { key: 'service_name', header: 'Service', width: '20%', sortable: true },
@@ -101,14 +108,14 @@ export default function ErrorDistribution() {
       header: 'Count',
       width: '10%',
       sortable: true,
-      render: (v: number) => <span className="text-red-600 font-semibold">{v}</span>,
+      render: (v) => <span className="text-red-600 font-semibold">{v as number}</span>,
     },
     {
       key: 'last_seen',
       header: 'Last Seen',
       width: '10%',
       sortable: true,
-      render: (v: string) => new Date(v).toLocaleTimeString('en-US', { hour12: false }),
+      render: (v) => new Date(v as string).toLocaleTimeString('en-US', { hour12: false }),
     },
   ];
 

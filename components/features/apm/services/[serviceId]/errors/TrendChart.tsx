@@ -1,8 +1,15 @@
 'use client';
 import dynamic from 'next/dynamic';
+import * as echarts from 'echarts';
 import { mockErrorTrendData } from './mock';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
+
+interface TrendParam {
+  color: string;
+  seriesName: string;
+  value: [string, number];
+}
 
 export default function ErrorTrendChart() {
   /* 급격한 에러 증가 감지 포인트 */
@@ -17,7 +24,7 @@ export default function ErrorTrendChart() {
       })),
   );
 
-  /* ECharts의 그래프 전체 설정 */
+  /* ECharts 그래프 전체 설정 */
   const option = {
     backgroundColor: 'transparent',
     tooltip: {
@@ -25,10 +32,10 @@ export default function ErrorTrendChart() {
       backgroundColor: 'rgba(0,0,0,0.8)',
       textStyle: { color: '#f9fafb', fontSize: 12 },
       borderColor: 'transparent',
-      formatter: (params: any) =>
+      formatter: (params: TrendParam[]) =>
         params
           .map(
-            (p: any) =>
+            (p) =>
               `<div><b style="color:${p.color}">${p.seriesName}</b>: ${p.value[1]} errors</div>`,
           )
           .join(''),
@@ -85,7 +92,7 @@ export default function ErrorTrendChart() {
         name: 'Critical Spikes',
         type: 'effectScatter',
         data: criticalPoints.map((p) => [p.timestamp, p.count]),
-        symbolSize: (val: any) => Math.min(val[1] / 30, 18),
+        symbolSize: (val: [string, number]) => Math.min(val[1] / 30, 18),
         itemStyle: { color: '#ef4444' },
         rippleEffect: { scale: 3, brushType: 'stroke' },
         z: 5,
