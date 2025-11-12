@@ -2,10 +2,13 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'export', // 빌드 결과물을 정적 파일로 내보내기
-  trailingSlash: true,
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', // 필요한 경우 특정 도메인으로 제한
+      },
+    ],
   },
 };
 
