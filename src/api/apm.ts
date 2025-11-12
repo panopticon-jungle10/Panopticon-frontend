@@ -17,10 +17,21 @@ import {
 } from '@/types/apm';
 
 /**
+ * API Base URL 가져오기
+ * 환경변수에 설정된 API 서버 주소 사용
+ */
+const getApiBaseUrl = (): string => {
+  return process.env.NEXT_PUBLIC_API_BASE_URL || '';
+};
+
+/**
  * 공통 Fetch 헬퍼
  */
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+  const baseUrl = getApiBaseUrl();
+  const fullUrl = `${baseUrl}${url}`;
+
+  const response = await fetch(fullUrl);
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
