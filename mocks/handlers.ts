@@ -280,7 +280,7 @@ export const handlers = [
       total: totalLogs,
       page,
       size,
-      logs,
+      items: logs,
     };
 
     return HttpResponse.json(response);
@@ -327,7 +327,7 @@ export const handlers = [
       total: totalSpans,
       page,
       size,
-      spans,
+      items: spans,
     };
 
     return HttpResponse.json(response);

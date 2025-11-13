@@ -236,7 +236,29 @@ export interface GetLogsParams extends TimeRangeParams, EnvironmentParams, Pagin
  * GET /logs - 응답
  */
 export interface GetLogsResponse extends PaginationMeta {
-  logs: LogItem[];
+  items: LogItem[];
+}
+
+/**
+ * UI용 로그 엔트리 (LogItem을 기반으로 변환된 형태)
+ */
+export interface LogEntry {
+  id: string;
+  level: LogLevel;
+  service: string;
+  traceId: string;
+  message: string;
+  timestamp: string;
+}
+
+/**
+ * 통계 아이템 (StatGrid, StatCard에서 사용)
+ */
+export interface StatItem {
+  id: string;
+  label: string;
+  value: number | string;
+  tone: 'neutral' | 'info' | 'warning' | 'danger';
 }
 
 // ---------- GET /spans ----------
@@ -265,7 +287,7 @@ export interface GetSpansParams extends TimeRangeParams, EnvironmentParams, Pagi
  * GET /spans - 응답
  */
 export interface GetSpansResponse extends PaginationMeta {
-  spans: SpanItem[];
+  items: SpanItem[];
 }
 
 // ---------- GET /services/{serviceName}/endpoints ----------

@@ -6,7 +6,7 @@ import StatGrid from '../../../../../ui/StatGrid';
 import LogList from '../logs/LogList';
 import { useQuery } from '@tanstack/react-query';
 import { getLogs } from '@/src/api/apm';
-import { LogItem, LogLevel } from '@/types/apm';
+import { LogLevel } from '@/types/apm';
 
 interface LogsSectionProps {
   serviceName: string;
@@ -30,8 +30,8 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   // 로그 데이터 변환
   const logs = useMemo(() => {
-    if (!logsData?.logs) return [];
-    return logsData.logs.map((log) => ({
+    if (!logsData?.items) return [];
+    return logsData.items.map((log) => ({
       id: `${log.service_name}-${log.timestamp}`,
       level: log.level as LogLevel,
       service: log.service_name,
