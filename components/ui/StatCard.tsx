@@ -35,7 +35,9 @@ export default function StatCard({ item, onClick }: StatCardProps) {
 
   return (
     <div
-      className={`rounded-2xl border border-gray-200 bg-white p-4 flex items-center justify-between transition hover:shadow-sm ${onClick ? 'cursor-pointer' : ''}`}
+      className={`rounded-2xl border border-gray-200 bg-white p-4 flex items-center justify-between transition hover:shadow-sm ${
+        onClick ? 'cursor-pointer' : ''
+      }`}
       onClick={onClick}
     >
       <div>
