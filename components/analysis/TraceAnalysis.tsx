@@ -76,7 +76,9 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 z-40 transition-opacity"
+        className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
