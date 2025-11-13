@@ -17,7 +17,7 @@ export const AuthenticatedHeader = () => {
   // Agent 드롭다운 아이템
   const agentItems = [
     {
-      href: '/install',
+      href: '/setting/install',
       label: 'Install Agents',
       ariaLabel: 'Go to Install Agents page',
     },
