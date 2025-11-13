@@ -85,10 +85,11 @@ export default function RegisterPage() {
   }, []);
 
   const handleCreate = async (name: string, description?: string) => {
-    // TODO: 실제 생성 API 호출
+    console.info('[App Register] Creating application', { name, description });
+
+    // TODO: 실제 API 호출
     await new Promise((r) => r(null));
 
-    // 생성 후 다시 목록 불러오기
     fetchApplications();
   };
 
