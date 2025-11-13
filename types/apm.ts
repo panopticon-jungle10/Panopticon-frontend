@@ -237,6 +237,22 @@ export interface GetLogsParams extends TimeRangeParams, EnvironmentParams, Pagin
  */
 export interface GetLogsResponse extends PaginationMeta {
   items: LogItem[];
+  /**
+   * TODO: 백엔드 API 준비 시 추가 예정
+   * 레벨별 전체 로그 카운트 (페이지네이션과 무관한 전체 통계)
+   *
+   * 현재는 items 배열로 계산하지만, 페이지네이션된 데이터로는 정확한 통계를 알 수 없음.
+   * 백엔드에서 직접 집계한 전체 카운트를 받아야 정확한 통계 표시 가능.
+   *
+   * 예시 구조:
+   * level_counts: {
+   *   ERROR: 150,
+   *   WARN: 800,
+   *   INFO: 9050,
+   *   DEBUG: 2000
+   * }
+   */
+  level_counts?: Record<LogLevel, number>;
 }
 
 /**

@@ -41,20 +41,26 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     }));
   }, [logsData]);
 
-  // 통계 데이터 계산 (로그에서 집계)
   const stats = useMemo(() => {
-    if (!logs.length) return [];
+    if (!logsData) return [];
+
+    // TODO: 백엔드에서 level_counts 필드를 제공하면 아래 코드로 교체
+    // const errorCount = logsData.level_counts?.ERROR ?? 0;
+    // const warnCount = logsData.level_counts?.WARN ?? 0;
+    // const infoCount = logsData.level_counts?.INFO ?? 0;
+    //
+    // 현재는 페이지네이션된 100개 로그만으로 계산하므로 정확하지 않음
     const errorCount = logs.filter((l) => l.level === 'ERROR').length;
     const warnCount = logs.filter((l) => l.level === 'WARN').length;
     const infoCount = logs.filter((l) => l.level === 'INFO').length;
 
     return [
-      { id: 'total', label: '총 로그', value: logs.length, tone: 'neutral' as const },
+      { id: 'total', label: '총 로그', value: logsData.total, tone: 'neutral' as const },
       { id: 'error', label: '에러', value: errorCount, tone: 'danger' as const },
       { id: 'warn', label: '경고', value: warnCount, tone: 'warning' as const },
       { id: 'info', label: '정보', value: infoCount, tone: 'info' as const },
     ];
-  }, [logs]);
+  }, [logsData, logs]);
 
   const services: string[] = useMemo(() => {
     const serviceSet = new Set(logs.map((l: { service: string }) => l.service));
