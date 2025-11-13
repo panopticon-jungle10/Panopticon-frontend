@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getServiceMetrics } from '@/src/api/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { formatChartTimeLabel, getBarWidth } from '@/src/utils/chartFormatter';
+import StateHandler from '@/components/ui/StateHandler';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -16,7 +17,7 @@ export default function ChartsSection({ serviceName }: ChartsProps) {
   const { startTime, endTime, interval } = useTimeRangeStore();
 
   // API 데이터 가져오기
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceMetrics', serviceName, startTime, endTime, interval],
     queryFn: () =>
       getServiceMetrics(serviceName, {
@@ -29,6 +30,9 @@ export default function ChartsSection({ serviceName }: ChartsProps) {
 
   // 차트 데이터 변환 (새로운 API 응답 형식: 배열 또는 단일 객체)
   const metricsArray = Array.isArray(data) ? data : data ? [data] : [];
+
+  // 데이터 없음 체크
+  const isEmpty = metricsArray.length === 0 || !metricsArray[0]?.points.length;
 
   const chartData = {
     timestamps:
@@ -201,23 +205,49 @@ export default function ChartsSection({ serviceName }: ChartsProps) {
     ],
   };
 
-  if (isLoading) {
-    return <div className="text-center text-gray-500 p-10">Loading data...</div>;
-  }
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-5 rounded-lg border border-gray-200">
-          <ReactECharts option={requestsOption} style={{ height: 300 }} />
+          <StateHandler
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            type="chart"
+            height={300}
+            loadingMessage="메트릭을 불러오는 중..."
+            emptyMessage="표시할 메트릭 데이터가 없습니다"
+          >
+            <ReactECharts option={requestsOption} style={{ height: 300 }} />
+          </StateHandler>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-200">
-          <ReactECharts option={errorsOption} style={{ height: 300 }} />
+          <StateHandler
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            type="chart"
+            height={300}
+            loadingMessage="메트릭을 불러오는 중..."
+            emptyMessage="표시할 에러 데이터가 없습니다"
+          >
+            <ReactECharts option={errorsOption} style={{ height: 300 }} />
+          </StateHandler>
         </div>
       </div>
 
       <div className="bg-white p-5 rounded-lg border border-gray-200">
-        <ReactECharts option={latencyOption} style={{ height: 340 }} />
+        <StateHandler
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={isEmpty}
+          type="chart"
+          height={340}
+          loadingMessage="레이턴시 데이터를 불러오는 중..."
+          emptyMessage="표시할 레이턴시 데이터가 없습니다"
+        >
+          <ReactECharts option={latencyOption} style={{ height: 340 }} />
+        </StateHandler>
       </div>
     </>
   );
