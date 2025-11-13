@@ -265,7 +265,8 @@ export const handlers = [
         timestamp: new Date(Date.now() - i * 60000).toISOString(),
         level: logLevel,
         message: `Sample log message ${i}: ${logLevel} level event occurred`,
-        service_name: serviceName || SERVICE_NAMES[Math.floor(Math.random() * SERVICE_NAMES.length)],
+        service_name:
+          serviceName || SERVICE_NAMES[Math.floor(Math.random() * SERVICE_NAMES.length)],
         span_id: traceId ? `span-${i}` : null,
         trace_id: traceId || `trace-${Math.random().toString(36).substring(7)}`,
         labels: {
@@ -311,7 +312,8 @@ export const handlers = [
         kind: spanKind,
         duration_ms: Math.floor(Math.random() * 500) + 50,
         status: spanStatus,
-        service_name: serviceName || SERVICE_NAMES[Math.floor(Math.random() * SERVICE_NAMES.length)],
+        service_name:
+          serviceName || SERVICE_NAMES[Math.floor(Math.random() * SERVICE_NAMES.length)],
         environment: 'prod',
         http_method: spanKind === 'SERVER' ? 'GET' : null,
         http_path: spanKind === 'SERVER' ? `/api/resource/${i}` : null,

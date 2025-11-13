@@ -244,11 +244,7 @@ export interface GetLogsResponse extends PaginationMeta {
 /**
  * 스팬 정렬 순서
  */
-export type SpanSortOrder =
-  | 'duration_asc'
-  | 'duration_desc'
-  | 'start_time_asc'
-  | 'start_time_desc';
+export type SpanSortOrder = 'duration_asc' | 'duration_desc' | 'start_time_asc' | 'start_time_desc';
 
 /**
  * GET /spans - 쿼리 파라미터
@@ -312,7 +308,10 @@ export type TraceSortOrder =
 /**
  * GET /services/{serviceName}/traces - 쿼리 파라미터
  */
-export interface GetServiceTracesParams extends TimeRangeParams, EnvironmentParams, PaginationParams {
+export interface GetServiceTracesParams
+  extends TimeRangeParams,
+    EnvironmentParams,
+    PaginationParams {
   status?: Status;
   min_duration_ms?: number;
   max_duration_ms?: number;

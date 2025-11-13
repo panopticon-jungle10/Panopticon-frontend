@@ -75,9 +75,7 @@ function toQueryString(searchParams: URLSearchParams): string {
  * GET /services
  * 서비스 별 개요(요약 메트릭) 조회
  */
-export const getServices = async (
-  params?: GetServicesParams
-): Promise<GetServicesResponse> => {
+export const getServices = async (params?: GetServicesParams): Promise<GetServicesResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/services${toQueryString(searchParams)}`;
   return fetchJson<GetServicesResponse>(url);
@@ -89,7 +87,7 @@ export const getServices = async (
  */
 export const getTraceById = async (
   traceId: string,
-  params?: GetTraceByIdParams
+  params?: GetTraceByIdParams,
 ): Promise<GetTraceByIdResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/traces/${traceId}${toQueryString(searchParams)}`;
@@ -102,7 +100,7 @@ export const getTraceById = async (
  */
 export const getServiceMetrics = async (
   serviceName: string,
-  params?: GetServiceMetricsParams
+  params?: GetServiceMetricsParams,
 ): Promise<GetServiceMetricsResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/services/${serviceName}/metrics${toQueryString(searchParams)}`;
@@ -113,9 +111,7 @@ export const getServiceMetrics = async (
  * GET /logs
  * 로그 검색
  */
-export const getLogs = async (
-  params?: GetLogsParams
-): Promise<GetLogsResponse> => {
+export const getLogs = async (params?: GetLogsParams): Promise<GetLogsResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/logs${toQueryString(searchParams)}`;
   return fetchJson<GetLogsResponse>(url);
@@ -125,9 +121,7 @@ export const getLogs = async (
  * GET /spans
  * 스팬 검색
  */
-export const getSpans = async (
-  params?: GetSpansParams
-): Promise<GetSpansResponse> => {
+export const getSpans = async (params?: GetSpansParams): Promise<GetSpansResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/spans${toQueryString(searchParams)}`;
   return fetchJson<GetSpansResponse>(url);
@@ -139,7 +133,7 @@ export const getSpans = async (
  */
 export const getServiceEndpoints = async (
   serviceName: string,
-  params?: GetServiceEndpointsParams
+  params?: GetServiceEndpointsParams,
 ): Promise<GetServiceEndpointsResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/services/${serviceName}/endpoints${toQueryString(searchParams)}`;
@@ -152,7 +146,7 @@ export const getServiceEndpoints = async (
  */
 export const getServiceTraces = async (
   serviceName: string,
-  params?: GetServiceTracesParams
+  params?: GetServiceTracesParams,
 ): Promise<GetServiceTracesResponse> => {
   const searchParams = buildSearchParams(params);
   const url = `/services/${serviceName}/traces${toQueryString(searchParams)}`;
