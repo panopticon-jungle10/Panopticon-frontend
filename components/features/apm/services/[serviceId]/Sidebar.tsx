@@ -16,13 +16,16 @@ const apmItems = [
   { key: 'logs', label: 'Logs', icon: HiOutlineDocumentText },
 ] as const;
 
-export default function Sidebar() {
-  const [activeSection, setActiveSection] = useState('overview');
-  const sectionIds = useMemo(() => apmItems.map((item) => item.key), []);
+type SectionKey = (typeof apmItems)[number]['key'];
 
-  const scrollToSection = (sectionId: string) => {
+export default function Sidebar() {
+  const [activeSection, setActiveSection] = useState<SectionKey>('overview');
+  const sectionIds = useMemo<SectionKey[]>(() => apmItems.map((item) => item.key), []);
+
+  const scrollToSection = (sectionId: SectionKey) => {
     const element = document.getElementById(sectionId);
     if (!element) return;
+
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setActiveSection(sectionId);
   };
@@ -42,10 +45,11 @@ export default function Sidebar() {
         });
 
         const topMost = inView.find((entry) => entry.boundingClientRect.top <= 160) ?? inView[0];
-        const nextActive = topMost.target.id;
+        const nextId = topMost.target.id;
+        const sectionKey = sectionIds.find((id) => id === nextId);
 
-        if (nextActive && nextActive !== activeSection) {
-          setActiveSection(nextActive);
+        if (sectionKey && sectionKey !== activeSection) {
+          setActiveSection(sectionKey);
         }
       },
       {
@@ -61,8 +65,9 @@ export default function Sidebar() {
     });
 
     const initialHash = window.location.hash.replace('#', '');
-    if (initialHash && sectionIds.includes(initialHash)) {
-      setActiveSection(initialHash);
+    const initialKey = sectionIds.find((id) => id === initialHash);
+    if (initialKey) {
+      setActiveSection(initialKey);
     }
 
     return () => observer.disconnect();
