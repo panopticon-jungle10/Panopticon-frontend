@@ -9,6 +9,7 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface FlameGraphProps {
   spans: SpanItem[];
+  onSpanSelect?: (spanId: string) => void;
 }
 
 interface FlameBlock {
@@ -18,7 +19,7 @@ interface FlameBlock {
   widthRatio: number; // 부모 대비 너비 비율 (0~1)
 }
 
-export default function FlameGraph({ spans }: FlameGraphProps) {
+export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
   // 스팬을 Flame Graph 블록으로 변환
   const { flameBlocks, maxDepth } = useMemo(() => {
     if (!spans || spans.length === 0) return { flameBlocks: [], maxDepth: 0 };
@@ -130,10 +131,10 @@ export default function FlameGraph({ spans }: FlameGraphProps) {
           const data = params.data.spanData;
           return `
             <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${data.name}</div>
-            <div style="margin:2px 0;">Duration: ${data.duration_ms}ms</div>
-            <div style="margin:2px 0;">Service: ${data.service_name}</div>
-            <div style="margin:2px 0;">Kind: ${data.kind}</div>
-            <div style="margin:2px 0;">Status: ${data.status}</div>
+            <div style="margin:2px 0;">소요시간: ${data.duration_ms}ms</div>
+            <div style="margin:2px 0;">서비스명: ${data.service_name}</div>
+            <div style="margin:2px 0;">종류: ${data.kind}</div>
+            <div style="margin:2px 0;">상태: ${data.status}</div>
             ${
               data.http_method
                 ? `<div style="margin:2px 0;">HTTP: ${data.http_method} ${
@@ -248,13 +249,20 @@ export default function FlameGraph({ spans }: FlameGraphProps) {
     );
   }
 
+  // 차트 클릭 이벤트 핸들러
+  const onChartClick = (params: any) => {
+    if (params.data && params.data.spanData && onSpanSelect) {
+      onSpanSelect(params.data.spanData.span_id);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Flame Graph</h3>
-          <p className="text-sm text-gray-500">Total Spans: {spans.length}</p>
+          <p className="text-sm text-gray-500">전체 span 개수: {spans.length}</p>
         </div>
       </div>
 
@@ -262,7 +270,8 @@ export default function FlameGraph({ spans }: FlameGraphProps) {
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <ReactECharts
           option={option}
-          style={{ height: `${Math.max(400, (maxDepth + 1) * 50)}px` }}
+          style={{ height: `${Math.max(300, (maxDepth + 1) * 50)}px` }}
+          onEvents={{ click: onChartClick }}
         />
       </div>
     </div>

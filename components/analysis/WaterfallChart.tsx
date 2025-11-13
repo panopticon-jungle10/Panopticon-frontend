@@ -9,9 +9,10 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface WaterfallChartProps {
   spans: SpanItem[];
+  onSpanSelect?: (spanId: string) => void;
 }
 
-export default function WaterfallChart({ spans }: WaterfallChartProps) {
+export default function WaterfallChart({ spans, onSpanSelect }: WaterfallChartProps) {
   // 스팬을 시간순으로 정렬하고 waterfall 데이터로 변환
   const waterfallData = useMemo(() => {
     if (!spans || spans.length === 0) return null;
@@ -96,12 +97,12 @@ export default function WaterfallChart({ spans }: WaterfallChartProps) {
           const end = params.data.value[2].toFixed(2);
           return `
             <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${data.name}</div>
-            <div style="margin:2px 0;">Start: ${start}ms</div>
-            <div style="margin:2px 0;">End: ${end}ms</div>
-            <div style="margin:2px 0;">Duration: ${data.duration_ms}ms</div>
-            <div style="margin:2px 0;">Service: ${data.service_name}</div>
-            <div style="margin:2px 0;">Kind: ${data.kind}</div>
-            <div style="margin:2px 0;">Status: ${data.status}</div>
+            <div style="margin:2px 0;">시작: ${start}ms</div>
+            <div style="margin:2px 0;">종료: ${end}ms</div>
+            <div style="margin:2px 0;">소요시간: ${data.duration_ms}ms</div>
+            <div style="margin:2px 0;">서비스명: ${data.service_name}</div>
+            <div style="margin:2px 0;">종류: ${data.kind}</div>
+            <div style="margin:2px 0;">상태: ${data.status}</div>
             ${
               data.http_method
                 ? `<div style="margin:2px 0;">HTTP: ${data.http_method} ${
@@ -189,19 +190,30 @@ export default function WaterfallChart({ spans }: WaterfallChartProps) {
     );
   }
 
+  // 차트 클릭 이벤트 핸들러
+  const onChartClick = (params: any) => {
+    if (params.data && params.data.spanData && onSpanSelect) {
+      onSpanSelect(params.data.spanData.span_id);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Waterfall Chart</h3>
-          <p className="text-sm text-gray-500">Total Spans: {spans.length}</p>
+          <p className="text-sm text-gray-500">전체 span 개수: {spans.length}</p>
         </div>
       </div>
 
       {/* Chart */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <ReactECharts option={option} style={{ height: `${Math.max(300, spans.length * 25)}px` }} />
+        <ReactECharts
+          option={option}
+          style={{ height: `${Math.max(300, spans.length * 50)}px` }}
+          onEvents={{ click: onChartClick }}
+        />
       </div>
     </div>
   );
