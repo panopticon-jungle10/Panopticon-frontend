@@ -86,7 +86,6 @@ export default function ApmPage() {
     return {
       from: oneHourAgo.toISOString(),
       to: now.toISOString(),
-      environment: 'prod',
     };
   }, []);
 
