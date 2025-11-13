@@ -60,7 +60,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       { id: 'warn', label: '경고', value: warnCount, tone: 'warning' as const },
       { id: 'info', label: '정보', value: infoCount, tone: 'info' as const },
     ];
-  }, [logsData]);
+  }, [logs, logsData]);
 
   const services: string[] = useMemo(() => {
     const serviceSet = new Set(logs.map((l: { service: string }) => l.service));
