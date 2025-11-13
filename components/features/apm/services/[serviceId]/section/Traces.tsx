@@ -8,6 +8,7 @@ import { getServiceTraces } from '@/src/api/apm';
 import { TraceSummary } from '@/types/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { formatChartTimeLabel, getXAxisInterval } from '@/src/utils/chartFormatter';
+import StateHandler from '@/components/ui/StateHandler';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false }); // Import from utility
 
@@ -129,7 +130,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   const { startTime, endTime, interval } = useTimeRangeStore();
 
   // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용)
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceTraces', serviceName, startTime, endTime],
     queryFn: () =>
       getServiceTraces(serviceName, {
@@ -151,6 +152,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   }, [data]);
 
   const totalCount = allTraces.length;
+  const isEmpty = allTraces.length === 0;
 
   // 현재 페이지의 데이터만 추출 (테이블용)
   const traces = useMemo(() => {
@@ -334,42 +336,34 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
     }
   };
 
-  if (error) {
-    return (
-      <div className="bg-white p-5 rounded-lg border border-gray-200">
-        <div className="text-center text-red-500 py-8">
-          <p className="font-semibold mb-2">Error loading traces</p>
-          <p className="text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading && allTraces.length === 0) {
-    return (
-      <div className="bg-white p-5 rounded-lg border border-gray-200">
-        <div className="text-center text-gray-500 py-8">Loading traces...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-white p-5 rounded-lg border border-gray-200">
-      {/* 차트 */}
-      <ReactECharts option={option} style={{ height: 400 }} />
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={isEmpty}
+        type="chart"
+        height={600}
+        loadingMessage="트레이스 데이터를 불러오는 중..."
+        errorMessage="트레이스 데이터를 불러올 수 없습니다"
+        emptyMessage="선택한 시간 범위에 트레이스가 없습니다"
+      >
+        {/* 차트 */}
+        <ReactECharts option={option} style={{ height: 400 }} />
 
-      {/* 테이블 */}
-      <div className="mt-6">
-        <Table<TracePoint> columns={TRACE_TABLE_COLUMNS} data={traces} className="w-full" />
-      </div>
+        {/* 테이블 */}
+        <div className="mt-6">
+          <Table<TracePoint> columns={TRACE_TABLE_COLUMNS} data={traces} className="w-full" />
+        </div>
 
-      {/* 페이지네이션 */}
-      <Pagination
-        page={currentPage}
-        totalPages={totalPages}
-        onPrev={handlePrevPage}
-        onNext={handleNextPage}
-      />
+        {/* 페이지네이션 */}
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          onPrev={handlePrevPage}
+          onNext={handleNextPage}
+        />
+      </StateHandler>
     </div>
   );
 }
