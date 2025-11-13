@@ -59,10 +59,24 @@ export default function ServicesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // 지난 한 달의 시간 범위 계산
+  const getLastMonthRange = () => {
+    const now = new Date();
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return {
+      from: oneMonthAgo.toISOString(),
+      to: now.toISOString(),
+    };
+  };
+
   // API 데이터 가져오기
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['services', page, pageSize],
-    queryFn: () => getServices({ environment: 'prod', limit: pageSize }),
+    queryFn: () =>
+      getServices({
+        limit: pageSize,
+        ...getLastMonthRange(),
+      }),
   });
 
   // 페이징 계산
