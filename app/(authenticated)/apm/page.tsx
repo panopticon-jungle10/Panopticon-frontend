@@ -3,71 +3,39 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FiAlertOctagon } from 'react-icons/fi';
 import { BiBug, BiGridAlt } from 'react-icons/bi';
 import SearchInput from '@/components/ui/SearchInput';
 import Table from '@/components/ui/Table';
-import DatabaseIcon from '@/components/icons/services/Database';
-import FrontendIcon from '@/components/icons/services/Frontend';
-import ApiIcon from '@/components/icons/services/Api';
 import { getServices } from '@/src/api/apm';
 import { ServiceSummary } from '@/types/apm';
-
-// 서비스 타입별 아이콘 매핑
-const SERVICE_TYPE_ICONS: Record<string, { icon: typeof DatabaseIcon; color: string }> = {
-  DB: { icon: DatabaseIcon, color: '#3b82f6' },
-  CACHE: { icon: DatabaseIcon, color: '#06b6d4' },
-  API: { icon: ApiIcon, color: '#10b981' },
-  API_GATEWAY: { icon: ApiIcon, color: '#8b5cf6' },
-  WORKER: { icon: ApiIcon, color: '#f59e0b' },
-  WEB: { icon: FrontendIcon, color: '#8b5cf6' },
-};
-
-const renderServiceIcon = (type: string) => {
-  const config = SERVICE_TYPE_ICONS[type] || SERVICE_TYPE_ICONS.API;
-  const IconComponent = config.icon;
-  return <IconComponent size={20} color={config.color} />;
-};
+import StateHandler from '@/components/ui/StateHandler';
 
 // Table Column 정의 (API 응답 기반)
-type TableService = ServiceSummary & { service_type?: string };
-
 const columns = [
   {
-    key: 'service_type' as keyof TableService,
-    header: 'Type',
-    width: '20%',
-    render: (_value: TableService[keyof TableService], row: TableService) => (
-      <div className="flex items-center gap-2">
-        {renderServiceIcon(row.service_type || 'API')}
-        <span className="text-sm text-gray-600">{row.service_type || 'API'}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'service_name' as keyof TableService,
+    key: 'service_name' as keyof ServiceSummary,
     header: 'Service',
-    width: '25%',
+    width: '35%',
   },
   {
-    key: 'request_count' as keyof TableService,
+    key: 'request_count' as keyof ServiceSummary,
     header: 'Requests',
-    width: '20%',
-    render: (value: TableService[keyof TableService]) => (value as number).toLocaleString(),
+    width: '25%',
+    render: (value: ServiceSummary[keyof ServiceSummary]) => (value as number).toLocaleString(),
   },
   {
-    key: 'latency_p95_ms' as keyof TableService,
+    key: 'latency_p95_ms' as keyof ServiceSummary,
     header: 'P95 Latency',
-    width: '15%',
-    render: (value: TableService[keyof TableService]) => (
+    width: '20%',
+    render: (value: ServiceSummary[keyof ServiceSummary]) => (
       <span className="flex items-center gap-1">{value as number}ms</span>
     ),
   },
   {
-    key: 'error_rate' as keyof TableService,
+    key: 'error_rate' as keyof ServiceSummary,
     header: 'Error Rate',
-    width: '15%',
-    render: (value: TableService[keyof TableService]) => (
+    width: '20%',
+    render: (value: ServiceSummary[keyof ServiceSummary]) => (
       <span className={(value as number) > 0.02 ? 'text-red-600 font-semibold' : ''}>
         {((value as number) * 100).toFixed(2)}%
       </span>
@@ -86,11 +54,14 @@ export default function ApmPage() {
     return {
       from: oneHourAgo.toISOString(),
       to: now.toISOString(),
-      environment: 'prod',
     };
   }, []);
 
-  const { data: servicesData, isLoading: servicesLoading } = useQuery({
+  const {
+    data: servicesData,
+    isLoading: servicesLoading,
+    isError: servicesError,
+  } = useQuery({
     queryKey: ['services', timeRange],
     queryFn: () => getServices(timeRange),
   });
@@ -101,8 +72,10 @@ export default function ApmPage() {
       service.service_name.toLowerCase().includes(searchQuery.toLowerCase()),
     ) || [];
 
+  const isServicesEmpty = filteredServices.length === 0;
+
   // 테이블 행 클릭 핸들러
-  const handleServiceRowClick = (service: TableService) => {
+  const handleServiceRowClick = (service: ServiceSummary) => {
     router.push(`/apm/services/${service.service_name}`);
   };
 
@@ -136,25 +109,26 @@ export default function ApmPage() {
           </div>
 
           {/* Table */}
-          {servicesLoading ? (
-            <div className="px-4 py-16 flex items-center justify-center">
-              <p className="text-gray-400 text-sm">Loading services...</p>
-            </div>
-          ) : filteredServices.length === 0 ? (
-            <div className="px-4 py-16 flex flex-col items-center justify-center text-center">
-              <FiAlertOctagon className="w-12 h-12 mb-3 text-purple-400" />
-              <p className="text-gray-600 text-sm">No services match the filter</p>
-              <p className="text-xs text-gray-400 mt-1">Please widen your filter</p>
-            </div>
-          ) : (
-            <Table<TableService>
+          <StateHandler
+            isLoading={servicesLoading}
+            isError={servicesError}
+            isEmpty={isServicesEmpty}
+            type="table"
+            height={400}
+            loadingMessage="서비스 목록을 불러오는 중..."
+            errorMessage="서비스 목록을 불러올 수 없습니다"
+            emptyMessage={
+              searchQuery ? '검색 조건에 맞는 서비스가 없습니다' : '표시할 서비스가 없습니다'
+            }
+          >
+            <Table<ServiceSummary>
               columns={columns}
               data={filteredServices}
               showFavorite={true}
               className="w-full"
               onRowClick={handleServiceRowClick}
             />
-          )}
+          </StateHandler>
         </div>
 
         {/* Issues Section - Temporarily hidden (API endpoint not available in new spec) */}
@@ -168,11 +142,17 @@ export default function ApmPage() {
           </div>
 
           {/* Content */}
-          <div className="px-4 py-16 flex flex-col items-center justify-center text-center">
-            <FiAlertOctagon className="w-12 h-12 mb-3 text-purple-400" />
-            <p className="text-gray-600 text-sm">No issues detected</p>
-            <p className="text-xs text-gray-400 mt-1">All services are running normally</p>
-          </div>
+          <StateHandler
+            isLoading={false}
+            isError={false}
+            isEmpty={true}
+            type="general"
+            height={200}
+            emptyMessage="감지된 이슈가 없습니다"
+          >
+            {/* TODO : Issues content will be rendered here when API is available */}
+            <div />
+          </StateHandler>
         </div>
       </div>
     </>
