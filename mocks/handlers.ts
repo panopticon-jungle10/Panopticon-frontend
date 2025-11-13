@@ -48,8 +48,8 @@ const SERVICE_NAMES = [
 ];
 
 export const handlers = [
-  // ==================== GET /services ====================
-  http.get('/services', ({ request }) => {
+  // ==================== GET /query/services ====================
+  http.get('/query/services', ({ request }) => {
     const url = new URL(request.url);
     const from = url.searchParams.get('from') || new Date(Date.now() - 3600000).toISOString();
     const to = url.searchParams.get('to') || new Date().toISOString();
@@ -86,8 +86,8 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // ==================== GET /traces/{traceId} ====================
-  http.get('/traces/:traceId', ({ params, request }) => {
+  // ==================== GET /query/traces/{traceId} ====================
+  http.get('/query/traces/:traceId', ({ params, request }) => {
     const { traceId } = params;
     const url = new URL(request.url);
     const environment = url.searchParams.get('environment');
@@ -173,8 +173,8 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // ==================== GET /services/{serviceName}/metrics ====================
-  http.get('/services/:serviceName/metrics', ({ params, request }) => {
+  // ==================== GET /query/services/{serviceName}/metrics ====================
+  http.get('/query/services/:serviceName/metrics', ({ params, request }) => {
     const { serviceName } = params;
     const url = new URL(request.url);
     const from = url.searchParams.get('from') || new Date(Date.now() - 3600000).toISOString();
@@ -245,8 +245,8 @@ export const handlers = [
     return HttpResponse.json(allMetrics as GetServiceMetricsResponse);
   }),
 
-  // ==================== GET /logs ====================
-  http.get('/logs', ({ request }) => {
+  // ==================== GET /query/logs ====================
+  http.get('/query/logs', ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const size = parseInt(url.searchParams.get('size') || '50');
@@ -285,8 +285,8 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // ==================== GET /spans ====================
-  http.get('/spans', ({ request }) => {
+  // ==================== GET /query/spans ====================
+  http.get('/query/spans', ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const size = parseInt(url.searchParams.get('size') || '50');
@@ -331,8 +331,8 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // ==================== GET /services/{serviceName}/endpoints ====================
-  http.get('/services/:serviceName/endpoints', ({ params, request }) => {
+  // ==================== GET /query/services/{serviceName}/endpoints ====================
+  http.get('/query/services/:serviceName/endpoints', ({ params, request }) => {
     const { serviceName } = params;
     const url = new URL(request.url);
     const from = url.searchParams.get('from') || new Date(Date.now() - 3600000).toISOString();
@@ -374,8 +374,8 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // ==================== GET /services/{serviceName}/traces ====================
-  http.get('/services/:serviceName/traces', ({ params, request }) => {
+  // ==================== GET /query/services/{serviceName}/traces ====================
+  http.get('/query/services/:serviceName/traces', ({ params, request }) => {
     const { serviceName } = params;
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
