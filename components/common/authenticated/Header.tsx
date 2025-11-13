@@ -47,7 +47,7 @@ export const AuthenticatedHeader = () => {
             <HeaderDropdown
               triggerIcon={<FiSettings className="w-6 h-6 text-zinc-700" />}
               triggerLabel="Setting menu"
-              triggerHref="/setting"
+              triggerHref="/setting/register"
               title="Setting"
               items={settingItems}
             />
