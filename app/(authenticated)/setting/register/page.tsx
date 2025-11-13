@@ -73,7 +73,8 @@ export default function RegisterPage() {
       ];
 
       setApps(mockApps);
-    } catch (e) {
+    } catch (error) {
+      console.error('[App Register] fetchApplications failed', error);
       setIsError(true);
     } finally {
       setIsLoading(false);
