@@ -201,7 +201,6 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
       getServiceEndpoints(serviceName, {
         from: startTime,
         to: endTime,
-        environment: 'prod',
         limit: 100,
       }),
   });

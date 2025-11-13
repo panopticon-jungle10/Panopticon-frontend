@@ -136,7 +136,6 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
       getServiceTraces(serviceName, {
         from: startTime,
         to: endTime,
-        environment: 'prod',
         page: 1,
         size: 500,
       }),
