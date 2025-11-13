@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { HiXMark } from "react-icons/hi2";
+import * as React from 'react';
+import { HiXMark } from 'react-icons/hi2';
 
 interface DialogProps {
   open?: boolean;
@@ -38,24 +38,16 @@ const DialogContext = React.createContext<{
 });
 
 export function Dialog({ open = false, onOpenChange = () => {}, children }: DialogProps) {
-  return (
-    <DialogContext.Provider value={{ open, onOpenChange }}>
-      {children}
-    </DialogContext.Provider>
-  );
+  return <DialogContext.Provider value={{ open, onOpenChange }}>{children}</DialogContext.Provider>;
 }
 
 export function DialogTrigger({ children }: { children: React.ReactNode }) {
   const { onOpenChange } = React.useContext(DialogContext);
 
-  return (
-    <div onClick={() => onOpenChange(true)}>
-      {children}
-    </div>
-  );
+  return <div onClick={() => onOpenChange(true)}>{children}</div>;
 }
 
-export function DialogContent({ className = "", children }: DialogContentProps) {
+export function DialogContent({ className = '', children }: DialogContentProps) {
   const { open, onOpenChange } = React.useContext(DialogContext);
 
   React.useEffect(() => {
@@ -97,7 +89,7 @@ export function DialogContent({ className = "", children }: DialogContentProps) 
   );
 }
 
-export function DialogHeader({ className = "", children }: DialogHeaderProps) {
+export function DialogHeader({ className = '', children }: DialogHeaderProps) {
   return (
     <div className={`mb-4 flex flex-col gap-2 text-center sm:text-left ${className}`}>
       {children}
@@ -105,23 +97,21 @@ export function DialogHeader({ className = "", children }: DialogHeaderProps) {
   );
 }
 
-export function DialogTitle({ className = "", children }: DialogTitleProps) {
-  return (
-    <h2 className={`${className}`}>
-      {children}
-    </h2>
-  );
+export function DialogTitle({ className = '', children }: DialogTitleProps) {
+  return <h2 className={`${className}`}>{children}</h2>;
 }
 
-export function DialogDescription({ className = "", children }: DialogDescriptionProps) {
-  return (
-    <p className={`text-sm text-slate-600 ${className}`}>
-      {children}
-    </p>
-  );
+export function DialogDescription({ className = '', children }: DialogDescriptionProps) {
+  return <p className={`text-sm text-slate-600 ${className}`}>{children}</p>;
 }
 
-export function DialogFooter({ className = "", children }: { className?: string; children?: React.ReactNode }) {
+export function DialogFooter({
+  className = '',
+  children,
+}: {
+  className?: string;
+  children?: React.ReactNode;
+}) {
   return (
     <div className={`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end ${className}`}>
       {children}
@@ -132,11 +122,7 @@ export function DialogFooter({ className = "", children }: { className?: string;
 export function DialogClose({ children }: { children: React.ReactNode }) {
   const { onOpenChange } = React.useContext(DialogContext);
 
-  return (
-    <div onClick={() => onOpenChange(false)}>
-      {children}
-    </div>
-  );
+  return <div onClick={() => onOpenChange(false)}>{children}</div>;
 }
 
 export const DialogPortal = ({ children }: { children: React.ReactNode }) => children;

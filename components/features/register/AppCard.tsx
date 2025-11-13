@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  HiCube,
-  HiArrowTrendingUp,
-  HiExclamationTriangle,
-} from 'react-icons/hi2';
+import { HiCube, HiArrowTrendingUp, HiExclamationTriangle } from 'react-icons/hi2';
 import type { ApplicationSummary } from './types';
 
 function DiffBadge({ diff }: { diff: number }) {
@@ -15,11 +11,7 @@ function DiffBadge({ diff }: { diff: number }) {
   const isUp = diff > 0;
 
   return (
-    <span
-      className={`text-xs font-semibold ml-1 ${
-        isUp ? 'text-red-600' : 'text-emerald-600'
-      }`}
-    >
+    <span className={`text-xs font-semibold ml-1 ${isUp ? 'text-red-600' : 'text-emerald-600'}`}>
       ({isUp ? `+${diff}` : diff})
     </span>
   );
@@ -69,8 +61,7 @@ export function AppCard({ app }: { app: ApplicationSummary }) {
         {/* 요청 수 */}
         <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
           <p className="flex items-center gap-1 text-xs font-medium text-slate-500 mb-1">
-            <HiArrowTrendingUp className="h-4 w-4" />
-            총 요청 수
+            <HiArrowTrendingUp className="h-4 w-4" />총 요청 수
           </p>
           <p className="text-lg font-bold text-slate-900 flex items-center">
             {(app.requestCount ?? 0).toLocaleString()}
