@@ -7,12 +7,14 @@ import {
   GetSpansResponse,
   GetServiceEndpointsResponse,
   GetServiceTracesResponse,
+  GetServiceErrorsResponse,
   ServiceSummary,
   SpanItem,
   LogItem,
   TraceSummary,
   EndpointMetrics,
   MetricTimeSeries,
+  ErrorItem,
 } from '@/types/apm';
 
 /**
@@ -410,6 +412,83 @@ export const handlers = [
       page,
       size,
       traces,
+    };
+
+    return HttpResponse.json(response);
+  }),
+
+  // ==================== GET /query/services/{serviceName}/errors ====================
+  http.get('/query/services/:serviceName/errors', ({ params, request }) => {
+    const { serviceName } = params;
+    const url = new URL(request.url);
+    const from = url.searchParams.get('from') || new Date(Date.now() - 3600000).toISOString();
+    const to = url.searchParams.get('to') || new Date().toISOString();
+    const environment = url.searchParams.get('environment') || 'prod';
+    const limit = parseInt(url.searchParams.get('limit') || '100');
+    const resourceFilter = url.searchParams.get('resource_filter')?.toLowerCase();
+    const messageFilter = url.searchParams.get('message_filter')?.toLowerCase();
+
+    // 샘플 에러 메시지들
+    const errorMessages = [
+      'Database connection timeout',
+      'Null pointer exception in user handler',
+      'Invalid request parameters',
+      'Authentication token expired',
+      'Rate limit exceeded',
+      'Failed to parse JSON response',
+      'Network socket timeout',
+      'Internal server error',
+    ];
+
+    // 샘플 리소스들 (엔드포인트)
+    const resources = [
+      'GET /api/users',
+      'POST /api/orders',
+      'PUT /api/users/:id',
+      'GET /api/products',
+      'POST /api/payments',
+      'DELETE /api/users/:id',
+      'GET /api/orders/:id',
+      'POST /api/auth/login',
+    ];
+
+    let errors: ErrorItem[] = [];
+
+    // 에러 데이터 생성
+    for (let i = 0; i < Math.min(20, limit); i++) {
+      const errorMessage = errorMessages[i % errorMessages.length];
+      const resource = resources[i % resources.length];
+
+      errors.push({
+        error_message: errorMessage,
+        service_name: serviceName as string,
+        resource,
+        count: Math.floor(Math.random() * 500) + 10,
+        last_seen: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+        labels: {
+          error_type: i % 2 === 0 ? 'ServerError' : 'ClientError',
+          version: '1.0.0',
+        },
+      });
+    }
+
+    // 필터 적용
+    if (resourceFilter) {
+      errors = errors.filter((e) => e.resource.toLowerCase().includes(resourceFilter));
+    }
+    if (messageFilter) {
+      errors = errors.filter((e) => e.error_message.toLowerCase().includes(messageFilter));
+    }
+
+    // limit 적용
+    errors = errors.slice(0, limit);
+
+    const response: GetServiceErrorsResponse = {
+      service_name: serviceName as string,
+      environment,
+      from,
+      to,
+      errors,
     };
 
     return HttpResponse.json(response);

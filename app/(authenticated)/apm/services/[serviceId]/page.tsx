@@ -8,6 +8,7 @@ import ResourcesSection from '@/components/features/apm/services/[serviceId]/sec
 import { useParams } from 'next/navigation';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
+import ErrorsSection from '@/components/features/apm/services/[serviceId]/section/Errors';
 
 export default function ServiceOverview() {
   const params = useParams();
@@ -61,8 +62,7 @@ export default function ServiceOverview() {
       {/* 에러 영역 */}
       <div id="errors" className="pt-4 scroll-mt-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Errors</h2>
-        <div className="bg-white p-5 rounded-lg border border-gray-200">준비 중...</div>
-        {/* <ErrorsSection serviceName={serviceId} /> */}
+        <ErrorsSection serviceName={serviceId} />
       </div>
 
       {/* 로그 영역 */}

@@ -346,3 +346,52 @@ export interface GetServiceTracesParams
 export interface GetServiceTracesResponse extends PaginationMeta {
   traces: TraceSummary[];
 }
+
+// ---------- GET /services/{serviceName}/errors ----------
+
+/**
+ * 에러 아이템 (서비스 에러 분포)
+ */
+export interface ErrorItem {
+  error_message: string; // 에러 메시지
+  service_name: string;
+  resource: string; // 리소스 (엔드포인트 또는 작업)
+  count: number; // 발생 횟수
+  last_seen: string; // ISO 8601 date-time
+  labels?: Labels;
+}
+
+/**
+ * 에러 트렌드 데이터 포인트
+ */
+export interface ErrorTrendPoint {
+  timestamp: string; // ISO 8601 date-time
+  count: number; // 해당 시간대 에러 발생 횟수
+}
+
+/**
+ * 에러 트렌드 시리즈 (서비스별)
+ */
+export interface ErrorTrendSeries {
+  service: string; // 서비스 이름
+  color: string; // 차트 색상
+  data: ErrorTrendPoint[];
+}
+
+/**
+ * GET /services/{serviceName}/errors - 쿼리 파라미터
+ */
+export interface GetServiceErrorsParams extends TimeRangeParams, EnvironmentParams {
+  resource_filter?: string; // 리소스 필터 (대소문자 구분 없음)
+  message_filter?: string; // 에러 메시지 필터 (대소문자 구분 없음)
+  limit?: number; // 기본값: 100, 최소: 1
+}
+
+/**
+ * GET /services/{serviceName}/errors - 응답
+ */
+export interface GetServiceErrorsResponse extends TimeRangeParams {
+  service_name: string;
+  environment: string;
+  errors: ErrorItem[];
+}

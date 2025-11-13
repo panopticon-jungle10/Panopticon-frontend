@@ -18,6 +18,8 @@ import {
   GetServiceEndpointsResponse,
   GetServiceTracesParams,
   GetServiceTracesResponse,
+  GetServiceErrorsParams,
+  GetServiceErrorsResponse,
 } from '@/types/apm';
 
 /**
@@ -151,4 +153,17 @@ export const getServiceTraces = async (
   const searchParams = buildSearchParams(params);
   const url = `/services/${serviceName}/traces${toQueryString(searchParams)}`;
   return fetchJson<GetServiceTracesResponse>(url);
+};
+
+/**
+ * GET /services/{serviceName}/errors
+ * 서비스의 에러 분포 및 통계 조회
+ */
+export const getServiceErrors = async (
+  serviceName: string,
+  params?: GetServiceErrorsParams,
+): Promise<GetServiceErrorsResponse> => {
+  const searchParams = buildSearchParams(params);
+  const url = `/services/${serviceName}/errors${toQueryString(searchParams)}`;
+  return fetchJson<GetServiceErrorsResponse>(url);
 };
