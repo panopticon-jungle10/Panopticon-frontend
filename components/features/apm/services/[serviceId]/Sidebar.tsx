@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoEyeSharp, IoCubeSharp } from 'react-icons/io5';
 import { SiRelay } from 'react-icons/si';
 import { PiGraph } from 'react-icons/pi';
@@ -17,10 +17,14 @@ const apmItems = [
 ] as const;
 
 type SectionKey = (typeof apmItems)[number]['key'];
+const SECTION_IDS: SectionKey[] = apmItems.map((item) => item.key);
 
 export default function Sidebar() {
-  const [activeSection, setActiveSection] = useState<SectionKey>('overview');
-  const sectionIds = useMemo<SectionKey[]>(() => apmItems.map((item) => item.key), []);
+  const [activeSection, setActiveSection] = useState<SectionKey>(() => {
+    if (typeof window === 'undefined') return 'overview';
+    const initialHash = window.location.hash.replace('#', '');
+    return SECTION_IDS.find((id) => id === initialHash) ?? 'overview';
+  });
 
   const scrollToSection = (sectionId: SectionKey) => {
     const element = document.getElementById(sectionId);
@@ -46,7 +50,7 @@ export default function Sidebar() {
 
         const topMost = inView.find((entry) => entry.boundingClientRect.top <= 160) ?? inView[0];
         const nextId = topMost.target.id;
-        const sectionKey = sectionIds.find((id) => id === nextId);
+        const sectionKey = SECTION_IDS.find((id) => id === nextId);
 
         if (sectionKey && sectionKey !== activeSection) {
           setActiveSection(sectionKey);
@@ -59,19 +63,13 @@ export default function Sidebar() {
       },
     );
 
-    sectionIds.forEach((sectionId) => {
+    SECTION_IDS.forEach((sectionId) => {
       const el = document.getElementById(sectionId);
       if (el) observer.observe(el);
     });
 
-    const initialHash = window.location.hash.replace('#', '');
-    const initialKey = sectionIds.find((id) => id === initialHash);
-    if (initialKey) {
-      setActiveSection(initialKey);
-    }
-
     return () => observer.disconnect();
-  }, [activeSection, sectionIds]);
+  }, [activeSection]);
 
   return (
     <aside className="w-56 flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm h-fit sticky top-6">
