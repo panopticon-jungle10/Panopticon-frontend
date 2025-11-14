@@ -1,16 +1,16 @@
 'use client';
 
 import Table from '@/components/ui/Table';
-import ViewModeSelectBox from '../../../../components/features/apm/services/ViewModeSelectBox';
-import PageSizeSelect from '../../../../components/features/apm/services/PageSizeSelect';
-import Pagination from '../../../../components/features/apm/services/Pagination';
+import ViewModeSelectBox from '@/components/features/apps/services/ViewModeSelectBox';
+import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
+import Pagination from '@/components/features/apps/services/Pagination';
 import { useState, useMemo } from 'react';
 import SearchInput from '@/components/ui/SearchInput';
-import { SelectDate } from '@/components/features/apm/services/SelectDate';
+import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import { useQuery } from '@tanstack/react-query';
 import { getServices } from '@/src/api/apm';
 import { ServiceSummary } from '@/types/apm';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import StateHandler from '@/components/ui/StateHandler';
 
 const columns = [
@@ -56,6 +56,9 @@ const columns = [
 
 export default function ServicesPage() {
   const router = useRouter();
+  const params = useParams();
+  const appId = params.appId as string;
+
   const [viewType, setViewType] = useState<'list' | 'map'>('list');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -72,7 +75,7 @@ export default function ServicesPage() {
 
   // API 데이터 가져오기
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['services', page, pageSize, timeRange],
+    queryKey: ['services', appId, page, pageSize, timeRange],
     queryFn: () =>
       getServices({
         limit: pageSize,
@@ -92,7 +95,7 @@ export default function ServicesPage() {
 
   // 테이블 행 클릭 핸들러
   const handleServiceRowClick = (service: ServiceSummary) => {
-    router.push(`/apm/services/${service.service_name}`);
+    router.push(`/apps/${appId}/services/${service.service_name}`);
   };
 
   return (

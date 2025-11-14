@@ -3,24 +3,31 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceErrors } from '@/src/api/apm';
-import LogsSection from '../../../../../components/features/apm/services/[serviceId]/section/Logs';
-import { SelectDate } from '@/components/features/apm/services/SelectDate';
-import TracesSection from '@/components/features/apm/services/[serviceId]/section/Traces';
-import ChartsSection from '@/components/features/apm/services/[serviceId]/section/Charts';
+import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
+import { SelectDate } from '@/components/features/apps/services/SelectDate';
+import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
+import ChartsSection from '@/components/features/apps/services/[serviceId]/section/Charts';
 import { TimeRange } from '@/types/time';
-import ResourcesSection from '@/components/features/apm/services/[serviceId]/section/Resources';
+import ResourcesSection from '@/components/features/apps/services/[serviceId]/section/Resources';
 import { useParams } from 'next/navigation';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
-import ErrorsSection from '@/components/features/apm/services/[serviceId]/section/Errors';
+import ErrorsSection from '@/components/features/apps/services/[serviceId]/section/Errors';
+import { HiArrowLeft } from 'react-icons/hi2';
 
 export default function ServiceOverview() {
   const router = useRouter();
   const params = useParams();
   const serviceId = params.serviceId as string;
+  const appId = params.appId as string;
 
   // Zustand store 사용
   const { timeRange, setTimeRange, startTime, endTime } = useTimeRangeStore();
+
+  // 서비스 목록으로 돌아가기
+  const handleBackToServices = () => {
+    router.push(`/apps/${appId}/services`);
+  };
 
   // 서비스 존재 여부 검증 (첫 API 요청으로 확인)
   const { isError: serviceNotFound } = useQuery({
@@ -53,6 +60,15 @@ export default function ServiceOverview() {
 
   return (
     <div className="space-y-8">
+      {/* 뒤로가기 버튼 */}
+      <button
+        onClick={handleBackToServices}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors hover:cursor-pointer"
+      >
+        <HiArrowLeft className="w-5 h-5" />
+        <span className="text-sm font-medium">서비스 목록으로 돌아가기</span>
+      </button>
+
       {/* 개요 영역 */}
       <div id="overview" className="flex justify-between items-center mb-2 scroll-mt-8">
         <h1 className="text-2xl font-semibold text-gray-800">Overview</h1>

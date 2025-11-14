@@ -1,6 +1,6 @@
 'use client';
 import Table from '@/components/ui/Table';
-import Pagination from '@/components/features/apm/services/Pagination';
+import Pagination from '@/components/features/apps/services/Pagination';
 import dynamic from 'next/dynamic';
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
