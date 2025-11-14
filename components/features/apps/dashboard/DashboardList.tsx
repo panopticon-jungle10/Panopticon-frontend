@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { HiPlus } from 'react-icons/hi2';
 import { useParams } from 'next/navigation';
 import { DashboardListItem } from './DashboardListItem';
 import type { Dashboard } from './types';
@@ -70,6 +72,8 @@ export function DashboardList() {
   const params = useParams();
   const appId = params.appId;
   const serviceId = params.serviceId;
+  const createLink =
+    appId && serviceId ? `/apps/${appId}/services/${serviceId}/dashboards/create` : null;
 
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,7 +127,7 @@ export function DashboardList() {
           <h1 className="text-2xl font-semibold text-gray-900">대시보드</h1>
           <p className="text-sm text-gray-500">팀의 모니터링 대시보드를 관리하고 생성하세요</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-full bg-blue-50 px-3 py-0.5 text-sm font-semibold text-blue-600">
             총 {totalCount}개
           </span>
@@ -140,6 +144,15 @@ export function DashboardList() {
               </option>
             ))}
           </select>
+          {createLink && (
+            <Link
+              href={createLink}
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              <HiPlus className="h-4 w-4" />
+              + New Dashboard
+            </Link>
+          )}
         </div>
       </div>
 

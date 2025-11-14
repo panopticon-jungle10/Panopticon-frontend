@@ -244,19 +244,19 @@ function DashboardListView({
               <h1 className="text-gray-900 mb-1">대시보드</h1>
               <p className="text-gray-600 text-sm">팀의 모니터링 대시보드를 관리하고 생성하세요</p>
             </div>
-            <button
-              onClick={() => onNavigate('create')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <HiPlus className="w-5 h-5" />
-              New Dashboard
-            </button>
           </div>
 
           <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
               <div className="flex items-center gap-4">
+                <button
+                  onClick={() => onNavigate('create')}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <HiPlus className="w-5 h-5" />
+                  New Dashboard
+                </button>
                 <div className="text-sm text-gray-600">
                   총 <span className="text-gray-900">{filteredDashboards.length}</span>개
                 </div>
