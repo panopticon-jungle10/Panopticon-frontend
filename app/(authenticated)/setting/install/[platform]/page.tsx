@@ -1,4 +1,4 @@
-import PlatformInstallClient from '@/components/features/install/PlatformInstallClient';
+import PlatformInstallClient from '@/components/features/apps/install/PlatformInstallClient';
 import { PlatformType } from '@/types/agent-install';
 
 // Vercel Dynamic Rendering 활성화

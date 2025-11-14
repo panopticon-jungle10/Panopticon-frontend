@@ -1,4 +1,4 @@
-import FrameworkInstallClient from '@/components/features/install/FrameworkInstallClient';
+import FrameworkInstallClient from '@/components/features/apps/install/FrameworkInstallClient';
 import { frameworksData } from '../frameworks';
 
 export default function PythonInstallPage() {
