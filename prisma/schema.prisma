@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 애플리케이션 (앱 카드)
+model Application {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계: 하나의 앱은 여러 서비스를 가질 수 있음
+  services Service[]
+
+  @@map("applications")
+}
+
+// 서비스 (앱 내부 서비스)
+model Service {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  applicationId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 관계: 서비스는 하나의 앱에 속함
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("services")
+}
