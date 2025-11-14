@@ -6,7 +6,6 @@ import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
-
   const handleGithubLogin = () => {
     // GitHub OAuth 로그인 시작
     window.location.href = '/api/auth/github';
