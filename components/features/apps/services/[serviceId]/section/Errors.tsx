@@ -6,7 +6,7 @@ import ErrorTrendChart from '../errors/TrendChart';
 import ErrorDistribution from '../errors/Distribution';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceErrors } from '@/src/api/apm';
-import { useTimeRangeStore } from '@/src/store/timeRangeStore';
+import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
 
 interface ErrorsSectionProps {
@@ -19,6 +19,7 @@ export default function ErrorsSection({ serviceName }: ErrorsSectionProps) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceErrors', serviceName, startTime, endTime],
     queryFn: () => getServiceErrors(serviceName, { from: startTime, to: endTime }),
+    refetchInterval: POLLING_INTERVAL,
   });
 
   const isEmpty = !data || data.errors.length === 0;
