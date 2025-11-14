@@ -1,13 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Logo from '@/components/icons/Logo';
 import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
-  const router = useRouter();
 
   const handleGithubLogin = () => {
     // GitHub OAuth 로그인 시작
