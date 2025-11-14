@@ -7,12 +7,12 @@ import {
   HydrationBoundary,
   dehydrate,
 } from '@tanstack/react-query';
-import { SelectDate } from '@/components/features/apm/services/SelectDate';
-import ChartsSection from '@/components/features/apm/services/[serviceId]/section/Charts';
-import ResourcesSection from '@/components/features/apm/services/[serviceId]/section/Resources';
-import TracesSection from '@/components/features/apm/services/[serviceId]/section/Traces';
-import ErrorsSection from '@/components/features/apm/services/[serviceId]/section/Errors';
-import LogsSection from '@/components/features/apm/services/[serviceId]/section/Logs';
+import { SelectDate } from '@/components/features/apps/services/SelectDate';
+import ChartsSection from '@/components/features/apps/services/[serviceId]/section/Charts';
+import ResourcesSection from '@/components/features/apps/services/[serviceId]/section/Resources';
+import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
+import ErrorsSection from '@/components/features/apps/services/[serviceId]/section/Errors';
+import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as SelectDateValue } from '@/types/time';
 import type { TimeRange as StoreTimeRange } from '@/src/utils/timeRange';

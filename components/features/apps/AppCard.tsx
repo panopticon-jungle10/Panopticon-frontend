@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { HiCube, HiArrowTrendingUp, HiExclamationTriangle } from 'react-icons/hi2';
 import type { ApplicationSummary } from './types';
 
@@ -18,8 +19,15 @@ function DiffBadge({ diff }: { diff: number }) {
 }
 
 export function AppCard({ app }: { app: ApplicationSummary }) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(`/apps/${app.id}/services`);
+  };
+
   return (
     <article
+      onClick={handleClick}
       className="
         group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6
         hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-[3px]

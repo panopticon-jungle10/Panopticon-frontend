@@ -1,4 +1,4 @@
-import Sidebar from '@/components/features/apm/services/[serviceId]/Sidebar';
+import Sidebar from '@/components/features/apps/services/[serviceId]/Sidebar';
 
 // Vercel Dynamic Rendering 활성화
 // 런타임에 동적으로 모든 serviceId 값을 처리 가능

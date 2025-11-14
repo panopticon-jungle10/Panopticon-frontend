@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Table from '@/components/ui/Table';
 import SearchInput from '@/components/ui/SearchInput';
-import Pagination from '@/components/features/apm/services/Pagination';
+import Pagination from '@/components/features/apps/services/Pagination';
 import Dropdown from '@/components/ui/Dropdown';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';

@@ -48,7 +48,7 @@ export default function LandingPage() {
         </p>
 
         {/* 그래프형 대시보드 Mockup */}
-        <div className="relative max-w-5xl mx-auto rounded-[2rem] border border-black overflow-hidden shadow-xl bg-[#f9f9f9]">
+        <div className="relative max-w-5xl mx-auto rounded-4xl border border-black overflow-hidden shadow-xl bg-[#f9f9f9]">
           <div className="p-8 text-left">
             <div className="text-sm text-gray-600 mb-4">Reports / Overview</div>
 

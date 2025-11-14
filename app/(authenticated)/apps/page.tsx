@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { HiArrowPath, HiPlus, HiPencil, HiTrash } from 'react-icons/hi2';
-import type { ApplicationSummary } from '@/components/features/register/types';
-import { AppForm } from '@/components/features/register/AppForm';
-import { AppList } from '@/components/features/register/AppList';
+import type { ApplicationSummary } from '@/components/features/apps/types';
+import { AppForm } from '@/components/features/apps/AppForm';
+import { AppList } from '@/components/features/apps/AppList';
 import {
   Dialog,
   DialogContent,
