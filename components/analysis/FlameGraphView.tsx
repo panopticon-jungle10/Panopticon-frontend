@@ -3,11 +3,12 @@
 
 import { SpanItem } from '@/types/apm';
 import { useMemo } from 'react';
+import { getBucketColor, getBucketLabel, getBucketByIndex } from '@/src/utils/durationBuckets';
 import dynamic from 'next/dynamic';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
-interface FlameGraphProps {
+interface FlameGraphViewProps {
   spans: SpanItem[];
   onSpanSelect?: (spanId: string) => void;
 }
@@ -19,7 +20,7 @@ interface FlameBlock {
   widthRatio: number; // 부모 대비 너비 비율 (0~1)
 }
 
-export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
+export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewProps) {
   // 스팬을 Flame Graph 블록으로 변환
   const { flameBlocks, maxDepth } = useMemo(() => {
     if (!spans || spans.length === 0) return { flameBlocks: [], maxDepth: 0 };
@@ -76,20 +77,7 @@ export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
     };
   }, [spans]);
 
-  // 색상 함수
-  const getColorByStatus = (status: string, kind: string) => {
-    if (status === 'ERROR') return '#ef4444'; // red-500
-    switch (kind) {
-      case 'SERVER':
-        return '#3b82f6'; // blue-500
-      case 'CLIENT':
-        return '#10b981'; // green-500
-      case 'INTERNAL':
-        return '#8b5cf6'; // purple-500
-      default:
-        return '#6b7280'; // gray-500
-    }
-  };
+  // (removed getColorByStatus helper) - colors assigned directly below using bucket util
 
   const option = useMemo(() => {
     if (flameBlocks.length === 0) return {};
@@ -98,19 +86,21 @@ export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
     const rootSpan = spans.find((s) => !s.parent_span_id);
     const totalDuration = rootSpan?.duration_ms || 0;
 
-    // Custom 시리즈 데이터 생성 (0-totalDuration 범위로 변경)
-    const seriesData = flameBlocks.map((block) => ({
-      value: [
-        block.startOffset * totalDuration, // X 시작 위치 (0-totalDuration ms)
-        block.depth, // Y 위치 (depth)
-        (block.startOffset + block.widthRatio) * totalDuration, // X 끝 위치 (0-totalDuration ms)
-        block.span.duration_ms, // duration (tooltip용)
-      ],
-      itemStyle: {
-        color: getColorByStatus(block.span.status, block.span.kind),
-      },
-      spanData: block.span,
-    }));
+    // Custom 시리즈 data 생성 (0-totalDuration 범위로 변경)
+    const seriesData = flameBlocks.map((block) => {
+      const ratio = (block.span.duration_ms ?? 0) / Math.max(1, totalDuration);
+      const color = getBucketColor(ratio);
+      return {
+        value: [
+          block.startOffset * totalDuration, // X 시작 위치 (0-totalDuration ms)
+          block.depth, // Y 위치 (depth)
+          (block.startOffset + block.widthRatio) * totalDuration, // X 끝 위치 (0-totalDuration ms)
+          block.span.duration_ms, // duration (tooltip용)
+        ],
+        itemStyle: { color },
+        spanData: block.span,
+      };
+    });
 
     const blockHeight = 35; // 블록 높이
     const blockGap = 0; // 블록 간 간격
@@ -126,25 +116,32 @@ export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: 'transparent',
-        textStyle: { color: '#f9fafb', fontSize: 12 },
+        textStyle: { color: '#f9fafb', fontSize: 14 },
         formatter: (params: any) => {
           const data = params.data.spanData;
+          const ratio =
+            (data.duration_ms ?? 0) /
+            Math.max(1, spans.find((s) => !s.parent_span_id)?.duration_ms || 1);
+          const statusText = getBucketLabel(ratio);
           return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${data.name}</div>
-            <div style="margin:2px 0;">소요시간: ${data.duration_ms}ms</div>
-            <div style="margin:2px 0;">서비스명: ${data.service_name}</div>
-            <div style="margin:2px 0;">종류: ${data.kind}</div>
-            <div style="margin:2px 0;">상태: ${data.status}</div>
+            <div style="font-weight:700;margin-bottom:8px;font-size:16px;">${data.name}</div>
+            <div style="margin:4px 0;font-size:15px;">Duration: ${data.duration_ms}ms</div>
+            <div style="margin:4px 0;font-size:15px;">Service: ${data.service_name}</div>
+            <div style="margin:4px 0;font-size:15px;">Kind: ${data.kind}</div>
+            <div style="margin:4px 0;font-size:15px;">Status: ${statusText}</div>
             ${
               data.http_method
-                ? `<div style="margin:2px 0;">HTTP: ${data.http_method} ${
+                ? `<div style="margin:4px 0;font-size:14px;">HTTP: ${data.http_method} ${
                     data.http_path || ''
                   }</div>`
                 : ''
             }
             ${
               data.db_statement
-                ? `<div style="margin:2px 0;">DB: ${data.db_statement.substring(0, 50)}...</div>`
+                ? `<div style="margin:4px 0;font-size:14px;">DB: ${data.db_statement.substring(
+                    0,
+                    50,
+                  )}...</div>`
                 : ''
             }
           `;
@@ -220,7 +217,7 @@ export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
                     y: y + blockHeight / 2,
                     text: spanData.name,
                     fill: '#ffffff',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 500,
                     textAlign: 'center',
                     textVerticalAlign: 'middle',
@@ -263,6 +260,17 @@ export default function FlameGraph({ spans, onSpanSelect }: FlameGraphProps) {
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Flame Graph</h3>
           <p className="text-sm text-gray-500">전체 span 개수: {spans.length}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const b = getBucketByIndex(i);
+            return (
+              <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="w-3 h-3 rounded-full" style={{ background: b.color }}></div>
+                <span>{b.label}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
