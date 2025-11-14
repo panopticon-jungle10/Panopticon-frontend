@@ -42,10 +42,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code');
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Authorization code not found' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Authorization code not found' }, { status: 400 });
     }
 
     const clientId = process.env.GITHUB_CLIENT_ID;
@@ -53,10 +50,7 @@ export async function GET(request: NextRequest) {
     const redirectUri = process.env.GITHUB_REDIRECT_URI;
 
     if (!clientId || !clientSecret || !redirectUri) {
-      return NextResponse.json(
-        { error: 'GitHub OAuth is not configured' },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: 'GitHub OAuth is not configured' }, { status: 500 });
     }
 
     // 1. GitHub에서 access_token 획득
@@ -114,10 +108,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Could not retrieve email from GitHub' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Could not retrieve email from GitHub' }, { status: 400 });
     }
 
     // 4. JWT 생성

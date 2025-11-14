@@ -71,9 +71,7 @@ export async function createJwt(userInfo: UserInfo, expiresIn = '7d'): Promise<s
  * @param token - JWT 토큰
  * @returns 검증 결과 및 payload
  */
-export async function verifyJwt(
-  token: string,
-): Promise<{ valid: boolean; payload?: JWTPayload }> {
+export async function verifyJwt(token: string): Promise<{ valid: boolean; payload?: JWTPayload }> {
   try {
     const secret = getSecretKey();
     const { payload } = await jwtVerify(token, secret);
