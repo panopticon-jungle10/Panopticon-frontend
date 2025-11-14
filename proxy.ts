@@ -1,8 +1,3 @@
-/**
- * Next.js 미들웨어
- * 인증이 필요한 페이지 보호
- */
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyJwt } from '@/lib/jwt';
