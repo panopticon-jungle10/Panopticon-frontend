@@ -10,13 +10,13 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleGithubLogin = () => {
-    // TODO: GitHub OAuth 연동
-    router.push('/apps');
+    // GitHub OAuth 로그인 시작
+    window.location.href = '/api/auth/github';
   };
 
   const handleGoogleLogin = () => {
-    // TODO: Google OAuth 연동
-    router.push('/apps');
+    // Google OAuth 로그인 시작
+    window.location.href = '/api/auth/google';
   };
 
   return (
