@@ -69,10 +69,7 @@ export function DashboardCard({ dashboard, onSelect }: DashboardCardProps) {
             <span className="text-xs text-gray-500">Teams:</span>
             <div className="flex gap-1 flex-wrap">
               {dashboard.teams.map((team, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded"
-                >
+                <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
                   {team}
                 </span>
               ))}
