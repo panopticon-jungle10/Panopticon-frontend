@@ -13,11 +13,14 @@ const tagColorMap: Record<string, { bg: string; text: string }> = {
 
 export function DashboardTag({ name }: DashboardTagProps) {
   const colors = tagColorMap[name] ?? { bg: 'bg-gray-100', text: 'text-gray-700' };
-  const toneClass = colors.bg + ' ' + colors.text;
+  const toneClass = `${colors.bg} ${colors.text}`;
 
   return (
     <span
-      className={'inline-flex items-center gap-1 rounded-full border border-transparent px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ' + toneClass}
+      className={
+        'inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold border uppercase tracking-wide ' +
+        toneClass
+      }
     >
       {name}
     </span>

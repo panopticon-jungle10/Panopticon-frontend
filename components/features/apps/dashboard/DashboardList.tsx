@@ -1,197 +1,113 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { HiPlus } from 'react-icons/hi2';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { HiMagnifyingGlass, HiPlus } from 'react-icons/hi2';
+import { Dashboard } from './types';
 import { DashboardListItem } from './DashboardListItem';
-import type { Dashboard } from './types';
 
-const mockDashboards: Dashboard[] = [
-  {
-    id: '1',
-    name: "bhzsk8rzxe's Dashboard Tue, Oct 28, 11...",
-    description: 'Main monitoring dashboard for production services',
-    owner: { name: 'bhzsk8rzxe' },
-    tags: ['Platform', 'Backend'],
-    likes: 12,
-    favorite: true,
-  },
-  {
-    id: '2',
-    name: 'Postgres - Metrics',
-    description: 'PostgreSQL database performance metrics',
-    owner: { name: 'bhzsk8rzxe' },
-    tags: ['Database'],
-    likes: 3,
-    favorite: false,
-  },
-  {
-    id: '3',
-    name: 'APM Datadog Agent (Trace Agent)',
-    description: 'Trace agent monitoring and performance',
-    owner: { name: 'robot-datado...' },
-    tags: ['APM'],
-    likes: 15,
-    favorite: false,
-  },
-  {
-    id: '4',
-    name: 'Storeding SRE',
-    description: 'Site Reliability Engineering dashboard',
-    owner: { name: 'robot-datado...' },
-    tags: ['SRE'],
-    likes: 6,
-    favorite: false,
-  },
-  {
-    id: '5',
-    name: 'APM Traces Estimated Usage',
-    description: 'Estimated usage and costs for APM traces',
-    owner: { name: 'bhzsk8rzxe' },
-    tags: ['APM', 'Finance'],
-    likes: 10,
-    favorite: false,
-  },
-  {
-    id: '6',
-    name: 'Docker - Overview',
-    description: 'Container monitoring and metrics',
-    owner: { name: 'bhzsk8rzxe' },
-    tags: ['Platform'],
-    likes: 14,
-    favorite: false,
-  },
-];
+interface Props {
+  onNavigate: (view: 'list' | 'create' | 'view', dashboardId?: string) => void;
+}
 
-const fetchDashboards = () => {
-  return new Promise<Dashboard[]>((resolve) => setTimeout(() => resolve(mockDashboards), 400));
-};
-
-export function DashboardList() {
-  const params = useParams();
-  const appId = params.appId;
-  const serviceId = params.serviceId;
-  const createLink =
-    appId && serviceId ? `/apps/${appId}/services/${serviceId}/dashboards/create` : null;
-
+export function DashboardList({ onNavigate }: Props) {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchDashboards().then((items) => {
-      setDashboards(items);
+    const load = async () => {
+      setIsLoading(true);
+      await new Promise((r) => setTimeout(r, 400));
+      const { mockDashboards } = await import('./mock');
+      setDashboards(mockDashboards);
       setIsLoading(false);
-    });
+    };
+    load();
   }, []);
 
-  const tagOptions = useMemo(() => {
-    const tags = new Set<string>();
-    dashboards.forEach((dashboard) => dashboard.tags.forEach((tag) => tags.add(tag)));
-    return Array.from(tags);
-  }, [dashboards]);
+  const filtered = dashboards.filter((d) =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
-  const filteredDashboards = useMemo(() => {
-    return dashboards.filter((dashboard) => {
-      const normalizedSearch = search.toLowerCase();
-      const matchesSearch =
-        dashboard.name.toLowerCase().includes(normalizedSearch) ||
-        dashboard.description.toLowerCase().includes(normalizedSearch);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
-      if (!matchesSearch) {
-        return false;
-      }
-
-      if (filter === 'favorite') {
-        return dashboard.favorite;
-      }
-
-      if (filter.startsWith('tag:')) {
-        const tagValue = filter.replace('tag:', '');
-        return dashboard.tags.includes(tagValue);
-      }
-
-      return true;
-    });
-  }, [dashboards, filter, search]);
-
-  const totalCount = filteredDashboards.length;
+  const toggleFavorite = (id: string) => {
+    setDashboards((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, isFavorite: !d.isFavorite } : d)),
+    );
+  };
 
   return (
-    <div className="space-y-6 rounded-2xl border border-gray-200 bg-white px-6 py-6 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">대시보드</h1>
-          <p className="text-sm text-gray-500">팀의 모니터링 대시보드를 관리하고 생성하세요</p>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto bg-white shadow border rounded-lg overflow-hidden">
+
+        {/* Header */}
+        <div className="px-6 py-5 border-b">
+          <h1 className="text-gray-900">대시보드</h1>
+          <p className="text-gray-600 text-sm">팀의 모니터링 대시보드를 관리하고 생성하세요</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-blue-50 px-3 py-0.5 text-sm font-semibold text-blue-600">
-            총 {totalCount}개
-          </span>
-          <select
-            className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
+
+        {/* Toolbar */}
+        <div className="px-6 py-4 flex items-center gap-4 border-b bg-white">
+          <button
+            onClick={() => onNavigate('create')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
           >
-            <option value="all">필터: 전체</option>
-            <option value="favorite">필터: 즐겨찾기</option>
-            {tagOptions.map((tag) => (
-              <option key={tag} value={'tag:' + tag}>
-                필터: {tag}
-              </option>
-            ))}
-          </select>
-          {createLink && (
-            <Link
-              href={createLink}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            >
-              <HiPlus className="h-4 w-4" />
-              + New Dashboard
-            </Link>
-          )}
+            <HiPlus className="w-5 h-5" />
+            New Dashboard
+          </button>
+
+          <div className="relative ml-auto">
+            <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="대시보드 검색…"
+              className="w-80 pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm font-semibold text-gray-600">검색</div>
-          <input
-            type="text"
-            placeholder="대시보드 검색..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
-          />
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 w-12" />
+                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">대시보드 이름</th>
+                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">담당자</th>
+                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">팀</th>
+                <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">인기도</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-gray-400 text-sm">
+                    Loading dashboards…
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((d) => (
+                  <DashboardListItem
+                    key={d.id}
+                    dashboard={d}
+                    onSelect={(id) => onNavigate('view', id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <div className="grid grid-cols-[auto_1fr_auto_auto-auto] px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-        <span className="col-span-1" />
-        <span className="col-span-1">대시보드 이름</span>
-        <span className="col-span-1">담당자</span>
-        <span className="col-span-1">팀</span>
-        <span className="col-span-1">인기도</span>
-      </div>
-
-      <div className="space-y-0">
-        {isLoading ? (
-          <div className="py-20 text-center text-sm text-gray-500">대시보드를 불러오는 중...</div>
-        ) : filteredDashboards.length === 0 ? (
-          <div className="py-20 text-center text-sm text-gray-500">검색 조건에 맞는 대시보드가 없습니다.</div>
-        ) : (
-          filteredDashboards.map((dashboard) => {
-            const href =
-              appId && serviceId
-                ? '/apps/' + appId + '/services/' + serviceId + '/dashboards/' + dashboard.id
-                : '#';
-
-            return <DashboardListItem key={dashboard.id} dashboard={dashboard} href={href} />;
-          })
-        )}
       </div>
     </div>
   );

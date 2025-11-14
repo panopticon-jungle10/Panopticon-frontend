@@ -36,10 +36,15 @@ export default function ServiceOverview() {
     <div className="space-y-8">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <h1 className="text-4xl font-black text-gray-900">Summary</h1>
+
+        <div className="flex justify-end">
+          <SelectDate value={selectedTimeRange} onChange={handleTimeRangeChange} />
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <SelectDate value={selectedTimeRange} onChange={handleTimeRangeChange} />
+      <div id="resources" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Overview</h2>
+        <ResourcesSection serviceName={serviceId} />
       </div>
 
       <ChartsSection serviceName={serviceId} />
