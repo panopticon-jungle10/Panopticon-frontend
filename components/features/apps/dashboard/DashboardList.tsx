@@ -71,10 +71,10 @@ export function DashboardList({
           <thead>
             <tr className="bg-gray-50 border-b">
               <th className="px-8 py-3 w-12" />
-              <th className="px-8 py-3 text-left text-xs text-gray-500 uppercase">대시보드 이름</th>
-              <th className="px-8 py-3 text-left text-xs text-gray-500 uppercase">담당자</th>
-              <th className="px-8 py-3 text-left text-xs text-gray-500 uppercase">팀</th>
-              <th className="px-8 py-3 text-left text-xs text-gray-500 uppercase">인기도</th>
+              <th className="px-8 py-3 text-left text-xm text-gray-500 uppercase">대시보드 이름</th>
+              <th className="px-8 py-3 text-left text-xm text-gray-500 uppercase">담당자</th>
+              <th className="px-8 py-3 text-left text-xm text-gray-500 uppercase">팀</th>
+              <th className="px-8 py-3 text-left text-xm text-gray-500 uppercase">인기도</th>
             </tr>
           </thead>
 
