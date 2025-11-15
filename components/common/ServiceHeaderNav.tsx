@@ -18,7 +18,7 @@ export function ServiceHeaderNav() {
   }
 
   const basePath = '/apps/' + appId + '/services/' + serviceId;
-  const isDashboards = pathname?.includes('/dashboards');
+  const isDashboards = Boolean(pathname?.includes('/dashboards'));
 
   const handleBack = () => {
     router.push('/apps/' + appId + '/services');
@@ -30,7 +30,8 @@ export function ServiceHeaderNav() {
         <div className="flex gap-6 text-lg font-semibold">
           {tabs.map(function (tab) {
             const href = tab === 'Summary' ? basePath : basePath + '/dashboards';
-            const isActive = tab === 'Summary' ? !isDashboards : !!isDashboards;
+            const isActive =
+              tab === 'Summary' ? isDashboards === false : Boolean(isDashboards);
             return (
               <Link
                 key={tab}

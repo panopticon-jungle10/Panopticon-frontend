@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { mockDashboards } from './mock';
-import { Dashboard } from './types';
+import { Dashboard } from '../../../../src/types/dashboard';
 import { DashboardListItem } from './DashboardListItem';
 import { HiMagnifyingGlass, HiPlus } from 'react-icons/hi2';
 import Pagination from '@/components/features/apps/services/Pagination';

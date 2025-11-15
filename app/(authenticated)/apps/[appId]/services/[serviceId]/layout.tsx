@@ -9,7 +9,7 @@ export const dynamicParams = true;
 
 export default function ApmLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const showSidebar = !pathname?.includes('/dashboards');
+  const showSidebar = (pathname?.includes('/dashboards') ?? false) === false;
 
   return (
     <div className="min-h-screen bg-gray-50">

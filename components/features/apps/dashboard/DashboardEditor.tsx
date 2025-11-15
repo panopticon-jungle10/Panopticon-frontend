@@ -7,7 +7,7 @@ import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from 
 
 import { DashboardCanvas } from './DashboardCanvas';
 import { DashboardWidgetPanel } from './DashboardWidgetPanel';
-import type { CanvasWidget, Dashboard, DashboardWidget } from './types';
+import type { CanvasWidget, Dashboard, DashboardWidget } from '../../../../src/types/dashboard';
 
 type DashboardEditorProps = {
   mode: 'create' | 'edit';

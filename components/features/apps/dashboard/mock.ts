@@ -1,6 +1,6 @@
 // 대시보드 더미 데이터
 
-import type { Dashboard } from './types';
+import type { Dashboard } from '../../../../src/types/dashboard';
 
 export const mockDashboards: Dashboard[] = [
   {
