@@ -16,21 +16,31 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env.production
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.production
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env.production
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.production
-          echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" >> .env.production
-          echo "NEXT_PUBLIC_WS_ERROR_LOGS_URL=${{ secrets.NEXT_PUBLIC_WS_ERROR_LOGS_URL }}" >> .env.production
+          cat > .env.production << EOF
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+          NEXT_PUBLIC_WS_ERROR_LOGS_URL=${{ secrets.NEXT_PUBLIC_WS_ERROR_LOGS_URL }}
+          EOF
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Copy files to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: '.,!.git,!node_modules'
-          target: '~/panopticon_frontend'
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='coverage' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/panopticon_frontend/
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -48,6 +58,8 @@ jobs:
               sudo yum install -y docker
               sudo service docker start
               sudo usermod -a -G docker ${{ secrets.EC2_USER }}
+              echo "Docker installed. Please re-run the deployment."
+              exit 1
             fi
 
             if ! command -v docker-compose &> /dev/null; then
@@ -56,36 +68,62 @@ jobs:
               sudo chmod +x /usr/local/bin/docker-compose
             fi
 
+            # Docker 서비스 시작 및 권한 확인
+            sudo service docker start
+            sudo usermod -a -G docker ${{ secrets.EC2_USER }}
+
             # 기존 컨테이너 중지 및 제거
-            docker-compose -f docker-compose.prod.yml down || true
+            sudo docker-compose -f docker-compose.prod.yml down || true
 
             # 사용하지 않는 이미지 정리
-            docker image prune -af
+            sudo docker image prune -af
 
-            # 환경 변수 로드
-            export $(cat .env.production | xargs)
+            # 환경 변수 로드 및 확인
+            if [ -f .env.production ]; then
+              export $(cat .env.production | xargs)
+              echo "Environment variables loaded"
+            else
+              echo "Warning: .env.production file not found"
+            fi
 
             # Docker 이미지 빌드 및 컨테이너 시작
-            docker-compose -f docker-compose.prod.yml up -d --build
+            sudo -E docker-compose -f docker-compose.prod.yml up -d --build
 
             # Prisma 마이그레이션 실행 (최초 배포 시)
-            docker-compose -f docker-compose.prod.yml exec -T frontend npx prisma migrate deploy
+            sudo docker-compose -f docker-compose.prod.yml exec -T frontend npx prisma migrate deploy || echo "Prisma migration skipped"
 
             # 로그 확인 (마지막 20줄)
             echo "Deployment completed. Recent logs:"
-            docker-compose -f docker-compose.prod.yml logs --tail=20
+            sudo docker-compose -f docker-compose.prod.yml logs --tail=20
 
       - name: Check deployment status
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~/panopticon_frontend
-            docker-compose -f docker-compose.prod.yml ps
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          set -e
+          cd ~/panopticon_frontend
 
-            # 헬스 체크
-            sleep 10
-            curl -f http://localhost:3000/api/health || exit 1
-            echo "Deployment successful!"
+          echo "=== Container Status ==="
+          sudo docker-compose -f docker-compose.prod.yml ps  # sudo 추가
+
+          # 헬스 체크 (최대 30초 대기)
+          echo "=== Health Check ==="
+          for i in {1..6}; do
+              if curl -f http://localhost:3000/api/health; then
+              echo ""
+              echo "✅ Deployment successful! Application is healthy."
+              exit 0
+              fi
+              echo "Waiting for application to be ready... ($i/6)"
+              sleep 5
+          done
+
+          echo "❌ Health check failed after 30 seconds"
+          sudo docker-compose -f docker-compose.prod.yml logs --tail=50  # sudo 추가
+          exit 1
+          ENDSSH
+
+      - name: Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
