@@ -18,21 +18,34 @@ function DiffBadge({ diff }: { diff: number }) {
   );
 }
 
-export function AppCard({ app }: { app: ApplicationSummary }) {
+interface AppCardProps {
+  app: ApplicationSummary;
+  isSelected?: boolean;
+  onSelect?: (id: string) => void;
+}
+
+export function AppCard({ app, isSelected = false, onSelect }: AppCardProps) {
   const router = useRouter();
 
-  const handleClick = () => {
-    router.push(`/apps/${app.id}/services`);
+  const handleClick = (e: React.MouseEvent) => {
+    // 더블클릭이면 페이지 이동
+    if (e.detail === 2) {
+      router.push(`/apps/${app.id}/services`);
+    } else {
+      // 싱글클릭이면 선택
+      onSelect?.(app.id);
+    }
   };
 
   return (
     <article
       onClick={handleClick}
-      className="
-        group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6
+      className={`
+        group cursor-pointer rounded-2xl border bg-white p-6
         hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-[3px]
-        hover:border-blue-300 transition-all min-h-[340px]
-      "
+        transition-all min-h-[340px]
+        ${isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200 hover:border-blue-300'}
+      `}
     >
       {/* 헤더 */}
       <header className="mb-6">
