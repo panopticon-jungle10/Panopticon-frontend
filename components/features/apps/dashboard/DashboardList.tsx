@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { mockDashboards } from './mock';
 import { Dashboard } from './types';
 import { DashboardListItem } from './DashboardListItem';
@@ -25,11 +25,6 @@ export function DashboardList({
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const startIndex = (page - 1) * ITEMS_PER_PAGE;
   const paginatedDashboards = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  useEffect(() => {
-    // Keep the current page in range when the filtered result shrinks
-    setPage((prev) => Math.min(prev, totalPages));
-  }, [totalPages]);
 
   const handlePrev = () => setPage((prev) => Math.max(1, prev - 1));
   const handleNext = () => setPage((prev) => Math.min(totalPages, prev + 1));
