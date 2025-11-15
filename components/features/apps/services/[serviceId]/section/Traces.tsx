@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceTraces } from '@/src/api/apm';
 import { TraceSummary } from '@/types/apm';
-import { useTimeRangeStore } from '@/src/store/timeRangeStore';
+import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import { formatChartTimeLabel, getXAxisInterval } from '@/src/utils/chartFormatter';
 import StateHandler from '@/components/ui/StateHandler';
 import TraceAnalysis from '@/components/analysis/TraceAnalysis';
@@ -132,7 +132,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   // Zustand store에서 시간 정보 가져오기
   const { startTime, endTime, interval } = useTimeRangeStore();
 
-  // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용)
+  // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용, 10초마다 폴링)
   const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceTraces', serviceName, startTime, endTime],
     queryFn: () =>
@@ -140,8 +140,9 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
         from: startTime,
         to: endTime,
         page: 1,
-        size: 500,
+        size: 199, // TODO : 현재 최대 199개까지만 조회 가능
       }),
+    refetchInterval: POLLING_INTERVAL,
   });
 
   // 전체 트레이스 데이터 변환 (최신순 정렬)
