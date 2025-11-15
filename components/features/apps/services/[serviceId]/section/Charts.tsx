@@ -2,9 +2,9 @@
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceMetrics } from '@/src/api/apm';
-import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { formatChartTimeLabel, getBarWidth } from '@/src/utils/chartFormatter';
 import StateHandler from '@/components/ui/StateHandler';
+import { POLLING_INTERVAL, useTimeRangeStore } from '@/src/store/timeRangeStore';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -16,7 +16,7 @@ export default function ChartsSection({ serviceName }: ChartsProps) {
   // Zustand store에서 시간 정보 가져오기
   const { startTime, endTime, interval } = useTimeRangeStore();
 
-  // API 데이터 가져오기
+  // API 데이터 가져오기 (10초마다 폴링)
   const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceMetrics', serviceName, startTime, endTime, interval],
     queryFn: () =>
@@ -26,8 +26,7 @@ export default function ChartsSection({ serviceName }: ChartsProps) {
         interval: interval,
         environment: 'prod',
       }),
-    retry: false, // API 오류 시 재시도 하지 않음
-    throwOnError: false, // 오류를 throw하지 않고 isError 상태로만 처리
+    refetchInterval: POLLING_INTERVAL,
   });
 
   // 차트 데이터 변환 (새로운 API 응답 형식: 배열 또는 단일 객체)

@@ -14,8 +14,8 @@ RUN apt-get update && apt-get upgrade -y \
 COPY . .
 
 # Create non-root user and set ownership (reduce attack surface)
-RUN chown -R node:node /app
-USER node
+# RUN chown -R node:node /app
+# USER node
 
 # Expose default Next.js port
 ENV PORT=3000
