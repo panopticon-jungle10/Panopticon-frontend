@@ -3,7 +3,7 @@ import type { Dashboard } from './types';
 export const mockDashboards: Dashboard[] = [
   {
     id: '1',
-    name: "bhzsk8rzxe's Dashboard Tue, Oct 28, 11...",
+    name: "Production Metrics",
     description: 'Main monitoring dashboard for production services',
     author: { name: 'bhzsk8rzxe' },
     teams: ['Platform', 'Backend'],
@@ -27,9 +27,9 @@ export const mockDashboards: Dashboard[] = [
   },
   {
     id: '3',
-    name: 'APM Datadog Agent (Trace Agent)',
+    name: 'Trace Agent Overview',
     description: 'Trace agent monitoring and performance',
-    author: { name: 'robot-datado...' },
+    author: { name: 'robot-datado' },
     teams: ['APM'],
     popularity: 15,
     isFavorite: false,
@@ -39,9 +39,9 @@ export const mockDashboards: Dashboard[] = [
   },
   {
     id: '4',
-    name: 'Storeding SRE',
-    description: 'Site Reliability Engineering dashboard',
-    author: { name: 'robot-datado...' },
+    name: 'SRE Overview',
+    description: 'Site Reliability Engineering monitoring',
+    author: { name: 'robot-datado' },
     teams: ['SRE'],
     popularity: 6,
     isFavorite: false,
@@ -51,8 +51,8 @@ export const mockDashboards: Dashboard[] = [
   },
   {
     id: '5',
-    name: 'APM Traces Estimated Usage',
-    description: 'Estimated usage and costs for APM traces',
+    name: 'APM Cost Usage',
+    description: 'Estimated usage and APM costs',
     author: { name: 'bhzsk8rzxe' },
     teams: ['APM', 'Finance'],
     popularity: 10,
@@ -63,8 +63,8 @@ export const mockDashboards: Dashboard[] = [
   },
   {
     id: '6',
-    name: 'Docker - Overview',
-    description: 'Container monitoring and metrics',
+    name: 'Docker Overview',
+    description: 'Container monitoring & metrics',
     author: { name: 'bhzsk8rzxe' },
     teams: ['Platform'],
     popularity: 14,
@@ -73,4 +73,17 @@ export const mockDashboards: Dashboard[] = [
     updatedAt: '',
     widgets: [],
   },
+  // --- 추가 더미 9개 ---
+  ...Array.from({ length: 9 }).map((_, i) => ({
+    id: `${i + 7}`,
+    name: `Custom Dashboard ${i + 1}`,
+    description: 'User created dashboard',
+    author: { name: 'user01' },
+    teams: ['Platform'],
+    popularity: Math.floor(Math.random() * 15),
+    isFavorite: false,
+    createdAt: '',
+    updatedAt: '',
+    widgets: [],
+  })),
 ];
