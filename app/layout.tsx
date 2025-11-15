@@ -3,8 +3,14 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
-import MswProvider from '@/mocks/MswProvider';
 import QueryProvider from '@/src/providers/QueryProvider';
+import dynamic from 'next/dynamic';
+
+// MSW는 개발 환경에서만 동적으로 import
+const MswProvider = dynamic(() => import('@/mocks/MswProvider'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

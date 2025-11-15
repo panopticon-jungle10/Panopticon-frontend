@@ -3,9 +3,9 @@
 FROM node:21-bullseye-slim AS deps
 WORKDIR /app
 
-# Install dependencies
+# Install ALL dependencies (including devDependencies for build)
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production --silent && \
+RUN npm ci --silent && \
     npm cache clean --force
 
 # Stage 2: Builder
