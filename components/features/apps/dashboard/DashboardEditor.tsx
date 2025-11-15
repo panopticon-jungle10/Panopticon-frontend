@@ -35,7 +35,7 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
     setWidgets((prev) => prev.filter((w) => w.id !== id));
   };
 
-/* 드래그 시작/종료 처리 이벤트 */
+  /* 드래그 시작/종료 처리 이벤트 */
   const handleDragStart = (event: DragStartEvent) => {
     const widget = event.active.data.current?.widget as DashboardWidget | undefined;
     if (widget) setActiveWidget(widget);
@@ -55,7 +55,7 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-        {/* 전체 편집 UI 구성 */}
+      {/* 전체 편집 UI 구성 */}
       <div className="flex min-h-[calc(100vh-140px)] bg-gray-50">
         <DashboardCanvas widgets={widgets} removeWidget={removeWidget} />
         <DashboardWidgetPanel onSelectWidget={addWidget} />
