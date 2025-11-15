@@ -1,62 +1,71 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CanvasWidget, DashboardWidget, Dashboard } from './types';
+import { useState } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
+
 import { DashboardCanvas } from './DashboardCanvas';
 import { DashboardWidgetPanel } from './DashboardWidgetPanel';
+import type { CanvasWidget, DashboardWidget } from './types';
 
-interface Props {
-  mode: 'create' | 'edit';
-  initialData?: Dashboard;
-}
-
-export function DashboardEditor({ mode, initialData }: Props) {
-  const [dashboardName, setDashboardName] = useState(initialData?.name ?? 'New Dashboard');
-
-  const [widgets, setWidgets] = useState<CanvasWidget[]>(initialData?.widgets ?? []);
-
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+export function DashboardEditor() {
+  const [widgets, setWidgets] = useState<CanvasWidget[]>([]);
+  const [activeWidget, setActiveWidget] = useState<DashboardWidget | null>(null);
 
   const addWidget = (widget: DashboardWidget) => {
-    setWidgets((prev) => [
-      ...prev,
-      {
-        ...widget,
-        id: widget.id + '-' + Date.now(),
-        position: { x: 0, y: prev.length * 2 },
-        size: { width: 6, height: 2 },
-      },
-    ]);
+    const newWidget: CanvasWidget = {
+      ...widget,
+      id: `${widget.id}-${Date.now()}`,
+      position: { x: 0, y: 0 },
+      size: { width: 4, height: 2 },
+    };
+    setWidgets((prev) => [...prev, newWidget]);
   };
 
   const removeWidget = (id: string) => {
     setWidgets((prev) => prev.filter((w) => w.id !== id));
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const widget = event.active.data.current?.widget as DashboardWidget | undefined;
+    if (widget) setActiveWidget(widget);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const widget = event.active.data.current?.widget as DashboardWidget | undefined;
+    if (widget) addWidget(widget);
+    setActiveWidget(null);
+  };
+
+  const handleDragCancel = () => setActiveWidget(null);
+
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Header */}
-      <div className="h-14 bg-gray-800 text-white flex items-center px-4">
-        <input
-          value={dashboardName}
-          onChange={(e) => setDashboardName(e.target.value)}
-          className="bg-transparent border-none text-xl outline-none flex-1"
-        />
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className="flex min-h-[calc(100vh-140px)] bg-gray-50">
+        <DashboardCanvas widgets={widgets} removeWidget={removeWidget} />
+        <DashboardWidgetPanel onSelectWidget={addWidget} />
 
-        <button
-          onClick={() => setIsPanelOpen((v) => !v)}
-          className="px-3 py-1.5 bg-blue-600 rounded ml-4"
-        >
-          {isPanelOpen ? 'Close Widgets' : 'Add Widgets'}
-        </button>
+        <DragOverlay dropAnimation={null}>
+          {activeWidget ? (
+            <div className="w-64 rounded-xl border border-gray-200 bg-white p-4 shadow-lg">
+              <div className="text-lg font-semibold text-gray-900">
+                {activeWidget.name}
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                Widget content (preview)
+              </div>
+            </div>
+          ) : null}
+        </DragOverlay>
       </div>
-
-      {/* Main */}
-      <div className="flex flex-1 overflow-hidden">
-        <DashboardCanvas widgets={widgets} onWidgetRemove={removeWidget} />
-
-        {isPanelOpen && <DashboardWidgetPanel onWidgetSelect={addWidget} />}
-      </div>
-    </div>
+    </DndContext>
   );
 }

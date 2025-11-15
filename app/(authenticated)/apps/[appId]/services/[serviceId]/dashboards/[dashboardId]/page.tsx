@@ -6,12 +6,7 @@ import { mockDashboards } from '@/components/features/apps/dashboard/mock';
 
 export default function DashboardDetailPage() {
   const { dashboardId } = useParams();
-  const dashboard = mockDashboards.find(d => d.id === dashboardId);
+  const dashboard = mockDashboards.find((d) => d.id === dashboardId) ?? null;
 
-  return (
-    <DashboardEditor
-      mode="edit"
-      initialData={dashboard}
-    />
-  );
+  return <DashboardEditor mode="edit" initialData={dashboard} />;
 }

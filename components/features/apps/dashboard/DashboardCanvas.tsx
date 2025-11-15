@@ -1,85 +1,44 @@
 'use client';
 
-import { useState } from 'react';
-import { HiPlus } from 'react-icons/hi2';
-import { CanvasWidget, DashboardWidget } from './types';
+import { useDroppable } from '@dnd-kit/core';
+import type { CanvasWidget } from './types';
 
-interface DashboardCanvasProps {
+interface Props {
   widgets: CanvasWidget[];
-  onWidgetAdd?: (widget: DashboardWidget) => void;
-  onWidgetRemove?: (widgetId: string) => void;
+  removeWidget: (id: string) => void;
 }
 
-export function DashboardCanvas({ widgets, onWidgetAdd, onWidgetRemove }: DashboardCanvasProps) {
-  const [hoveredWidget, setHoveredWidget] = useState<string | null>(null);
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    // Widget drop logic will be implemented when needed
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
+export function DashboardCanvas({ widgets, removeWidget }: Props) {
+  const { setNodeRef, isOver } = useDroppable({ id: 'canvas' });
 
   return (
-    <div
-      className="flex-1 p-6 bg-gray-50 overflow-auto"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-    >
-      <div className="max-w-6xl mx-auto">
+    <div className="flex-1 overflow-auto p-6">
+      <div
+        ref={setNodeRef}
+        className={`min-h-[420px] rounded-2xl border-2 border-dashed p-6 transition-colors ${
+          isOver ? 'border-blue-500 bg-blue-50' : 'border-blue-300 bg-blue-50/30'
+        }`}
+      >
         {widgets.length === 0 ? (
-          // Empty state
-          <div className="border-2 border-dashed border-blue-300 rounded-lg p-12 bg-blue-50/30">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                <HiPlus className="w-8 h-8 text-blue-600" />
-              </div>
-              <p className="text-blue-600 text-lg mb-2">
-                Click a tray item to add it here
-              </p>
-              <p className="text-gray-500 text-sm">
-                Drag and drop widgets from the right panel to create your dashboard
-              </p>
-            </div>
+          <div className="flex h-full min-h-[280px] items-center justify-center text-blue-600">
+            Drag widgets here
           </div>
         ) : (
-          // Widget grid
-          <div className="grid grid-cols-12 gap-4 auto-rows-[200px]">
+          <div className="grid auto-rows-[240px] grid-cols-12 gap-4">
             {widgets.map((widget) => (
               <div
                 key={widget.id}
-                className={`col-span-${widget.size.width} row-span-${widget.size.height} bg-white border border-gray-200 rounded-lg p-4 relative group hover:border-blue-500 transition-colors`}
-                onMouseEnter={() => setHoveredWidget(widget.id)}
-                onMouseLeave={() => setHoveredWidget(null)}
+                className="relative col-span-4 rounded-xl border bg-white p-4 shadow-sm"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-gray-900">{widget.name}</h3>
-                  {hoveredWidget === widget.id && (
-                    <button
-                      onClick={() => onWidgetRemove?.(widget.id)}
-                      className="text-gray-400 hover:text-red-600 transition-colors"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  <p className="text-sm">Widget content will appear here</p>
-                </div>
+                <button
+                  onClick={() => removeWidget(widget.id)}
+                  className="absolute right-4 top-4 text-gray-400 hover:text-red-500"
+                >
+                  ×
+                </button>
+
+                <div className="text-lg font-semibold text-gray-900">{widget.name}</div>
+                <div className="mt-6 text-sm text-gray-500">Widget content (preview)</div>
               </div>
             ))}
           </div>
