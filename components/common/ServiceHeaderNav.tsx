@@ -30,8 +30,7 @@ export function ServiceHeaderNav() {
         <div className="flex gap-6 text-lg font-semibold">
           {tabs.map(function (tab) {
             const href = tab === 'Summary' ? basePath : basePath + '/dashboards';
-            const isActive =
-              tab === 'Summary' ? isDashboards === false : Boolean(isDashboards);
+            const isActive = tab === 'Summary' ? isDashboards === false : Boolean(isDashboards);
             return (
               <Link
                 key={tab}
