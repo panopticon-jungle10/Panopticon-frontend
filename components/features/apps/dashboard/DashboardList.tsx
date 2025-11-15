@@ -2,11 +2,14 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { mockDashboards } from './mock';
 import { Dashboard } from './types';
 import { DashboardListItem } from './DashboardListItem';
 import { HiMagnifyingGlass, HiPlus } from 'react-icons/hi2';
+import Pagination from '@/components/features/apps/services/Pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 export function DashboardList({
   onNavigate,
@@ -15,9 +18,21 @@ export function DashboardList({
 }) {
   const [dashboards, setDashboards] = useState<Dashboard[]>(mockDashboards);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   // 검색 기능
   const filtered = dashboards.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const paginatedDashboards = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    // Keep the current page in range when the filtered result shrinks
+    setPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  const handlePrev = () => setPage((prev) => Math.max(1, prev - 1));
+  const handleNext = () => setPage((prev) => Math.min(totalPages, prev + 1));
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow p-0 w-full">
@@ -42,7 +57,10 @@ export function DashboardList({
             placeholder="대시보드 검색…"
             className="w-80 pl-9 pr-3 py-2 border rounded-lg"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
@@ -61,7 +79,7 @@ export function DashboardList({
           </thead>
 
           <tbody>
-            {filtered.map((d) => (
+            {paginatedDashboards.map((d) => (
               <DashboardListItem
                 key={d.id}
                 dashboard={d}
@@ -76,6 +94,10 @@ export function DashboardList({
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="px-8 py-4 border-t">
+        <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
       </div>
     </div>
   );
