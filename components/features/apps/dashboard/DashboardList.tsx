@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { mockDashboards } from './mock';
 import { Dashboard } from './types';
 import { DashboardListItem } from './DashboardListItem';

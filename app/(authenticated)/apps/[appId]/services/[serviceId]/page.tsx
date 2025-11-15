@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
 import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
@@ -9,19 +8,12 @@ import ResourcesSection from '@/components/features/apps/services/[serviceId]/se
 import { useParams } from 'next/navigation';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
-import { HiArrowLeft } from 'react-icons/hi2';
 
 export default function ServiceOverview() {
-  const router = useRouter();
   const params = useParams();
   const serviceId = params.serviceId as string;
-  const appId = params.appId as string;
 
   const { timeRange, setTimeRange } = useTimeRangeStore();
-
-  const handleBackToServices = () => {
-    router.push('/apps/' + appId + '/services');
-  };
 
   const handleTimeRangeChange = (range: TimeRange) => {
     setTimeRange(range.value as TimeRangeType);
