@@ -1,39 +1,35 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { mockDashboards } from "./mock";
-import { Dashboard } from "./types";
-import { DashboardListItem } from "./DashboardListItem";
-import { HiMagnifyingGlass, HiPlus } from "react-icons/hi2";
+import { useEffect, useState } from 'react';
+import { mockDashboards } from './mock';
+import { Dashboard } from './types';
+import { DashboardListItem } from './DashboardListItem';
+import { HiMagnifyingGlass, HiPlus } from 'react-icons/hi2';
 
 export function DashboardList({
   onNavigate,
 }: {
-  onNavigate: (v: "list" | "create" | "view", id?: string) => void;
+  onNavigate: (v: 'list' | 'create' | 'view', id?: string) => void;
 }) {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     setDashboards(mockDashboards);
   }, []);
 
-  const filtered = dashboards.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = dashboards.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow p-0 w-full">
       <div className="px-8 py-7 border-b">
         <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
-        <p className="text-base text-gray-600 mt-2">
-          팀의 모니터링 대시보드를 관리하고 생성하세요
-        </p>
+        <p className="text-base text-gray-600 mt-2">팀의 모니터링 대시보드를 관리하고 생성하세요</p>
       </div>
 
       <div className="px-8 py-4 border-b flex items-center gap-4">
         <button
-          onClick={() => onNavigate("create")}
+          onClick={() => onNavigate('create')}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
                      flex items-center gap-2"
         >
@@ -70,12 +66,10 @@ export function DashboardList({
               <DashboardListItem
                 key={d.id}
                 dashboard={d}
-                onSelect={(id) => onNavigate("view", id)}
+                onSelect={(id) => onNavigate('view', id)}
                 onToggleFavorite={(id) =>
                   setDashboards((prev) =>
-                    prev.map((x) =>
-                      x.id === id ? { ...x, isFavorite: !x.isFavorite } : x
-                    )
+                    prev.map((x) => (x.id === id ? { ...x, isFavorite: !x.isFavorite } : x)),
                   )
                 }
               />
