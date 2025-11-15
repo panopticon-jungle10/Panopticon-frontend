@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // Docker 프로덕션 빌드를 위한 standalone 출력 설정
+  output: 'standalone',
 };
 
 export default nextConfig;
