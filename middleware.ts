@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyJwt } from '@/lib/jwt';
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 인증이 필요 없는 경로
-  const publicPaths = ['/auth', '/api/auth'];
+  const publicPaths = ['/auth', '/api/auth', '/api/health'];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
   if (isPublicPath) {
