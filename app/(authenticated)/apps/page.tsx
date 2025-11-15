@@ -143,11 +143,7 @@ export default function RegisterPage() {
         )}
 
         {!isLoading && !isError && (
-          <AppList
-            apps={apps}
-            onEditApp={handleOpenEditDialog}
-            onDeleteApp={handleDelete}
-          />
+          <AppList apps={apps} onEditApp={handleOpenEditDialog} onDeleteApp={handleDelete} />
         )}
       </div>
 

@@ -21,9 +21,7 @@ export async function POST(_request: Request, { params }: { params: Params }) {
     });
 
     return NextResponse.json({
-      lastAccessedAt: updated.lastAccessedAt
-        ? updated.lastAccessedAt.toISOString()
-        : null,
+      lastAccessedAt: updated.lastAccessedAt ? updated.lastAccessedAt.toISOString() : null,
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
