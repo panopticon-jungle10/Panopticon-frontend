@@ -156,7 +156,11 @@ export default function RegisterPage() {
               모니터링할 애플리케이션 정보를 입력하세요.
             </DialogDescription>
           </DialogHeader>
-          <AppForm onCreate={handleCreate} onClose={() => setIsCreateDialogOpen(false)} />
+          <AppForm
+            key="create-form"
+            onCreate={handleCreate}
+            onClose={() => setIsCreateDialogOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
@@ -171,6 +175,7 @@ export default function RegisterPage() {
           </DialogHeader>
           {selectedApp && (
             <AppForm
+              key={selectedApp.id}
               onCreate={handleEdit}
               onClose={() => setIsEditDialogOpen(false)}
               initialName={selectedApp.name}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HiPlus, HiPencil } from 'react-icons/hi2';
 
 interface AppFormProps {
@@ -16,16 +16,11 @@ export function AppForm({
   initialName = '',
   initialDescription = '',
 }: AppFormProps) {
-  const [name, setName] = useState(initialName);
-  const [description, setDescription] = useState(initialDescription || '');
+  const [name, setName] = useState(() => initialName);
+  const [description, setDescription] = useState(() => initialDescription || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditMode = !!initialName;
-
-  useEffect(() => {
-    setName(initialName);
-    setDescription(initialDescription || '');
-  }, [initialName, initialDescription]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
