@@ -5,6 +5,9 @@ import {
   type TimeRange,
 } from '@/src/utils/timeRange';
 
+// 폴링 간격 (밀리초)
+export const POLLING_INTERVAL = 10000; // 10초
+
 interface TimeRangeState {
   // 원본 timeRange 값
   timeRange: TimeRange;

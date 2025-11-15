@@ -1,0 +1,72 @@
+FROM node:21-bullseye-slim AS base
+
+# 1. Dependencies 설치 단계
+FROM base AS deps
+WORKDIR /app
+
+# 의존성 파일만 먼저 복사 (캐시 활용)
+COPY package.json package-lock.json* ./
+
+# 프로덕션 의존성만 설치
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# 2. 빌드 단계
+FROM base AS builder
+WORKDIR /app
+
+# 의존성 파일 복사
+COPY package.json package-lock.json* ./
+
+# 모든 의존성 설치 (devDependencies 포함)
+RUN npm ci
+
+# 소스 코드 복사
+COPY . .
+
+# Prisma 생성 (데이터베이스 클라이언트)
+RUN npx prisma generate
+
+# Next.js 프로덕션 빌드
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npm run build
+
+# 3. 프로덕션 실행 단계
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+# 보안을 위한 non-root 사용자 생성
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# 필요한 파일만 복사
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+
+# Next.js 빌드 결과물 복사
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Prisma 클라이언트 복사
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/prisma ./prisma
+
+# 프로덕션 의존성 복사
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+USER nextjs
+
+EXPOSE 3000
+
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+CMD ["node", "server.js"]
