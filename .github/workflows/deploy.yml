@@ -53,19 +53,19 @@ jobs:
 
             # Docker 및 Docker Compose 설치 확인
             if ! command -v docker &> /dev/null; then
-              echo "Installing Docker..."
-              sudo yum update -y
-              sudo yum install -y docker
-              sudo service docker start
-              sudo usermod -a -G docker ${{ secrets.EC2_USER }}
-              echo "Docker installed. Please re-run the deployment."
-              exit 1
+                echo "Installing Docker..."
+                sudo yum update -y
+                sudo yum install -y docker
+                sudo service docker start
+                sudo usermod -a -G docker ${{ secrets.EC2_USER }}
+                echo "Docker installed. Please re-run the deployment."
+                exit 1
             fi
 
             if ! command -v docker-compose &> /dev/null; then
-              echo "Installing Docker Compose..."
-              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
+                echo "Installing Docker Compose..."
+                sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                sudo chmod +x /usr/local/bin/docker-compose
             fi
 
             # Docker 서비스 시작 및 권한 확인
@@ -78,23 +78,29 @@ jobs:
             # 사용하지 않는 이미지 정리
             sudo docker image prune -af
 
-            # 환경 변수 로드 및 확인
+            # 환경 변수 확인
             if [ -f .env.production ]; then
-              export $(cat .env.production | xargs)
-              echo "Environment variables loaded"
+                echo "=== Environment Variables ==="
+                cat .env.production
+                echo "=========================="
             else
-              echo "Warning: .env.production file not found"
+                echo "❌ .env.production file not found"
+                exit 1
             fi
 
-            # Docker 이미지 빌드 및 컨테이너 시작
-            sudo -E docker-compose -f docker-compose.prod.yml up -d --build
+            # Docker 이미지 빌드 및 컨테이너 시작 (환경변수 파일 명시)
+            sudo docker-compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+
+            # 컨테이너 상태 확인
+            echo "=== Container Status After Build ==="
+            sudo docker-compose -f docker-compose.prod.yml ps
+
+            # 빌드 로그 확인
+            echo "=== Build Logs ==="
+            sudo docker-compose -f docker-compose.prod.yml logs --tail=30
 
             # Prisma 마이그레이션 실행 (최초 배포 시)
             sudo docker-compose -f docker-compose.prod.yml exec -T frontend npx prisma migrate deploy || echo "Prisma migration skipped"
-
-            # 로그 확인 (마지막 20줄)
-            echo "Deployment completed. Recent logs:"
-            sudo docker-compose -f docker-compose.prod.yml logs --tail=20
 
       - name: Check deployment status
         run: |
