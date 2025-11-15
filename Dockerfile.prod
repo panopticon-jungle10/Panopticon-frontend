@@ -19,9 +19,19 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build Next.js application
+# Build-time arguments for NEXT_PUBLIC_ variables
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WS_ERROR_LOGS_URL
+ARG NEXT_PUBLIC_ENABLE_MOCKING=false
+
+# Set environment variables for build
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_WS_ERROR_LOGS_URL=$NEXT_PUBLIC_WS_ERROR_LOGS_URL
+ENV NEXT_PUBLIC_ENABLE_MOCKING=$NEXT_PUBLIC_ENABLE_MOCKING
+
+# Build Next.js application
 RUN npm run build
 
 # Stage 3: Runner (Production)
