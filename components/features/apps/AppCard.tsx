@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { HiCube, HiArrowTrendingUp, HiExclamationTriangle } from 'react-icons/hi2';
 import type { ApplicationSummary } from './types';
 
@@ -20,8 +21,38 @@ function DiffBadge({ diff }: { diff: number }) {
 
 export function AppCard({ app }: { app: ApplicationSummary }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const updateCachedLastAccess = (timestamp: string) => {
+    queryClient.setQueryData<ApplicationSummary[] | undefined>(['apps'], (prev) => {
+      if (!prev) return prev;
+      return prev.map((item) => (item.id === app.id ? { ...item, lastAccessedAt: timestamp } : item));
+    });
+  };
+
+  const recordLastAccess = async () => {
+    const fallback = new Date().toISOString();
+
+    try {
+      const response = await fetch(`/api/apps/${app.id}/access`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        updateCachedLastAccess(fallback);
+        return;
+      }
+
+      const data = (await response.json()) as { lastAccessedAt?: string | null };
+      updateCachedLastAccess(data.lastAccessedAt ?? fallback);
+    } catch (error) {
+      console.error('Failed to record last access', error);
+      updateCachedLastAccess(fallback);
+    }
+  };
 
   const handleClick = () => {
+    recordLastAccess();
     router.push(`/apps/services`);
   };
 
