@@ -10,7 +10,7 @@ import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import { useQuery } from '@tanstack/react-query';
 import { getServices } from '@/src/api/apm';
 import { ServiceSummary } from '@/types/apm';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import StateHandler from '@/components/ui/StateHandler';
 
 const columns = [
@@ -56,8 +56,6 @@ const columns = [
 
 export default function ServicesPage() {
   const router = useRouter();
-  const params = useParams();
-  const appId = params.appId as string;
 
   const [viewType, setViewType] = useState<'list' | 'map'>('list');
   const [page, setPage] = useState(1);
@@ -75,7 +73,7 @@ export default function ServicesPage() {
 
   // API 데이터 가져오기
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['services', appId, page, pageSize, timeRange],
+    queryKey: ['services', page, pageSize, timeRange],
     queryFn: () =>
       getServices({
         limit: pageSize,
@@ -95,7 +93,7 @@ export default function ServicesPage() {
 
   // 테이블 행 클릭 핸들러
   const handleServiceRowClick = (service: ServiceSummary) => {
-    router.push(`/apps/${appId}/services/${service.service_name}`);
+    router.push(`/apps/services/${service.service_name}`);
   };
 
   return (

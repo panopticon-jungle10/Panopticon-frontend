@@ -34,25 +34,22 @@ export const AuthenticatedHeader = () => {
     return items;
   }, [appId]);
 
-  // APM 드롭다운 아이템 (동적으로 생성)
-  const apmItems = useMemo(() => {
-    if (!appId) {
-      return [];
-    }
-
-    return [
+  // APM 드롭다운 아이템 (공용 서비스 뷰)
+  const apmItems = useMemo(
+    () => [
       {
-        href: `/apps/${appId}/services`,
+        href: '/apps/services',
         label: 'Service list',
-        ariaLabel: 'Go to the service list for this app',
+        ariaLabel: 'Go to the shared service list',
       },
       {
-        href: `/apps/${appId}/services/user-service`,
+        href: '/apps/services/user-service',
         label: 'Summary',
         ariaLabel: 'Go to the summary view for user-service',
       },
-    ];
-  }, [appId]);
+    ],
+    [],
+  );
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-white shadow-md font-sans">
@@ -64,15 +61,13 @@ export const AuthenticatedHeader = () => {
         {/* 오른쪽 아이콘들: Setting 드롭다운 */}
         <div className="ml-auto flex items-center gap-6">
           <div className="flex items-center gap-5">
-            {apmItems.length > 0 && (
-              <HeaderDropdown
-                triggerIcon={<FiLayers className="w-6 h-6 text-zinc-700" />}
-                triggerLabel="APM menu"
-                triggerHref={`/apps/${appId}/services`}
-                title="APM"
-                items={apmItems}
-              />
-            )}
+            <HeaderDropdown
+              triggerIcon={<FiLayers className="w-6 h-6 text-zinc-700" />}
+              triggerLabel="APM menu"
+              triggerHref="/apps/services"
+              title="APM"
+              items={apmItems}
+            />
             <HeaderDropdown
               triggerIcon={<FiSettings className="w-6 h-6 text-zinc-700" />}
               triggerLabel="Setting menu"

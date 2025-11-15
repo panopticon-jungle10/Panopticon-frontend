@@ -22,7 +22,7 @@ export function AppCard({ app }: { app: ApplicationSummary }) {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/apps/${app.id}/services`);
+    router.push(`/apps/services`);
   };
 
   return (

@@ -15,14 +15,13 @@ export default function ServiceOverview() {
   const router = useRouter();
   const params = useParams();
   const serviceId = params.serviceId as string;
-  const appId = params.appId as string;
 
   // Zustand store 사용
   const { timeRange, setTimeRange } = useTimeRangeStore();
 
   // 서비스 목록으로 돌아가기
   const handleBackToServices = () => {
-    router.push(`/apps/${appId}/services`);
+    router.push(`/apps/services`);
   };
 
   const handleTimeRangeChange = (range: TimeRange) => {
