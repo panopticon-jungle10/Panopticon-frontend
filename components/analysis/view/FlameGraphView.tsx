@@ -275,10 +275,10 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
       </div>
 
       {/* Chart */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="flex-1 bg-linear-to-br from-slate-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm overflow-hidden p-4">
         <ReactECharts
           option={option}
-          style={{ height: `${Math.max(300, (maxDepth + 1) * 50)}px` }}
+          style={{ height: `${Math.max(300, (maxDepth + 1) * 50)}px`, width: '100%' }}
           onEvents={{ click: onChartClick }}
         />
       </div>

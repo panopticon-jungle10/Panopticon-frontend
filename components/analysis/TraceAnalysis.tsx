@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTraceById } from '@/src/api/apm';
 import StateHandler from '@/components/ui/StateHandler';
-import SelectedSpanDetails from './SelectedSpanDetails';
-import SpanListView from './SpanListView';
-import MapView from './MapView';
-import WaterfallView from './WaterfallView';
-import FlameGraphView from './FlameGraphView';
+import SpanListView from './view/SpanListView';
+import MapView from './view/MapView';
+import WaterfallView from './view/WaterfallView';
+import FlameGraphView from './view/FlameGraphView';
+import SelectedSpanDetailsView from './view/SelectedSpanDetailsView';
 
 /**
  * Trace Analysis Component : Slide-over Panel 방식(모달 X)
@@ -245,7 +245,7 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
 
               {/* Selected Span Details */}
               {selectedSpanId && data && (
-                <SelectedSpanDetails
+                <SelectedSpanDetailsView
                   spanId={selectedSpanId}
                   spans={data.spans}
                   logs={data.logs}
