@@ -32,16 +32,12 @@ const getApiBaseUrl = (): string => {
 
 /**
  * 공통 Fetch 헬퍼
- * JWT 토큰을 Authorization 헤더에 자동으로 포함
  */
 async function fetchJson<T>(url: string): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const fullUrl = `${baseUrl}${url}`;
 
-  // 브라우저에서 쿠키 자동 전송 (credentials: 'include')
-  const response = await fetch(fullUrl, {
-    credentials: 'include',
-  });
+  const response = await fetch(fullUrl);
 
   if (!response.ok) {
     const error = new Error(`HTTP error! status: ${response.status}`) as Error & {
