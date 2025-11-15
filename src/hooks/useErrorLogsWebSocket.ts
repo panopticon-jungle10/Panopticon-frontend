@@ -43,42 +43,24 @@ export function useErrorLogsWebSocket({
         return;
       }
 
-      if (!enabled) {
-        return;
-      }
-
-      // 이미 연결되어 있으면 재연결하지 않음
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        return;
-      }
-
       try {
+        // 기존 연결이 있으면 정리
+        if (wsRef.current) {
+          wsRef.current.close();
+        }
+
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
-          console.log('에러 로그 웹소켓 연결됨');
-          reconnectAttemptsRef.current = 0;
-
-          // 특정 서비스 구독 메시지 전송 (필요 시)
-          if (serviceName) {
-            ws.send(
-              JSON.stringify({
-                type: 'subscribe',
-                service_name: serviceName,
-              }),
-            );
-          }
+          console.log('웹소켓 연결 성공');
+          reconnectAttemptsRef.current = 0; // 재연결 시도 횟수 초기화
         };
 
         ws.onmessage = (event) => {
           try {
             const log: LogItem = JSON.parse(event.data);
-
-            // ERROR 레벨 로그만 처리
-            if (log.level === 'ERROR') {
-              onLogReceivedRef.current(log);
-            }
+            onLogReceivedRef.current(log);
           } catch (error) {
             console.error('로그 파싱 오류:', error);
           }
@@ -90,17 +72,22 @@ export function useErrorLogsWebSocket({
 
         ws.onclose = (event) => {
           console.log('웹소켓 연결 종료:', event.code, event.reason);
+          wsRef.current = null;
 
           // 정상 종료가 아니고 재연결 시도 횟수가 남아있으면 재연결
-          if (enabled && !event.wasClean && reconnectAttemptsRef.current < maxReconnectAttempts) {
+          if (
+            event.code !== 1000 &&
+            reconnectAttemptsRef.current < maxReconnectAttempts &&
+            enabled
+          ) {
             reconnectAttemptsRef.current += 1;
-            console.log(
-              `웹소켓 재연결 시도 ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`,
-            );
+            console.log(`재연결 시도 ${reconnectAttemptsRef.current}/${maxReconnectAttempts}...`);
 
             reconnectTimeoutRef.current = setTimeout(() => {
               connect();
             }, reconnectDelay);
+          } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+            console.error('최대 재연결 시도 횟수 초과');
           }
         };
       } catch (error) {
@@ -121,7 +108,9 @@ export function useErrorLogsWebSocket({
       reconnectAttemptsRef.current = 0;
     };
 
-    connect();
+    if (enabled) {
+      connect();
+    }
 
     return () => {
       disconnect();

@@ -4,7 +4,7 @@ import { SpanItem, LogItem } from '@/types/apm';
 import { useMemo } from 'react';
 import { IoClose } from 'react-icons/io5';
 
-interface SelectedSpanDetailsProps {
+interface SelectedSpanDetailsViewProps {
   spanId: string;
   spans: SpanItem[];
   logs: LogItem[];
@@ -53,12 +53,12 @@ const getLogLevelColor = (level: string) => {
   }
 };
 
-export default function SelectedSpanDetails({
+export default function SelectedSpanDetailsView({
   spanId,
   spans,
   logs,
   onClose,
-}: SelectedSpanDetailsProps) {
+}: SelectedSpanDetailsViewProps) {
   // 선택된 스팬 찾기
   const selectedSpan = useMemo(() => {
     return spans.find((span) => span.span_id === spanId);

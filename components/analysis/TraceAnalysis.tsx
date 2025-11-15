@@ -5,9 +5,11 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTraceById } from '@/src/api/apm';
 import StateHandler from '@/components/ui/StateHandler';
-import FlameGraph from './FlameGraph';
-import WaterfallChart from './WaterfallChart';
-import SelectedSpanDetails from './SelectedSpanDetails';
+import SpanListView from './view/SpanListView';
+import MapView from './view/MapView';
+import WaterfallView from './view/WaterfallView';
+import FlameGraphView from './view/FlameGraphView';
+import SelectedSpanDetailsView from './view/SelectedSpanDetailsView';
 
 /**
  * Trace Analysis Component : Slide-over Panel 방식(모달 X)
@@ -18,11 +20,12 @@ interface TraceAnalysisProps {
   traceId: string;
 }
 
-type ViewMode = 'flamegraph' | 'waterfall';
+type ViewMode = 'map' | 'flamegraph' | 'waterfall' | 'spanlist';
 
 export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysisProps) {
   // traceId를 key로 사용하여 상태 초기화
-  const [viewMode, setViewMode] = useState<ViewMode>('flamegraph');
+  // 기본은 Map을 먼저 보여줌
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
 
   // Trace 데이터 가져오기
@@ -169,6 +172,16 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
         <div className="flex border-b border-gray-200">
           <button
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer ${
+              viewMode === 'map'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setViewMode('map')}
+          >
+            Map
+          </button>
+          <button
+            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer ${
               viewMode === 'flamegraph'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
@@ -187,6 +200,16 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
           >
             Waterfall
           </button>
+          <button
+            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors hover:cursor-pointer ${
+              viewMode === 'spanlist'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setViewMode('spanlist')}
+          >
+            Span List
+          </button>
         </div>
 
         {/* Content */}
@@ -201,16 +224,28 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
             emptyMessage="트레이스에 스팬 데이터가 없습니다"
           >
             <div className="p-6 space-y-6">
-              {/* Charts */}
-              {viewMode === 'flamegraph' ? (
-                <FlameGraph spans={data?.spans || []} onSpanSelect={setSelectedSpanId} />
-              ) : (
-                <WaterfallChart spans={data?.spans || []} onSpanSelect={setSelectedSpanId} />
+              {/* Views */}
+              {viewMode === 'map' && (
+                <MapView spans={data?.spans || []} onSpanSelect={setSelectedSpanId} />
+              )}
+              {viewMode === 'flamegraph' && (
+                <FlameGraphView spans={data?.spans || []} onSpanSelect={setSelectedSpanId} />
+              )}
+              {viewMode === 'waterfall' && (
+                // Waterfall now reuses the bar-based map UI
+                <WaterfallView spans={data?.spans || []} onSpanSelect={setSelectedSpanId} />
+              )}
+              {viewMode === 'spanlist' && (
+                <SpanListView
+                  spans={data?.spans || []}
+                  onSpanSelect={setSelectedSpanId}
+                  selectedSpanId={selectedSpanId}
+                />
               )}
 
               {/* Selected Span Details */}
               {selectedSpanId && data && (
-                <SelectedSpanDetails
+                <SelectedSpanDetailsView
                   spanId={selectedSpanId}
                   spans={data.spans}
                   logs={data.logs}
