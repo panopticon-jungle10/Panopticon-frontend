@@ -3,11 +3,11 @@ import type { ApplicationSummary } from './types';
 
 interface AppListProps {
   apps: ApplicationSummary[];
-  selectedAppId?: string;
-  onSelectApp?: (id: string) => void;
+  onEditApp?: (id: string) => void;
+  onDeleteApp?: (id: string) => void;
 }
 
-export function AppList({ apps, selectedAppId, onSelectApp }: AppListProps) {
+export function AppList({ apps, onEditApp, onDeleteApp }: AppListProps) {
   return (
     <div>
       {/* 상단 라벨 */}
@@ -21,8 +21,8 @@ export function AppList({ apps, selectedAppId, onSelectApp }: AppListProps) {
           <AppCard
             key={app.id}
             app={app}
-            isSelected={app.id === selectedAppId}
-            onSelect={onSelectApp}
+            onEdit={() => onEditApp?.(app.id)}
+            onDelete={() => onDeleteApp?.(app.id)}
           />
         ))}
       </div>
