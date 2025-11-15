@@ -17,16 +17,9 @@ export default function DashboardsPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {view === 'list' && (
-        <DashboardList onNavigate={go} />
-      )}
+      {view === 'list' && <DashboardList onNavigate={go} />}
 
-      {view === 'create' && (
-        <DashboardEditor
-          mode="create"
-          onBack={() => setView('list')}
-        />
-      )}
+      {view === 'create' && <DashboardEditor mode="create" onBack={() => setView('list')} />}
 
       {view === 'view' && (
         <DashboardEditor

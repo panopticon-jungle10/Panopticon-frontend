@@ -8,6 +8,7 @@ export interface Dashboard {
   createdAt?: string;
   updatedAt?: string;
   isFavorite?: boolean;
+  widgets?: CanvasWidget[]; // ← mock 데이터와 맞춰줌
 }
 
 export type WidgetType =

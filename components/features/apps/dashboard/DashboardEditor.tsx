@@ -1,19 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  type DragEndEvent,
-  type DragStartEvent,
-} from '@dnd-kit/core';
+import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 
 import { DashboardCanvas } from './DashboardCanvas';
 import { DashboardWidgetPanel } from './DashboardWidgetPanel';
-import type { CanvasWidget, DashboardWidget } from './types';
+import type { CanvasWidget, Dashboard, DashboardWidget } from './types';
 
-export function DashboardEditor() {
-  const [widgets, setWidgets] = useState<CanvasWidget[]>([]);
+type DashboardEditorProps = {
+  mode: 'create' | 'edit';
+  initialData?: Dashboard | null;
+  onBack?: () => void;
+};
+
+export function DashboardEditor({ mode, initialData = null, onBack }: DashboardEditorProps) {
+  const [widgets, setWidgets] = useState<CanvasWidget[]>(initialData?.widgets ?? []);
   const [activeWidget, setActiveWidget] = useState<DashboardWidget | null>(null);
 
   const addWidget = (widget: DashboardWidget) => {
@@ -56,16 +57,26 @@ export function DashboardEditor() {
         <DragOverlay dropAnimation={null}>
           {activeWidget ? (
             <div className="w-64 rounded-xl border border-gray-200 bg-white p-4 shadow-lg">
-              <div className="text-lg font-semibold text-gray-900">
-                {activeWidget.name}
-              </div>
-              <div className="mt-2 text-sm text-gray-500">
-                Widget content (preview)
-              </div>
+              <div className="text-lg font-semibold text-gray-900">{activeWidget.name}</div>
+              <div className="mt-2 text-sm text-gray-500">Widget content (preview)</div>
             </div>
           ) : null}
         </DragOverlay>
       </div>
+
+      {onBack ? (
+        <div className="mt-4 flex items-center justify-between px-6">
+          <span className="text-sm text-gray-500">
+            {mode === 'create' ? '새 대시보드 작성 중' : '대시보드 수정 중'}
+          </span>
+          <button
+            onClick={onBack}
+            className="rounded-lg border px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            목록으로 돌아가기
+          </button>
+        </div>
+      ) : null}
     </DndContext>
   );
 }
