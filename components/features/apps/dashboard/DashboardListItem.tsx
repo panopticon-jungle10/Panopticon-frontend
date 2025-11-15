@@ -1,3 +1,5 @@
+// 대시보드 리스트 UI
+
 'use client';
 
 import { Dashboard } from './types';
@@ -20,6 +22,7 @@ export function DashboardListItem({
       className="group cursor-pointer hover:bg-gray-50 transition"
       onClick={() => onSelect(dashboard.id)}
     >
+      {/* ⭐ 즐겨찾기 토글 버튼 */}
       <td className="px-6 py-4">
         <button
           onClick={(e) => {
@@ -35,6 +38,7 @@ export function DashboardListItem({
         </button>
       </td>
 
+      {/* 대시보드 이름 + 설명 영역 */}
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
@@ -47,6 +51,7 @@ export function DashboardListItem({
         </div>
       </td>
 
+      {/* 작성자 정보 (프로필 아이콘 + 이름) */}
       <td className="px-6 py-4">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center">
@@ -56,6 +61,7 @@ export function DashboardListItem({
         </div>
       </td>
 
+      {/* 팀 태그 리스트 */}
       <td className="px-6 py-4">
         <div className="flex gap-1 flex-wrap">
           {dashboard.teams.slice(0, 2).map((t) => (
@@ -67,10 +73,12 @@ export function DashboardListItem({
         </div>
       </td>
 
+      {/* ❤️ 인기(popularity)  */}
       <td className="px-6 py-4">
         <div className="flex items-center gap-2">
           <div className="relative w-5 h-5">
             <HiHeart className="absolute text-gray-200 w-5 h-5" />
+            {/* popularity 비율만큼 빨간 하트가 채워짐 */}
             <div
               className="absolute inset-0 overflow-hidden"
               style={{ clipPath: `inset(${100 - fill}% 0 0 0)` }}

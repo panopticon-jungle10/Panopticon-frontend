@@ -1,3 +1,5 @@
+// 기존 대시보드 상세/수정 페이지
+
 'use client';
 
 import { useParams } from 'next/navigation';

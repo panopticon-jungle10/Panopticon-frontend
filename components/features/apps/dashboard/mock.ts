@@ -1,3 +1,5 @@
+// 대시보드 더미 데이터
+
 import type { Dashboard } from './types';
 
 export const mockDashboards: Dashboard[] = [
@@ -73,7 +75,7 @@ export const mockDashboards: Dashboard[] = [
     updatedAt: '',
     widgets: [],
   },
-  // --- 추가 더미 9개 ---
+
   ...Array.from({ length: 9 }).map((_, i) => ({
     id: `${i + 7}`,
     name: `Custom Dashboard ${i + 1}`,

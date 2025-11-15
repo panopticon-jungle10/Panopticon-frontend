@@ -1,4 +1,5 @@
-// components/features/apps/dashboard/mock-widgets.ts
+//위젯 유형 더미 데이터
+
 import {
   HiOutlineChartBarSquare,
   HiOutlineChartPie,

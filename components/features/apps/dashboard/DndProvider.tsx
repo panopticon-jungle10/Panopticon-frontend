@@ -1,3 +1,5 @@
+// DnD 센서 세팅
+
 'use client';
 
 import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';

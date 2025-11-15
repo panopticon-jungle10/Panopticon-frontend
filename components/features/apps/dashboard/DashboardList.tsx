@@ -1,3 +1,5 @@
+// 대시보드 리스트(검색/즐겨찾기 포함)
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -14,6 +16,7 @@ export function DashboardList({
   const [dashboards, setDashboards] = useState<Dashboard[]>(mockDashboards);
   const [search, setSearch] = useState('');
 
+  // 검색 기능
   const filtered = dashboards.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -63,6 +66,7 @@ export function DashboardList({
                 key={d.id}
                 dashboard={d}
                 onSelect={(id) => onNavigate('view', id)}
+                // 즐겨찾기 토글
                 onToggleFavorite={(id) =>
                   setDashboards((prev) =>
                     prev.map((x) => (x.id === id ? { ...x, isFavorite: !x.isFavorite } : x)),

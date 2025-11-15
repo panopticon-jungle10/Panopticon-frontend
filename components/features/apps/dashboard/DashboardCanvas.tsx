@@ -1,3 +1,5 @@
+// 대시보드 캔버스(위젯이 놓이는 공간)
+
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';

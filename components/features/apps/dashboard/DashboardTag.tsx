@@ -1,3 +1,5 @@
+// 팀 태그 컴포넌트
+
 'use client';
 
 const COLOR_MAP: Record<string, { bg: string; text: string }> = {

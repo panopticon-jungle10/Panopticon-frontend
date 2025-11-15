@@ -1,3 +1,5 @@
+// 우측 그래프 위젯 패널
+
 'use client';
 
 import { useState } from 'react';

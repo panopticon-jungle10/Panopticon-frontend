@@ -1,3 +1,5 @@
+// 대시보드 편집기(드래그·추가·삭제 전부 관리)
+
 'use client';
 
 import { useState } from 'react';
@@ -17,6 +19,7 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
   const [widgets, setWidgets] = useState<CanvasWidget[]>(initialData?.widgets ?? []);
   const [activeWidget, setActiveWidget] = useState<DashboardWidget | null>(null);
 
+  /*위젯 추가*/
   const addWidget = (widget: DashboardWidget) => {
     const newWidget: CanvasWidget = {
       ...widget,
@@ -27,10 +30,12 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
     setWidgets((prev) => [...prev, newWidget]);
   };
 
+  /* 위젯 삭제*/
   const removeWidget = (id: string) => {
     setWidgets((prev) => prev.filter((w) => w.id !== id));
   };
 
+/* 드래그 시작/종료 처리 이벤트 */
   const handleDragStart = (event: DragStartEvent) => {
     const widget = event.active.data.current?.widget as DashboardWidget | undefined;
     if (widget) setActiveWidget(widget);
@@ -50,6 +55,7 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
+        {/* 전체 편집 UI 구성 */}
       <div className="flex min-h-[calc(100vh-140px)] bg-gray-50">
         <DashboardCanvas widgets={widgets} removeWidget={removeWidget} />
         <DashboardWidgetPanel onSelectWidget={addWidget} />
