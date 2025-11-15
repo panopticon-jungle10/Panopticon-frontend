@@ -172,7 +172,7 @@ export default function InstallPage() {
 
           <div className="mt-8 text-center">
             <button
-              onClick={() => router.push(`/apps/${appId}/services`)}
+              onClick={() => router.push(`/apps/services`)}
               className="text-gray-600 hover:text-gray-900 underline text-sm"
             >
               Skip for now

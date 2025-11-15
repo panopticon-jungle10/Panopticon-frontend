@@ -60,7 +60,7 @@ export function AppCard({ app, onEdit, onDelete }: AppCardProps) {
 
   const handleNavigate = () => {
     recordLastAccess();
-    router.push(`/apps/${app.id}/services`);
+    router.push(`/apps/services`);
   };
 
   const handleEditClick = (event: React.MouseEvent) => {

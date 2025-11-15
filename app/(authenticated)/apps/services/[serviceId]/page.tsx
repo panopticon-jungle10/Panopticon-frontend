@@ -1,12 +1,11 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
 import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
 import ChartsSection from '@/components/features/apps/services/[serviceId]/section/Charts';
 import { TimeRange } from '@/types/time';
 import ResourcesSection from '@/components/features/apps/services/[serviceId]/section/Resources';
-import { useParams } from 'next/navigation';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
 import { HiArrowLeft } from 'react-icons/hi2';
@@ -15,14 +14,13 @@ export default function ServiceOverview() {
   const router = useRouter();
   const params = useParams();
   const serviceId = params.serviceId as string;
-  const appId = params.appId as string;
 
   // Zustand store 사용
   const { timeRange, setTimeRange } = useTimeRangeStore();
 
   // 서비스 목록으로 돌아가기
   const handleBackToServices = () => {
-    router.push(`/apps/${appId}/services`);
+    router.push(`/apps/services`);
   };
 
   const handleTimeRangeChange = (range: TimeRange) => {
