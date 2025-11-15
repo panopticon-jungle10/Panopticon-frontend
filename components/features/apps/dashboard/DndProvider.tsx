@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  DndContext,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 
 export default function DndProvider({ children }: { children: React.ReactNode }) {
   const sensors = useSensors(

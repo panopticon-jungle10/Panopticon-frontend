@@ -16,26 +16,18 @@ export default function DashboardsPage() {
     if (id) setSelectedId(id);
   };
 
-  const selectedDashboard =
-    selectedId ? mockDashboards.find((d) => d.id === selectedId) ?? null : null;
+  const selectedDashboard = selectedId
+    ? mockDashboards.find((d) => d.id === selectedId) ?? null
+    : null;
 
   return (
     <div className="flex h-screen flex-col bg-gray-50">
       {view === 'list' && <DashboardList onNavigate={go} />}
 
-      {view === 'create' && (
-        <DashboardEditor
-          mode="create"
-          onBack={() => go('list')}
-        />
-      )}
+      {view === 'create' && <DashboardEditor mode="create" onBack={() => go('list')} />}
 
       {view === 'view' && (
-        <DashboardEditor
-          mode="edit"
-          initialData={selectedDashboard}
-          onBack={() => go('list')}
-        />
+        <DashboardEditor mode="edit" initialData={selectedDashboard} onBack={() => go('list')} />
       )}
     </div>
   );

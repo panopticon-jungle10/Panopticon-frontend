@@ -12,9 +12,7 @@ interface Props {
 export function DashboardWidgetPanel({ onSelectWidget }: Props) {
   const [query, setQuery] = useState('');
 
-  const filtered = mockWidgets.filter((w) =>
-    w.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = mockWidgets.filter((w) => w.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="w-80 border-l bg-white p-4 overflow-y-auto">

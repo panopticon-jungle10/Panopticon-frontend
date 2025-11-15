@@ -3,7 +3,7 @@ import type { Dashboard } from './types';
 export const mockDashboards: Dashboard[] = [
   {
     id: '1',
-    name: "Production Metrics",
+    name: 'Production Metrics',
     description: 'Main monitoring dashboard for production services',
     author: { name: 'bhzsk8rzxe' },
     teams: ['Platform', 'Backend'],

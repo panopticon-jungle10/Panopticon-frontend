@@ -1,8 +1,8 @@
 'use client';
 
-import { Dashboard } from "./types";
-import { DashboardTag } from "./DashboardTag";
-import { HiHeart, HiOutlineStar, HiStar } from "react-icons/hi2";
+import { Dashboard } from './types';
+import { DashboardTag } from './DashboardTag';
+import { HiHeart, HiOutlineStar, HiStar } from 'react-icons/hi2';
 
 export function DashboardListItem({
   dashboard,
@@ -62,9 +62,7 @@ export function DashboardListItem({
             <DashboardTag key={t} name={t} />
           ))}
           {dashboard.teams.length > 2 && (
-            <span className="text-xs text-gray-500">
-              +{dashboard.teams.length - 2}
-            </span>
+            <span className="text-xs text-gray-500">+{dashboard.teams.length - 2}</span>
           )}
         </div>
       </td>

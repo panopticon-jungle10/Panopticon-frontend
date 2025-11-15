@@ -11,12 +11,8 @@ export function DashboardList({
 }: {
   onNavigate: (v: 'list' | 'create' | 'view', id?: string) => void;
 }) {
-  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [dashboards, setDashboards] = useState<Dashboard[]>(mockDashboards);
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    setDashboards(mockDashboards);
-  }, []);
 
   const filtered = dashboards.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
 
