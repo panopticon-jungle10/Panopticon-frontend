@@ -27,7 +27,7 @@ export function ServiceHeaderNav() {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-6 text-sm font-semibold">
+        <div className="flex gap-6 text-lg font-semibold">
           {tabs.map(function (tab) {
             const href = tab === 'Summary' ? basePath : basePath + '/dashboards';
             const isActive = tab === 'Summary' ? !isDashboards : !!isDashboards;
