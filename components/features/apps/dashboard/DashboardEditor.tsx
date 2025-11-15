@@ -75,12 +75,6 @@ export function DashboardEditor({ mode, initialData = null, onBack }: DashboardE
           <span className="text-sm text-gray-500">
             {mode === 'create' ? '새 대시보드 작성 중' : '대시보드 수정 중'}
           </span>
-          <button
-            onClick={onBack}
-            className="rounded-lg border px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-          >
-            목록으로 돌아가기
-          </button>
         </div>
       ) : null}
     </DndContext>
