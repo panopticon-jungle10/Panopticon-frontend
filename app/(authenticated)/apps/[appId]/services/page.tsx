@@ -42,10 +42,9 @@ export default function ServicesPage() {
       }),
   });
 
-  const services = data?.services ?? [];
-
   // 검색 필터 적용
   const filteredServices = useMemo(() => {
+    const services = data?.services ?? [];
     const keyword = searchKeyword.trim().toLowerCase();
     if (!keyword) return services;
     return services.filter(
@@ -53,7 +52,7 @@ export default function ServicesPage() {
         service.service_name.toLowerCase().includes(keyword) ||
         service.environment.toLowerCase().includes(keyword),
     );
-  }, [services, searchKeyword]);
+  }, [data?.services, searchKeyword]);
 
   // 페이지네이션
   const totalItems = filteredServices.length;
