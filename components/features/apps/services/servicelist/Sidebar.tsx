@@ -4,7 +4,6 @@ import type { ServiceListCategory, ServiceListSidebarItem } from '@/types/servic
 import { FiAlertTriangle, FiClock, FiList, FiTrendingUp } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
-
 const sidebarItems: (ServiceListSidebarItem & { icon: IconType })[] = [
   { key: 'list', label: '리스트', description: '기본 테이블 뷰', icon: FiList },
   { key: 'request_count', label: '요청수', description: 'Request Count', icon: FiTrendingUp },

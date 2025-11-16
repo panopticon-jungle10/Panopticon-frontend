@@ -97,7 +97,12 @@ export default function CategoryContent({
         </StateHandler>
       )}
       {pagination && category !== 'list' && (
-        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPrev={pagination.onPrev} onNext={pagination.onNext} />
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          onPrev={pagination.onPrev}
+          onNext={pagination.onNext}
+        />
       )}
     </>
   );
