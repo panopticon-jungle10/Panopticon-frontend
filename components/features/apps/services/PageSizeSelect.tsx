@@ -1,7 +1,7 @@
 interface PageSizeSelectProps {
   value: number;
   onChange: (value: number) => void;
-  options?: number[]; // 선택 가능한 페이지 크기 옵션들
+  options?: number[];
 }
 
 export default function PageSizeSelect({
@@ -11,9 +11,6 @@ export default function PageSizeSelect({
 }: PageSizeSelectProps) {
   return (
     <div className="flex items-center gap-2 ml-2">
-      <label htmlFor="pageSize" className="text-sm text-gray-600">
-        페이지당 표시 개수 :
-      </label>
       <select
         id="pageSize"
         value={value}

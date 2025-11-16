@@ -1,9 +1,13 @@
+// 선택된 카테고리에 맞춰 테이블/카드 콘텐츠를 분기
+
 'use client';
 
 import StateHandler from '@/components/ui/StateHandler';
 import type { ServiceSummary } from '@/types/apm';
 import ServiceListTable from './Table';
 import ServiceMetricGrid from './MetricGrid';
+import Pagination from '@/components/features/apps/services/Pagination';
+
 import type { MetricKey, ServiceListCategory } from '@/types/servicelist';
 
 interface PaginationControls {
@@ -16,7 +20,6 @@ interface PaginationControls {
 interface CategoryContentProps {
   category: ServiceListCategory;
   services: ServiceSummary[];
-  fullCount: number;
   isLoading: boolean;
   isError: boolean;
   isEmpty: boolean;
@@ -24,7 +27,7 @@ interface CategoryContentProps {
   pagination?: PaginationControls;
 }
 
-const categoryMeta: Record<
+export const serviceListCategoryMeta: Record<
   ServiceListCategory,
   { title: string; subtitle: string; metricKey?: MetricKey; stateType: 'table' | 'general' }
 > = {
@@ -46,7 +49,7 @@ const categoryMeta: Record<
     stateType: 'general',
   },
   latency: {
-    title: '레이턴시 (P95 Latency)',
+    title: 'Latency(P95)',
     subtitle: '서비스별 지연 현황',
     metricKey: 'latency_p95_ms',
     stateType: 'general',
@@ -56,25 +59,16 @@ const categoryMeta: Record<
 export default function CategoryContent({
   category,
   services,
-  fullCount,
   isLoading,
   isError,
   isEmpty,
   onRowClick,
   pagination,
 }: CategoryContentProps) {
-  const meta = categoryMeta[category];
+  const meta = serviceListCategoryMeta[category];
 
   return (
-    <section className="space-y-4">
-      <div>
-        <p className="text-sm text-gray-500">{meta.subtitle}</p>
-        <div className="flex items-baseline gap-3">
-          <h2 className="text-xl font-semibold text-gray-900">{meta.title}</h2>
-          <span className="text-xs text-gray-400">{fullCount}개 서비스</span>
-        </div>
-      </div>
-
+    <>
       {category === 'list' ? (
         <StateHandler
           isLoading={isLoading}
@@ -102,6 +96,9 @@ export default function CategoryContent({
           {meta.metricKey && <ServiceMetricGrid services={services} metric={meta.metricKey} />}
         </StateHandler>
       )}
-    </section>
+      {pagination && category !== 'list' && (
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPrev={pagination.onPrev} onNext={pagination.onNext} />
+      )}
+    </>
   );
 }

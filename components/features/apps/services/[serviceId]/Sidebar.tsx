@@ -3,17 +3,13 @@
 import { useEffect, useState } from 'react';
 import { IoEyeSharp, IoCubeSharp } from 'react-icons/io5';
 import { SiRelay } from 'react-icons/si';
-import { PiGraph } from 'react-icons/pi';
 import { BiBug } from 'react-icons/bi';
-import { HiOutlineDocumentText } from 'react-icons/hi';
 
 const apmItems = [
-  { key: 'overview', label: 'Overview', icon: IoEyeSharp },
-  { key: 'resources', label: 'Resources', icon: IoCubeSharp },
-  { key: 'dependencies', label: 'Dependencies', icon: PiGraph },
-  { key: 'traces', label: 'Traces', icon: SiRelay },
-  { key: 'errors', label: 'Errors', icon: BiBug },
-  { key: 'logs', label: 'Logs', icon: HiOutlineDocumentText },
+  { key: 'overview', label: '개요', icon: IoEyeSharp },
+  { key: 'resources', label: '리소스', icon: IoCubeSharp },
+  { key: 'traces', label: '요청 추적', icon: SiRelay },
+  { key: 'errors-logs', label: '에러 로그', icon: BiBug },
 ] as const;
 
 type SectionKey = (typeof apmItems)[number]['key'];

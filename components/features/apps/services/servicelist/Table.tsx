@@ -1,8 +1,10 @@
+// 서비스 목록 테이블 (+페이지네이션)
 'use client';
 
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apps/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
+
 
 const columns = [
   {
@@ -59,12 +61,7 @@ export default function ServiceListTable({ services, pagination, onRowClick }: S
     <>
       <Table<ServiceSummary> columns={columns} data={services} showFavorite onRowClick={onRowClick} />
       {pagination && (
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          onPrev={pagination.onPrev}
-          onNext={pagination.onNext}
-        />
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPrev={pagination.onPrev} onNext={pagination.onNext} />
       )}
     </>
   );

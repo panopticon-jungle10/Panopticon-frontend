@@ -1,3 +1,5 @@
+// 선택된 지표에 따라 카드형 서비스 목록을 출력
+
 'use client';
 
 import { useMemo } from 'react';
@@ -10,39 +12,27 @@ const compactFormatter = Intl.NumberFormat('en', {
   maximumFractionDigits: 1,
 });
 
-const statusLabels: Record<MetricKey, Record<MetricTone, string>> = {
-  request_count: {
-    neutral: 'Traffic',
-    success: 'Traffic',
-    warning: 'Traffic',
-    danger: 'Traffic',
-  },
-  error_rate: {
-    neutral: 'Healthy',
-    success: 'Healthy',
-    warning: 'Warning',
-    danger: 'Critical',
-  },
-  latency_p95_ms: {
-    neutral: 'Good',
-    success: 'Excellent',
-    warning: 'Moderate',
-    danger: 'Slow',
-  },
-};
+function resolveErrorStatus(value: number): { tone: MetricTone; label: string } {
+  const percent = value * 100;
+  if (percent >= 5) return { tone: 'danger', label: 'Critical' };
+  if (percent >= 2) return { tone: 'warning', label: 'Warning' };
+  if (percent >= 1) return { tone: 'caution', label: 'Caution' };
+  return { tone: 'success', label: 'Healthy' };
+}
 
-function resolveTone(metric: MetricKey, value: number): MetricTone {
-  if (metric === 'error_rate') {
-    if (value >= 0.05) return 'danger';
-    if (value >= 0.01) return 'warning';
-    return 'success';
-  }
-  if (metric === 'latency_p95_ms') {
-    if (value >= 1000) return 'danger';
-    if (value >= 400) return 'warning';
-    return 'success';
-  }
-  return 'neutral';
+function resolveLatencyStatus(value: number): { tone: MetricTone; label: string } {
+  if (value >= 1000) return { tone: 'danger', label: 'Slow' };
+  if (value >= 400) return { tone: 'warning', label: 'Moderate' };
+  if (value >= 200) return { tone: 'caution', label: 'Good' };
+  return { tone: 'success', label: 'Excellent' };
+}
+
+function resolveRequestStatus(value: number, average: number): { tone: MetricTone; label: string } {
+  if (average <= 0) return { tone: 'neutral', label: 'Traffic' };
+  const ratio = value / average;
+  if (ratio >= 1.2) return { tone: 'neutral', label: 'High Traffic' };
+  if (ratio >= 0.8) return { tone: 'neutral', label: 'Stable' };
+  return { tone: 'neutral', label: 'Low Traffic' };
 }
 
 function formatLatency(latencyMs: number) {
@@ -68,6 +58,8 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
     () => [...services].sort((a, b) => pickMetricValue(b, metric) - pickMetricValue(a, metric)),
     [services, metric],
   );
+  const values = sorted.map((service) => pickMetricValue(service, metric));
+  const average = values.length ? values.reduce((sum, item) => sum + item, 0) / values.length : 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -75,22 +67,34 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
         let primaryValue = '';
         let secondaryValue = '';
         let tone: MetricTone = 'neutral';
+        let statusLabel = '';
+        const rawValue = pickMetricValue(service, metric);
+        const trendPercent = average === 0 ? 0 : ((rawValue - average) / average) * 100;
+        let isPositiveGood = true;
 
         if (metric === 'request_count') {
           primaryValue = compactFormatter.format(service.request_count);
           secondaryValue = `${service.request_count.toLocaleString()} requests`;
+          const status = resolveRequestStatus(service.request_count, average);
+          tone = status.tone;
+          statusLabel = status.label;
+          isPositiveGood = true;
         } else if (metric === 'error_rate') {
           const percent = service.error_rate * 100;
           primaryValue = `${percent.toFixed(2)}%`;
           secondaryValue = '최근 1시간 에러율';
-          tone = resolveTone(metric, service.error_rate);
+          const status = resolveErrorStatus(service.error_rate);
+          tone = status.tone;
+          statusLabel = status.label;
+          isPositiveGood = false;
         } else {
           primaryValue = formatLatency(service.latency_p95_ms);
           secondaryValue = 'P95 Latency';
-          tone = resolveTone(metric, service.latency_p95_ms);
+          const status = resolveLatencyStatus(service.latency_p95_ms);
+          tone = status.tone;
+          statusLabel = status.label;
+          isPositiveGood = false;
         }
-
-        const statusLabel = statusLabels[metric][tone];
 
         return (
           <ServiceMetricCard
@@ -101,6 +105,8 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
             secondaryValue={secondaryValue}
             statusLabel={statusLabel}
             tone={tone}
+            trendPercent={trendPercent}
+            isPositiveGood={isPositiveGood}
           />
         );
       })}
