@@ -16,9 +16,14 @@ interface MetricCardProps {
   isPositiveGood?: boolean;
 }
 
+// 카드 색상 톤 정의
 const toneStyles: Record<MetricTone, { border: string; primary: string; status: string }> = {
   neutral: { border: 'border-gray-300', primary: 'text-gray-900', status: 'text-gray-600' },
-  success: { border: 'border-emerald-400', primary: 'text-emerald-600', status: 'text-emerald-600' },
+  success: {
+    border: 'border-emerald-400',
+    primary: 'text-emerald-600',
+    status: 'text-emerald-600',
+  },
   caution: { border: 'border-yellow-400', primary: 'text-yellow-600', status: 'text-yellow-600' },
   warning: { border: 'border-orange-400', primary: 'text-orange-600', status: 'text-orange-600' },
   danger: { border: 'border-red-500', primary: 'text-red-600', status: 'text-red-600' },
@@ -48,6 +53,7 @@ export default function ServiceMetricCard({
     <article
       className={`rounded-2xl border ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
     >
+      {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">{serviceName}</p>
@@ -56,13 +62,21 @@ export default function ServiceMetricCard({
           </span>
         </div>
       </div>
+      {/* 메인 값 */}
       <div className={`text-3xl font-semibold ${toneClass.primary}`}>{primaryValue}</div>
+      {/* 보조 설명 */}
       <p className="text-sm text-gray-600 mt-1">{secondaryValue}</p>
+
+      {/*하단 상태 표시: 상태 라벨 + 트렌드 퍼센트*/}
       <div className="mt-4 flex items-center justify-between text-sm">
         <span className={`font-medium ${toneClass.status}`}>{statusLabel ?? '-'}</span>
         {trendValue !== null && (
           <span className={`inline-flex items-center gap-1 font-medium ${trendColor}`}>
-            {arrowUp ? <FiArrowUpRight className="w-4 h-4" /> : <FiArrowDownRight className="w-4 h-4" />}
+            {arrowUp ? (
+              <FiArrowUpRight className="w-4 h-4" />
+            ) : (
+              <FiArrowDownRight className="w-4 h-4" />
+            )}
             {Math.abs(trendValue).toFixed(0)}%
           </span>
         )}
@@ -70,5 +84,3 @@ export default function ServiceMetricCard({
     </article>
   );
 }
-
-

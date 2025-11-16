@@ -5,7 +5,6 @@ import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apps/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 
-
 const columns = [
   {
     key: 'service_name' as keyof ServiceSummary,
@@ -56,12 +55,26 @@ interface ServiceListTableProps {
   onRowClick: (service: ServiceSummary) => void;
 }
 
-export default function ServiceListTable({ services, pagination, onRowClick }: ServiceListTableProps) {
+export default function ServiceListTable({
+  services,
+  pagination,
+  onRowClick,
+}: ServiceListTableProps) {
   return (
     <>
-      <Table<ServiceSummary> columns={columns} data={services} showFavorite onRowClick={onRowClick} />
+      <Table<ServiceSummary>
+        columns={columns}
+        data={services}
+        showFavorite
+        onRowClick={onRowClick}
+      />
       {pagination && (
-        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPrev={pagination.onPrev} onNext={pagination.onNext} />
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          onPrev={pagination.onPrev}
+          onNext={pagination.onNext}
+        />
       )}
     </>
   );

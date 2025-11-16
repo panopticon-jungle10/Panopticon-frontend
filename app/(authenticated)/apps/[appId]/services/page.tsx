@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import ServiceListSidebar from '@/components/features/apps/services/servicelist/Sidebar';
@@ -22,6 +22,7 @@ export default function ServicesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // 시간 범위 생성
   const timeRange = useMemo(() => {
     const now = new Date();
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
@@ -31,6 +32,7 @@ export default function ServicesPage() {
     };
   }, []);
 
+  // 서비스 API 호출
   const { data, isLoading, isError } = useQuery({
     queryKey: ['services', appId, timeRange],
     queryFn: () =>
@@ -42,6 +44,7 @@ export default function ServicesPage() {
 
   const services = data?.services ?? [];
 
+  // 검색 필터 적용
   const filteredServices = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
     if (!keyword) return services;
@@ -52,36 +55,38 @@ export default function ServicesPage() {
     );
   }, [services, searchKeyword]);
 
+  // 페이지네이션
   const totalItems = filteredServices.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  useEffect(() => {
-    setPage((prev) => Math.min(prev, totalPages));
-  }, [totalPages]);
+  const currentPage = useMemo(() => Math.min(page, totalPages), [page, totalPages]);
 
   const paginatedServices = useMemo(() => {
-    const start = (page - 1) * pageSize;
+    const start = (currentPage - 1) * pageSize;
     return filteredServices.slice(start, start + pageSize);
-  }, [filteredServices, page, pageSize]);
+  }, [filteredServices, currentPage, pageSize]);
 
-  const handlePrev = () => setPage((prev) => Math.max(1, prev - 1));
-  const handleNext = () => setPage((prev) => Math.min(totalPages, prev + 1));
+  const handlePrev = () => setPage(Math.max(1, currentPage - 1));
+  const handleNext = () => setPage(Math.min(totalPages, currentPage + 1));
 
+  // 카테고리 변경 시 초기화
   const handleCategoryChange = (nextCategory: ServiceListCategory) => {
     setCategory(nextCategory);
     setPage(1);
   };
 
+  // 서비스 클릭 시 상세 페이지 이동
   const handleServiceRowClick = (service: ServiceSummary) => {
     router.push(`/apps/${appId}/services/${service.service_name}`);
   };
 
+  // categoryMeta
   const categoryMeta = serviceListCategoryMeta[category];
   const isEmpty = !isLoading && filteredServices.length === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 space-y-6">
       <section className="flex flex-col gap-6 lg:flex-row">
+        {/* 좌측 사이드바 */}
         <aside className="w-full lg:w-64 shrink-0">
           <ServiceListSidebar value={category} onChange={handleCategoryChange} />
         </aside>
@@ -89,12 +94,14 @@ export default function ServicesPage() {
         <main className="flex-1 min-w-0 space-y-6">
           <div>
             <div className="flex items-baseline gap-3">
+              {/* 상단 제목 + 설명 */}
               <h2 className="text-xl font-semibold text-gray-900">{categoryMeta.title}</h2>
               <span className="text-xs text-gray-400">{filteredServices.length}개 서비스</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">{categoryMeta.subtitle}</p>
           </div>
 
+          {/* 필터 (검색 / 시간 / 페이지당 개수) */}
           <ServiceListFilters
             searchValue={searchKeyword}
             onSearchChange={(value) => {
@@ -108,6 +115,7 @@ export default function ServicesPage() {
             }}
           />
 
+          {/* 카테고리별 콘텐츠 */}
           <CategoryContent
             category={category}
             services={paginatedServices}
@@ -116,7 +124,7 @@ export default function ServicesPage() {
             isEmpty={isEmpty}
             onRowClick={handleServiceRowClick}
             pagination={{
-              page,
+              page: currentPage,
               totalPages,
               onPrev: handlePrev,
               onNext: handleNext,

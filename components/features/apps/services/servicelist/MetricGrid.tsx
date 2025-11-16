@@ -7,11 +7,13 @@ import type { ServiceSummary } from '@/types/apm';
 import ServiceMetricCard from './MetricCard';
 import type { MetricKey, MetricTone } from '@/types/servicelist';
 
+// 숫자를 compact 형태(15K, 1.2M 등)로 표시
 const compactFormatter = Intl.NumberFormat('en', {
   notation: 'compact',
   maximumFractionDigits: 1,
 });
 
+// 에러율 상태 계산 (danger / warning / caution / success)
 function resolveErrorStatus(value: number): { tone: MetricTone; label: string } {
   const percent = value * 100;
   if (percent >= 5) return { tone: 'danger', label: 'Critical' };
@@ -20,6 +22,7 @@ function resolveErrorStatus(value: number): { tone: MetricTone; label: string } 
   return { tone: 'success', label: 'Healthy' };
 }
 
+// 레이턴시 상태 계산
 function resolveLatencyStatus(value: number): { tone: MetricTone; label: string } {
   if (value >= 1000) return { tone: 'danger', label: 'Slow' };
   if (value >= 400) return { tone: 'warning', label: 'Moderate' };
@@ -27,6 +30,7 @@ function resolveLatencyStatus(value: number): { tone: MetricTone; label: string 
   return { tone: 'success', label: 'Excellent' };
 }
 
+// 요청수 상태 계산 (평균 대비 높음/낮음)
 function resolveRequestStatus(value: number, average: number): { tone: MetricTone; label: string } {
   if (average <= 0) return { tone: 'neutral', label: 'Traffic' };
   const ratio = value / average;
@@ -35,6 +39,7 @@ function resolveRequestStatus(value: number, average: number): { tone: MetricTon
   return { tone: 'neutral', label: 'Low Traffic' };
 }
 
+// 레이턴시 출력 포맷 (ms → s 변환)
 function formatLatency(latencyMs: number) {
   if (latencyMs >= 1000) {
     return `${(latencyMs / 1000).toFixed(2)}s`;
@@ -42,6 +47,7 @@ function formatLatency(latencyMs: number) {
   return `${Math.round(latencyMs)}ms`;
 }
 
+// metric에 맞는 값을 추출
 function pickMetricValue(service: ServiceSummary, metric: MetricKey) {
   if (metric === 'error_rate') return service.error_rate;
   if (metric === 'latency_p95_ms') return service.latency_p95_ms;
@@ -54,6 +60,7 @@ interface MetricGridProps {
 }
 
 export default function ServiceMetricGrid({ services, metric }: MetricGridProps) {
+  // 서비스 내림차순 정렬 + 평균 계산
   const sorted = useMemo(
     () => [...services].sort((a, b) => pickMetricValue(b, metric) - pickMetricValue(a, metric)),
     [services, metric],
@@ -64,14 +71,17 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {sorted.map((service) => {
+        // 카드에 표시되는 값들
         let primaryValue = '';
         let secondaryValue = '';
         let tone: MetricTone = 'neutral';
         let statusLabel = '';
         const rawValue = pickMetricValue(service, metric);
+        // trendPercent 계산: (현재 값 - 평균) / 평균 * 100
         const trendPercent = average === 0 ? 0 : ((rawValue - average) / average) * 100;
         let isPositiveGood = true;
 
+        // metric 종류에 따라 카드 내용 커스터마이징
         if (metric === 'request_count') {
           primaryValue = compactFormatter.format(service.request_count);
           secondaryValue = `${service.request_count.toLocaleString()} requests`;
