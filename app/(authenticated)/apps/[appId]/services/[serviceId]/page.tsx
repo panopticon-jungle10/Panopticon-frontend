@@ -2,12 +2,12 @@
 import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
 import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
-import ChartsSection from '@/components/features/apps/services/[serviceId]/section/Charts';
 import { TimeRange } from '@/types/time';
 import ResourcesSection from '@/components/features/apps/services/[serviceId]/section/Resources';
 import { useParams } from 'next/navigation';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
+import OverviewSection from '@/components/features/apps/services/[serviceId]/section/Overview';
 
 export default function ServiceOverview() {
   const params = useParams();
@@ -34,30 +34,23 @@ export default function ServiceOverview() {
         </div>
       </div>
 
-      <ChartsSection serviceName={serviceId} />
+      <div id="overview" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">개요</h2>
+        <OverviewSection serviceName={serviceId} />
+      </div>
 
       <div id="resources" className="pt-4 scroll-mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Resources</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">리소스</h2>
         <ResourcesSection serviceName={serviceId} />
       </div>
 
-      <div id="dependencies" className="pt-4 scroll-mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Dependencies</h2>
-        <div className="bg-white p-5 rounded-lg border border-gray-200">준비 중...</div>
-      </div>
-
       <div id="traces" className="pt-4 scroll-mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Traces</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">요청 추적</h2>
         <TracesSection serviceName={serviceId} />
       </div>
 
-      <div id="errors" className="pt-4 scroll-mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Errors</h2>
-        <div className="bg-white p-5 rounded-lg border border-gray-200">준비 중...</div>
-      </div>
-
-      <div id="logs" className="pt-4 scroll-mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Logs</h2>
+      <div id="errors-logs" className="pt-4 scroll-mt-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">에러 로그</h2>
         <LogsSection serviceName={serviceId} />
       </div>
     </div>

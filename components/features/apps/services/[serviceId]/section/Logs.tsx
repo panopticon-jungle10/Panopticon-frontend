@@ -1,8 +1,6 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import FilterBar from '../logs/FilterBar';
-import StatGrid from '../../../../../ui/StatGrid';
 import LogList from '../logs/LogList';
 import Pagination from '../../Pagination';
 import { useQuery } from '@tanstack/react-query';
@@ -17,9 +15,8 @@ interface LogsSectionProps {
 }
 
 export default function LogsSection({ serviceName }: LogsSectionProps) {
-  const [query, setQuery] = useState('');
-  const [level, setLevel] = useState<LogLevel | ''>('ERROR');
-  const [service, setService] = useState('');
+  // const [level, setLevel] = useState<LogLevel | ''>('ERROR');
+  const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
@@ -82,61 +79,18 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   }, [realtimeLogs]);
 
   // API 로그 + 실시간 로그 병합 (실시간 로그가 먼저 표시됨)
+  // API 호출 시 이미 level로 필터링되므로 클라이언트 필터링 불필요
   const logs = useMemo(() => {
     return [...realtimeLogEntries, ...apiLogs];
   }, [realtimeLogEntries, apiLogs]);
 
-  const stats = useMemo(() => {
-    // TODO: 백엔드에서 level_counts 필드를 제공하면 아래 코드로 교체
-    // const errorCount = logsData.level_counts?.ERROR ?? 0;
-    // const warnCount = logsData.level_counts?.WARN ?? 0;
-    // const infoCount = logsData.level_counts?.INFO ?? 0;
-    //
-    // 현재는 API 로그 + 실시간 로그를 합쳐서 계산
-    const errorCount = logs.filter((l) => l.level === 'ERROR').length;
-    const warnCount = logs.filter((l) => l.level === 'WARN').length;
-    const infoCount = logs.filter((l) => l.level === 'INFO').length;
-
-    // 총 로그 수 = API 로그 총 개수 + 실시간 로그 개수
-    const totalCount = (logsData?.total ?? 0) + realtimeLogs.length;
-
-    return [
-      { id: 'total', label: '총 로그', value: totalCount, tone: 'neutral' as const },
-      { id: 'error', label: '에러', value: errorCount, tone: 'danger' as const },
-      { id: 'warn', label: '경고', value: warnCount, tone: 'warning' as const },
-      { id: 'info', label: '정보', value: infoCount, tone: 'info' as const },
-    ];
-  }, [logs, logsData, realtimeLogs.length]);
-
-  const services: string[] = useMemo(() => {
-    const serviceSet = new Set(logs.map((l: { service: string }) => l.service));
-    return ['', ...Array.from(serviceSet)];
-  }, [logs]);
-  const levels = ['', 'ERROR', 'WARN', 'INFO', 'DEBUG'];
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return logs.filter(
-      (l: { message: string; service: string; traceId: string; level: string }) => {
-        const matchQuery =
-          q === '' ||
-          l.message.toLowerCase().includes(q) ||
-          l.service.toLowerCase().includes(q) ||
-          l.traceId.toLowerCase().includes(q);
-        const matchLevel = level === '' || l.level.toLowerCase() === level.toLowerCase();
-        const matchService = service === '' || l.service === service;
-        return matchQuery && matchLevel && matchService;
-      },
-    );
-  }, [query, level, service, logs]);
-
   // 페이지네이션 계산
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
   const paginatedLogs = useMemo(() => {
     const startIdx = (page - 1) * pageSize;
     const endIdx = startIdx + pageSize;
-    return filtered.slice(startIdx, endIdx);
-  }, [filtered, page, pageSize]);
+    return logs.slice(startIdx, endIdx);
+  }, [logs, page, pageSize]);
 
   const handlePrev = () => {
     if (page > 1) {
@@ -147,33 +101,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const handleNext = () => {
     if (page < totalPages) {
       setPage(page + 1);
-    }
-  };
-
-  const handleLevelChange = (v: string) => {
-    setLevel(v as LogLevel | '');
-    setPage(1); // 레벨 변경 시 첫 페이지로 이동
-  };
-
-  const handleStatClick = (itemId: string) => {
-    setPage(1); // 첫 페이지로 이동
-
-    // StatItem의 id에 따라 해당 로그 레벨 설정
-    switch (itemId) {
-      case 'error':
-        setLevel('ERROR');
-        break;
-      case 'warn':
-        setLevel('WARN');
-        break;
-      case 'info':
-        setLevel('INFO');
-        break;
-      case 'total':
-        setLevel(''); // 전체 보기
-        break;
-      default:
-        break;
     }
   };
 
@@ -191,17 +118,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   return (
     <>
       <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
-        <FilterBar
-          query={query}
-          level={level}
-          service={service}
-          levels={levels}
-          services={services}
-          onChangeQuery={setQuery}
-          onChangeLevel={handleLevelChange}
-          onChangeService={setService}
-        />
-        <StatGrid items={stats} onItemClick={handleStatClick} />
         <LogList items={paginatedLogs} onItemClick={handleLogClick} />
         <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
       </section>

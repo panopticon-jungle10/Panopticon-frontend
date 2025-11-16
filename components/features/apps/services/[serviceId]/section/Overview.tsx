@@ -8,11 +8,11 @@ import { POLLING_INTERVAL, useTimeRangeStore } from '@/src/store/timeRangeStore'
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
-interface ChartsProps {
+interface OverviewSectionProps {
   serviceName: string;
 }
 
-export default function ChartsSection({ serviceName }: ChartsProps) {
+export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   // Zustand store에서 시간 정보 가져오기
   const { startTime, endTime, interval } = useTimeRangeStore();
 

@@ -267,16 +267,6 @@ export interface LogEntry {
   timestamp: string;
 }
 
-/**
- * 통계 아이템 (StatGrid, StatCard에서 사용)
- */
-export interface StatItem {
-  id: string;
-  label: string;
-  value: number | string;
-  tone: 'neutral' | 'info' | 'warning' | 'danger';
-}
-
 // ---------- GET /spans ----------
 
 /**
