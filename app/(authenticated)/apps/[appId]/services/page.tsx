@@ -1,69 +1,27 @@
 'use client';
 
-import Table from '@/components/ui/Table';
-import ViewModeSelectBox from '@/components/features/apps/services/ViewModeSelectBox';
-import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
-import Pagination from '@/components/features/apps/services/Pagination';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import SearchInput from '@/components/ui/SearchInput';
 import { SelectDate } from '@/components/features/apps/services/SelectDate';
-import { useQuery } from '@tanstack/react-query';
+import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
+import ServiceListSidebar from '@/components/features/apps/services/servicelist/Sidebar';
+import CategoryContent from '@/components/features/apps/services/servicelist/CategoryContent';
 import { getServices } from '@/src/api/apm';
-import { ServiceSummary } from '@/types/apm';
-import { useRouter, useParams } from 'next/navigation';
-import StateHandler from '@/components/ui/StateHandler';
-
-const columns = [
-  {
-    key: 'service_name' as keyof ServiceSummary,
-    header: 'Name',
-    width: '30%',
-  },
-  {
-    key: 'environment' as keyof ServiceSummary,
-    header: 'Environment',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (
-      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">{value as string}</span>
-    ),
-  },
-  {
-    key: 'request_count' as keyof ServiceSummary,
-    header: 'Requests',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (value as number).toLocaleString(),
-  },
-  {
-    key: 'error_rate' as keyof ServiceSummary,
-    header: 'Error Rate',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => {
-      const errorRate = (value as number) * 100;
-      return (
-        <span className={errorRate > 2 ? 'text-red-600 font-semibold' : ''}>
-          {errorRate.toFixed(2)}%
-        </span>
-      );
-    },
-  },
-  {
-    key: 'latency_p95_ms' as keyof ServiceSummary,
-    header: 'P95 Latency',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => <span>{value as number}ms</span>,
-  },
-];
+import type { ServiceSummary } from '@/types/apm';
+import type { ServiceListCategory } from '@/types/servicelist';
 
 export default function ServicesPage() {
   const router = useRouter();
   const params = useParams();
   const appId = params.appId as string;
 
-  const [viewType, setViewType] = useState<'list' | 'map'>('list');
+  const [category, setCategory] = useState<ServiceListCategory>('list');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // 지난 2주일의 시간 범위 (useMemo로 안정화)
   const timeRange = useMemo(() => {
     const now = new Date();
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
@@ -73,71 +31,114 @@ export default function ServicesPage() {
     };
   }, []);
 
-  // API 데이터 가져오기
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['services', appId, page, pageSize, timeRange],
+    queryKey: ['services', appId, timeRange],
     queryFn: () =>
       getServices({
-        limit: pageSize,
+        limit: 1000,
         ...timeRange,
       }),
   });
 
-  // 페이징 계산
-  const services = data?.services || [];
-  const total = services.length;
-  const totalPages = Math.ceil(total / pageSize);
-  const isEmpty = services.length === 0;
+  const services = data?.services ?? [];
 
-  // 페이지 변경 핸들러
-  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
-  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+  const filteredServices = useMemo(() => {
+    const keyword = searchKeyword.trim().toLowerCase();
+    if (!keyword) return services;
+    return services.filter(
+      (service) =>
+        service.service_name.toLowerCase().includes(keyword) ||
+        service.environment.toLowerCase().includes(keyword),
+    );
+  }, [services, searchKeyword]);
 
-  // 테이블 행 클릭 핸들러
+  const totalItems = filteredServices.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    setPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  const paginatedServices = useMemo(() => {
+    if (category !== 'list') {
+      return filteredServices;
+    }
+    const start = (page - 1) * pageSize;
+    return filteredServices.slice(start, start + pageSize);
+  }, [category, filteredServices, page, pageSize]);
+
+  const handlePrev = () => setPage((prev) => Math.max(1, prev - 1));
+  const handleNext = () => setPage((prev) => Math.min(totalPages, prev + 1));
+
+  const handleCategoryChange = (nextCategory: ServiceListCategory) => {
+    setCategory(nextCategory);
+    setPage(1);
+  };
+
   const handleServiceRowClick = (service: ServiceSummary) => {
     router.push(`/apps/${appId}/services/${service.service_name}`);
   };
 
+  const showPagination = category === 'list';
+  const isEmpty = !isLoading && filteredServices.length === 0;
+
   return (
-    <div id="apm-services-container" className="p-8">
-      <h1 className="text-2xl font-bold mb-6">서비스 목록</h1>
-
-      <SearchInput placeholder="서비스 검색..." className="mb-4 w-80 h-10" />
-
-      <div className="flex justify-start items-center mb-2 gap-3">
-        <SelectDate />
-        <ViewModeSelectBox selected={viewType} onSelect={setViewType} />
-        <PageSizeSelect
-          value={pageSize}
-          onChange={(v) => {
-            setPageSize(v);
-            setPage(1);
-          }}
-        />
+    <div className="p-8 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">서비스 목록</h1>
+        <p className="text-sm text-gray-500 mt-1">좌측 사이드바에서 원하는 지표를 선택하세요.</p>
       </div>
 
-      {viewType === 'list' ? (
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="table"
-          height={500}
-          loadingMessage="서비스 목록을 불러오는 중..."
-          errorMessage="서비스 목록을 불러올 수 없습니다"
-          emptyMessage="표시할 서비스가 없습니다"
-        >
-          <Table<ServiceSummary>
-            columns={columns}
-            data={services}
-            showFavorite={true}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <SearchInput
+          value={searchKeyword}
+          onChange={(event) => {
+            setSearchKeyword(event.target.value);
+            setPage(1);
+          }}
+          placeholder="서비스 검색..."
+          className="w-full md:w-80 h-10"
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <SelectDate />
+          {showPagination && (
+            <PageSizeSelect
+              value={pageSize}
+              onChange={(value) => {
+                setPageSize(value);
+                setPage(1);
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="w-full lg:w-64 shrink-0">
+          <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <CategoryContent
+            category={category}
+            services={paginatedServices}
+            fullCount={filteredServices.length}
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
             onRowClick={handleServiceRowClick}
+            pagination={
+              showPagination
+                ? {
+                    page,
+                    totalPages,
+                    onPrev: handlePrev,
+                    onNext: handleNext,
+                  }
+                : undefined
+            }
           />
-          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
-        </StateHandler>
-      ) : (
-        <div>맵 뷰 구현 예정...</div>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
