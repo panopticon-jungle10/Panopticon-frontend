@@ -2,7 +2,18 @@
  * TimeRange 타입을 start_time과 end_time으로 변환하는 유틸리티
  */
 
-export type TimeRange = '15min' | '30min' | '45min' | '1h' | '3h' | '6h' | '12h' | '1d' | '1w' | '2w' | '1M';
+export type TimeRange =
+  | '15min'
+  | '30min'
+  | '45min'
+  | '1h'
+  | '3h'
+  | '6h'
+  | '12h'
+  | '1d'
+  | '1w'
+  | '2w'
+  | '1M';
 
 export interface TimeRangeParams {
   start_time: string;
