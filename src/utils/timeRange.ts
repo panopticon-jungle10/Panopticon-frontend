@@ -10,13 +10,72 @@ export interface TimeRangeParams {
 }
 
 /**
+ * 시간을 interval에 맞게 정렬 (올림)
+ * @param date - 정렬할 Date 객체
+ * @param interval - 정렬 기준 interval (예: "1m", "5m", "1h", "1d")
+ * @returns 정렬된 Date 객체
+ */
+function alignTimeToInterval(date: Date, interval: string): Date {
+  const aligned = new Date(date);
+
+  // interval 파싱
+  const match = interval.match(/^(\d+)(m|h|d)$/);
+  if (!match) return aligned;
+
+  const value = parseInt(match[1]);
+  const unit = match[2];
+
+  // 현재 시간 정보
+  const minutes = aligned.getMinutes();
+  const hours = aligned.getHours();
+
+  if (unit === 'm') {
+    // 분 단위: 다음 interval 분으로 올림
+    const nextMinute = Math.ceil(minutes / value) * value;
+    if (nextMinute >= 60) {
+      aligned.setHours(hours + 1);
+      aligned.setMinutes(0);
+    } else {
+      aligned.setMinutes(nextMinute);
+    }
+    aligned.setSeconds(0);
+    aligned.setMilliseconds(0);
+  } else if (unit === 'h') {
+    // 시간 단위: 다음 interval 시간으로 올림
+    const nextHour = Math.ceil(hours / value) * value;
+    if (nextHour >= 24) {
+      aligned.setDate(aligned.getDate() + 1);
+      aligned.setHours(0);
+    } else {
+      aligned.setHours(nextHour);
+    }
+    aligned.setMinutes(0);
+    aligned.setSeconds(0);
+    aligned.setMilliseconds(0);
+  } else if (unit === 'd') {
+    // 일 단위: 다음 자정으로 올림
+    aligned.setDate(aligned.getDate() + 1);
+    aligned.setHours(0);
+    aligned.setMinutes(0);
+    aligned.setSeconds(0);
+    aligned.setMilliseconds(0);
+  }
+
+  return aligned;
+}
+
+/**
  * 상대 시간(TimeRange)을 절대 시간(start_time, end_time)으로 변환
+ * 시간을 interval에 맞게 정렬하여 차트 x축이 깔끔하게 표시되도록 함
  * @param timeRange - 상대 시간 값 (예: "15min", "1h", "1d")
  * @returns start_time과 end_time (ISO 8601 형식)
  */
 export function convertTimeRangeToParams(timeRange: TimeRange): TimeRangeParams {
   const now = new Date();
-  const endTime = now.toISOString();
+  const interval = getIntervalForTimeRange(timeRange);
+
+  // 종료 시간: interval에 맞게 올림
+  const alignedEnd = alignTimeToInterval(now, interval);
 
   // 시간 차이 계산 (밀리초)
   const timeRangeMap: Record<TimeRange, number> = {
@@ -34,11 +93,11 @@ export function convertTimeRangeToParams(timeRange: TimeRange): TimeRangeParams 
   };
 
   const diffMs = timeRangeMap[timeRange];
-  const startTime = new Date(now.getTime() - diffMs).toISOString();
+  const alignedStart = new Date(alignedEnd.getTime() - diffMs);
 
   return {
-    start_time: startTime,
-    end_time: endTime,
+    start_time: alignedStart.toISOString(),
+    end_time: alignedEnd.toISOString(),
   };
 }
 
