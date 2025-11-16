@@ -7,6 +7,9 @@ import { TimeRange } from '@/types/time';
 import { toast } from 'react-toastify';
 
 const PRESET_RANGES: TimeRange[] = [
+  { label: '지난 15분', value: '15min', hours: 0.25 },
+  { label: '지난 30분', value: '30min', hours: 0.5 },
+  { label: '지난 45분', value: '45min', hours: 0.75 },
   { label: '지난 1시간', value: '1h', hours: 1 },
   { label: '지난 3시간', value: '3h', hours: 3 },
   { label: '지난 6시간', value: '6h', hours: 6 },

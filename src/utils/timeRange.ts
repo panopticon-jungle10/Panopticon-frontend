@@ -2,7 +2,7 @@
  * TimeRange 타입을 start_time과 end_time으로 변환하는 유틸리티
  */
 
-export type TimeRange = '1h' | '3h' | '6h' | '12h' | '1d' | '1w' | '2w' | '1M';
+export type TimeRange = '15min' | '30min' | '45min' | '1h' | '3h' | '6h' | '12h' | '1d' | '1w' | '2w' | '1M';
 
 export interface TimeRangeParams {
   start_time: string;
@@ -11,7 +11,7 @@ export interface TimeRangeParams {
 
 /**
  * 상대 시간(TimeRange)을 절대 시간(start_time, end_time)으로 변환
- * @param timeRange - 상대 시간 값 (예: "1h", "1d")
+ * @param timeRange - 상대 시간 값 (예: "15min", "1h", "1d")
  * @returns start_time과 end_time (ISO 8601 형식)
  */
 export function convertTimeRangeToParams(timeRange: TimeRange): TimeRangeParams {
@@ -20,6 +20,9 @@ export function convertTimeRangeToParams(timeRange: TimeRange): TimeRangeParams 
 
   // 시간 차이 계산 (밀리초)
   const timeRangeMap: Record<TimeRange, number> = {
+    '15min': 15 * 60 * 1000,
+    '30min': 30 * 60 * 1000,
+    '45min': 45 * 60 * 1000,
     '1h': 1 * 60 * 60 * 1000,
     '3h': 3 * 60 * 60 * 1000,
     '6h': 6 * 60 * 60 * 1000,
@@ -46,6 +49,9 @@ export function convertTimeRangeToParams(timeRange: TimeRange): TimeRangeParams 
  */
 export function getIntervalForTimeRange(timeRange: TimeRange): string {
   const intervalMap: Record<TimeRange, string> = {
+    '15min': '1m', // 15분 → 1분 간격 (15개 포인트)
+    '30min': '2m', // 30분 → 2분 간격 (15개 포인트)
+    '45min': '3m', // 45분 → 3분 간격 (15개 포인트)
     '1h': '5m', // 1시간 → 5분 간격 (12개 포인트)
     '3h': '10m', // 3시간 → 10분 간격 (18개 포인트)
     '6h': '30m', // 6시간 → 30분 간격 (12개 포인트)
