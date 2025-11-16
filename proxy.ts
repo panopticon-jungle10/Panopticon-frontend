@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 인증이 필요 없는 경로
-  const publicPaths = ['/auth', '/api/auth'];
+  const publicPaths = ['/', '/auth', '/api/auth'];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
   if (isPublicPath) {
