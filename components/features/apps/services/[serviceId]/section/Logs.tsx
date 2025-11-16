@@ -15,7 +15,8 @@ interface LogsSectionProps {
 }
 
 export default function LogsSection({ serviceName }: LogsSectionProps) {
-  const [level, setLevel] = useState<LogLevel | ''>('ERROR');
+  // const [level, setLevel] = useState<LogLevel | ''>('ERROR');
+  const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
@@ -78,25 +79,18 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   }, [realtimeLogs]);
 
   // API 로그 + 실시간 로그 병합 (실시간 로그가 먼저 표시됨)
+  // API 호출 시 이미 level로 필터링되므로 클라이언트 필터링 불필요
   const logs = useMemo(() => {
     return [...realtimeLogEntries, ...apiLogs];
   }, [realtimeLogEntries, apiLogs]);
 
-  // level 필터 적용
-  const filtered = useMemo(() => {
-    return logs.filter((l: { level: string }) => {
-      const matchLevel = level === '' || l.level.toLowerCase() === level.toLowerCase();
-      return matchLevel;
-    });
-  }, [level, logs]);
-
   // 페이지네이션 계산
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
   const paginatedLogs = useMemo(() => {
     const startIdx = (page - 1) * pageSize;
     const endIdx = startIdx + pageSize;
-    return filtered.slice(startIdx, endIdx);
-  }, [filtered, page, pageSize]);
+    return logs.slice(startIdx, endIdx);
+  }, [logs, page, pageSize]);
 
   const handlePrev = () => {
     if (page > 1) {
