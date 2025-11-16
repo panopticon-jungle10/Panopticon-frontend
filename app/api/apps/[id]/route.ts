@@ -10,6 +10,10 @@ export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
 
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
+    }
+
     const app = await prisma.application.findUnique({
       where: { id },
       select: {
@@ -45,6 +49,10 @@ export async function PUT(request: Request, { params }: { params: Params }) {
     const body = await request.json();
     const { name, description } = body;
 
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
+    }
+
     const updatedApp = await prisma.application.update({
       where: { id },
       data: {
@@ -77,6 +85,10 @@ export async function PUT(request: Request, { params }: { params: Params }) {
 export async function DELETE(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
+
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
+    }
 
     await prisma.application.delete({
       where: { id },

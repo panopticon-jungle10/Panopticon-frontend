@@ -6,6 +6,10 @@ export const runtime = 'nodejs';
 // GET /api/apps - 모든 앱 조회 (서비스 개수 포함)
 export async function GET() {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
+    }
+
     const apps = await prisma.application.findMany({
       select: {
         id: true,
@@ -42,6 +46,10 @@ export async function POST(request: Request) {
 
     if (!name || typeof name !== 'string') {
       return NextResponse.json({ error: 'Name is required and must be a string' }, { status: 400 });
+    }
+
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
     }
 
     const newApp = await prisma.application.create({

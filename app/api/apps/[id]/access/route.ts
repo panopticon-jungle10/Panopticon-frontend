@@ -10,6 +10,10 @@ export async function POST(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params;
 
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database is not available' }, { status: 503 });
+    }
+
     const updated = await prisma.application.update({
       where: { id },
       data: {
