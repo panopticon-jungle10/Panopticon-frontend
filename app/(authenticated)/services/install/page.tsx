@@ -1,21 +1,19 @@
 'use client';
 
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { platformsData } from '@/components/features/apps/install/platforms';
 import { frameworksData } from '@/components/features/apps/install/frameworks';
 import { PlatformType, FrameworkType } from '@/types/agent-install';
 
 export default function InstallPage() {
   const router = useRouter();
-  const params = useParams();
-  const appId = params.appId as string;
 
   const handlePlatformSelect = (platform: PlatformType) => {
-    router.push(`/apps/${appId}/install/${platform}`);
+    router.push(`/services/install/${platform}`);
   };
 
   const handleFrameworkSelect = (framework: FrameworkType) => {
-    router.push(`/apps/${appId}/install/${framework}`);
+    router.push(`/services/install/${framework}`);
   };
 
   const platformNames: Record<PlatformType, string> = {
@@ -172,7 +170,7 @@ export default function InstallPage() {
 
           <div className="mt-8 text-center">
             <button
-              onClick={() => router.push(`/apps/${appId}/services`)}
+              onClick={() => router.push('/services')}
               className="text-gray-600 hover:text-gray-900 underline text-sm"
             >
               Skip for now

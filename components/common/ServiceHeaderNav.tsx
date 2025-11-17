@@ -10,18 +10,17 @@ export function ServiceHeaderNav() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  const appId = params.appId;
   const serviceId = params.serviceId;
 
-  if (!appId || !serviceId) {
+  if (!serviceId) {
     return null;
   }
 
-  const basePath = '/apps/' + appId + '/services/' + serviceId;
+  const basePath = '/services/' + serviceId;
   const isDashboards = Boolean(pathname?.includes('/dashboards'));
 
   const handleBack = () => {
-    router.push('/apps/' + appId + '/services');
+    router.push('/services');
   };
 
   return (

@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import ServiceListSidebar from '@/components/features/apps/services/servicelist/Sidebar';
 import CategoryContent, {
@@ -17,8 +17,6 @@ import type { ServiceListCategory } from '@/types/servicelist';
 
 export default function ServicesPage() {
   const router = useRouter();
-  const params = useParams();
-  const appId = params.appId as string;
 
   const [category, setCategory] = useState<ServiceListCategory>('list');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -41,7 +39,7 @@ export default function ServicesPage() {
 
   // 서비스 API 호출
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['services', appId, timeRange],
+    queryKey: ['services', timeRange],
     queryFn: () =>
       getServices({
         limit: 1000,
@@ -82,7 +80,7 @@ export default function ServicesPage() {
 
   // 서비스 클릭 시 상세 페이지 이동
   const handleServiceRowClick = (service: ServiceSummary) => {
-    router.push(`/apps/${appId}/services/${service.service_name}`);
+    router.push(`/services/${service.service_name}`);
   };
 
   // categoryMeta
@@ -117,7 +115,7 @@ export default function ServicesPage() {
   // 설치 시작 클릭 -> Install Agent 페이지
   const handleServiceModalSubmit = () => {
     setIsServiceModalOpen(false);
-    router.push(`/apps/${appId}/install`);
+    router.push(`/services/install`);
   };
 
   return (
