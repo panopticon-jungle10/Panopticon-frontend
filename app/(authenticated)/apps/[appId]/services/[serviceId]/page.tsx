@@ -12,19 +12,19 @@ export default function ServiceOverview() {
 
   return (
     <div className="space-y-8">
-      <div id="overview" className="pt-4 scroll-mt-8">
+      <section id="overview" className="pt-4 scroll-mt-8">
         <OverviewSection serviceName={serviceId} />
       </section>
 
-      <div id="resources" className="pt-4 scroll-mt-8">
+      <section id="resources" className="pt-4 scroll-mt-8">
         <ResourcesSection serviceName={serviceId} />
       </section>
 
-      <div id="traces" className="pt-4 scroll-mt-8">
+      <section id="traces" className="pt-4 scroll-mt-8">
         <TracesSection serviceName={serviceId} />
       </section>
 
-      <div id="errors-logs" className="pt-4 scroll-mt-8">
+      <section id="errors-logs" className="pt-4 scroll-mt-8">
         <LogsSection serviceName={serviceId} />
       </section>
     </div>
