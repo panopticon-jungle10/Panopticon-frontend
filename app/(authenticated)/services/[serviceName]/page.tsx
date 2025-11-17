@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import LogsSection from '@/components/features/services/[serviceId]/section/Logs';
-import TracesSection from '@/components/features/services/[serviceId]/section/Traces';
-import ResourcesSection from '@/components/features/services/[serviceId]/section/Resources';
+import LogsSection from '@/components/features/services/[serviceName]/section/Logs';
+import TracesSection from '@/components/features/services/[serviceName]/section/Traces';
+import ResourcesSection from '@/components/features/services/[serviceName]/section/Resources';
 import { useParams } from 'next/navigation';
-import OverviewSection from '@/components/features/services/[serviceId]/section/Overview';
+import OverviewSection from '@/components/features/services/[serviceName]/section/Overview';
 import { HiArrowLeft } from 'react-icons/hi2';
 
 export default function ServiceOverview() {
