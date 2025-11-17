@@ -7,11 +7,7 @@ import {
   SERVICE_LANGUAGE_OPTIONS,
   getDefaultServiceFormValues,
 } from '@/types/CreateService';
-import type {
-  CreateServiceFormValues,
-  CreateServiceModalProps,
-  ServiceModalMode,
-} from '@/types/CreateService';
+import type { CreateServiceFormValues, CreateServiceModalProps } from '@/types/CreateService';
 
 export default function CreateServiceModal({
   open,
