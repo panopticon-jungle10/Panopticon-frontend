@@ -21,11 +21,10 @@ export default function ServiceOverview() {
     setTimeRange(range.value as TimeRangeType);
   };
 
-  const selectedTimeRange: TimeRange =
-    PRESET_RANGES.find((range) => range.value === timeRange) || {
-      label: timeRange,
-      value: timeRange,
-    };
+  const selectedTimeRange: TimeRange = PRESET_RANGES.find((range) => range.value === timeRange) || {
+    label: timeRange,
+    value: timeRange,
+  };
 
   return (
     <div className="space-y-8">
