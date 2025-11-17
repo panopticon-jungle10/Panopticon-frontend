@@ -185,6 +185,8 @@ export const getEndpointTraces = async (
 ): Promise<GetEndpointTracesResponse> => {
   const searchParams = buildSearchParams(params);
   const encodedEndpointName = encodeURIComponent(endpointName);
-  const url = `/services/${serviceName}/endpoints/${encodedEndpointName}/traces${toQueryString(searchParams)}`;
+  const url = `/services/${serviceName}/endpoints/${encodedEndpointName}/traces${toQueryString(
+    searchParams,
+  )}`;
   return fetchJson<GetEndpointTracesResponse>(url);
 };

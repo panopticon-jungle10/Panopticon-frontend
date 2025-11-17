@@ -385,7 +385,9 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
               onEvents={{
                 click: (params: { name?: string; dataIndex?: number }) => {
                   const endpointName =
-                    params.name || (params.dataIndex !== undefined && topEndpoints[params.dataIndex]?.endpoint_name);
+                    params.name ||
+                    (params.dataIndex !== undefined &&
+                      topEndpoints[params.dataIndex]?.endpoint_name);
                   if (endpointName) {
                     handleEndpointClick(endpointName);
                   }
