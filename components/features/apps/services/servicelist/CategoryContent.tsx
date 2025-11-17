@@ -3,29 +3,11 @@
 'use client';
 
 import StateHandler from '@/components/ui/StateHandler';
-import type { ServiceSummary } from '@/types/apm';
 import ServiceListTable from './Table';
 import ServiceMetricGrid from './MetricGrid';
 import Pagination from '@/components/features/apps/services/Pagination';
 
-import type { MetricKey, ServiceListCategory } from '@/types/servicelist';
-
-interface PaginationControls {
-  page: number;
-  totalPages: number;
-  onPrev: () => void;
-  onNext: () => void;
-}
-
-interface CategoryContentProps {
-  category: ServiceListCategory;
-  services: ServiceSummary[];
-  isLoading: boolean;
-  isError: boolean;
-  isEmpty: boolean;
-  onRowClick: (service: ServiceSummary) => void;
-  pagination?: PaginationControls;
-}
+import type { CategoryContentProps, MetricKey, ServiceListCategory } from '@/types/servicelist';
 
 export const serviceListCategoryMeta: Record<
   ServiceListCategory,

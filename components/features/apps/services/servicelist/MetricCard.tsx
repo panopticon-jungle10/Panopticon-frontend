@@ -2,16 +2,7 @@
 
 'use client';
 
-import type { MetricTone } from '@/types/servicelist';
-
-interface MetricCardProps {
-  serviceName: string;
-  environment: string;
-  primaryValue: string;
-  secondaryValue: string;
-  statusLabel?: string;
-  tone?: MetricTone;
-}
+import type { MetricCardProps, MetricTone } from '@/types/servicelist';
 
 // 카드 색상 톤 정의
 const toneStyles: Record<MetricTone, { border: string; primary: string; status: string }> = {

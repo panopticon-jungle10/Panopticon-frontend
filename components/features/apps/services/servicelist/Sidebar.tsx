@@ -1,6 +1,10 @@
 'use client';
 
-import type { ServiceListCategory, ServiceListSidebarItem } from '@/types/servicelist';
+import type {
+  ServiceListCategory,
+  ServiceListSidebarItem,
+  ServiceListSidebarProps,
+} from '@/types/servicelist';
 import { FiAlertTriangle, FiClock, FiList, FiTrendingUp } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
@@ -10,11 +14,6 @@ const sidebarItems: (ServiceListSidebarItem & { icon: IconType })[] = [
   { key: 'error_rate', label: '에러율', description: 'Error Rate', icon: FiAlertTriangle },
   { key: 'latency', label: 'Latency', description: 'Latency P95', icon: FiClock },
 ];
-
-interface ServiceListSidebarProps {
-  value: ServiceListCategory;
-  onChange: (category: ServiceListCategory) => void;
-}
 
 export default function ServiceListSidebar({ value, onChange }: ServiceListSidebarProps) {
   return (

@@ -5,13 +5,7 @@
 import SearchInput from '@/components/ui/SearchInput';
 import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
-
-interface ServiceListFiltersProps {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  pageSize: number;
-  onPageSizeChange: (value: number) => void;
-}
+import type { ServiceListFiltersProps } from '@/types/servicelist';
 
 export default function ServiceListFilters({
   searchValue,

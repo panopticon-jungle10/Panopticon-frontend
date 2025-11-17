@@ -4,6 +4,7 @@
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apps/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
+import type { PaginationControls } from '@/types/servicelist';
 
 const columns = [
   {
@@ -41,13 +42,6 @@ const columns = [
     render: (value: ServiceSummary[keyof ServiceSummary]) => <span>{value as number}ms</span>,
   },
 ];
-
-interface PaginationControls {
-  page: number;
-  totalPages: number;
-  onPrev: () => void;
-  onNext: () => void;
-}
 
 interface ServiceListTableProps {
   services: ServiceSummary[];
