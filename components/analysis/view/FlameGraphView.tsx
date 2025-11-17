@@ -274,10 +274,7 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Flame Graph</h3>
-          <p className="text-sm text-gray-500">전체 span 개수: {spans.length}</p>
-        </div>
+        <p className="text-sm text-gray-500">전체 span 개수: {spans.length}</p>
         <div className="flex items-center gap-4">
           {Array.from({ length: 5 }).map((_, i) => {
             const b = getBucketByIndex(i);
