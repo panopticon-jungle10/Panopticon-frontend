@@ -32,6 +32,8 @@ export interface ServiceListFiltersProps {
   onSearchChange: (value: string) => void;
   pageSize: number;
   onPageSizeChange: (value: number) => void;
+  onEditClick?: () => void;
+  onCreateClick?: () => void;
 }
 
 export interface MetricCardProps {
