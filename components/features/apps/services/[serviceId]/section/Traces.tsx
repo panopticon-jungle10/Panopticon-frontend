@@ -65,7 +65,7 @@ const TRACE_TABLE_COLUMNS: Array<{
       if (ms >= 1000) {
         return `${(ms / 1000).toFixed(2)}s`;
       }
-      return `${ms}ms`;
+      return `${ms.toFixed(2)}ms`;
     },
   },
   {
@@ -266,7 +266,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
           <div style="margin:2px 0;">Service: ${trace.service}</div>
           <div style="margin:2px 0;">Resource: ${trace.resource}</div>
           <div style="margin:2px 0;">Time: ${time}</div>
-          <div style="margin:2px 0;">Duration: ${duration} ms</div>
+          <div style="margin:2px 0;">Duration: ${duration.toFixed(2)} ms</div>
           <div style="margin-top:8px;color:#3b82f6;font-size:11px;">Click to view details</div>
         `;
       },
