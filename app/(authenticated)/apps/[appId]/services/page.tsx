@@ -115,7 +115,7 @@ export default function ServicesPage() {
   };
 
   // 설치 시작 클릭 -> Install Agent 페이지
-  const handleServiceModalSubmit = (values: CreateServiceFormValues) => {
+  const handleServiceModalSubmit = () => {
     setIsServiceModalOpen(false);
     router.push(`/apps/${appId}/install`);
   };
