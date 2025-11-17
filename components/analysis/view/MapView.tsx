@@ -245,11 +245,7 @@ export default function MapView({ spans, onSpanSelect }: MapViewProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div className="flex items-center gap-2">
-          <div className="w-1 h-6 bg-linear-to-b from-indigo-500 to-purple-500 rounded-full"></div>
-          <h3 className="text-base font-semibold text-gray-900">Span Dependency Graph</h3>
-        </div>
+      <div className="flex items-center justify-end mb-4 px-1">
         <div className="flex items-center gap-3 text-xs text-gray-600">
           {Array.from({ length: 5 }).map((_, i) => {
             const b = getBucketByIndex(i);
