@@ -76,7 +76,6 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
         let secondaryValue = '';
         let tone: MetricTone = 'neutral';
         const statusLabel = '';
-        const rawValue = pickMetricValue(service, metric);
 
         // metric 종류에 따라 카드 내용 커스터마이징
         if (metric === 'request_count') {

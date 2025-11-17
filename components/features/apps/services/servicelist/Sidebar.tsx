@@ -1,10 +1,6 @@
 'use client';
 
-import type {
-  ServiceListCategory,
-  ServiceListSidebarItem,
-  ServiceListSidebarProps,
-} from '@/types/servicelist';
+import type { ServiceListSidebarItem, ServiceListSidebarProps } from '@/types/servicelist';
 import { FiAlertTriangle, FiClock, FiList, FiTrendingUp } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
