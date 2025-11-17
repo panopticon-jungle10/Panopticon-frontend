@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Dashboard } from '../../../../src/types/dashboard';
+import { Dashboard } from '../../../src/types/dashboard';
 import { DashboardTag } from './DashboardTag';
 import { HiHeart, HiOutlineStar, HiStar } from 'react-icons/hi2';
 

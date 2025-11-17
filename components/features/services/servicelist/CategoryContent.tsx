@@ -5,7 +5,7 @@
 import StateHandler from '@/components/ui/StateHandler';
 import ServiceListTable from './Table';
 import ServiceMetricGrid from './MetricGrid';
-import Pagination from '@/components/features/apps/services/Pagination';
+import Pagination from '@/components/features/services/Pagination';
 
 import type { CategoryContentProps, MetricKey, ServiceListCategory } from '@/types/servicelist';
 

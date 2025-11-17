@@ -2,7 +2,7 @@
 'use client';
 
 import Table from '@/components/ui/Table';
-import Pagination from '@/components/features/apps/services/Pagination';
+import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 import type { PaginationControls } from '@/types/servicelist';
 

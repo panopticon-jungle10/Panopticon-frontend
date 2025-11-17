@@ -9,7 +9,7 @@ import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
 import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
-import Pagination from '@/components/features/apps/services/Pagination';
+import Pagination from '@/components/features/services/Pagination';
 import EndpointTraceAnalysis from '@/components/analysis/EndpointTraceAnalysis';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });

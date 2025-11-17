@@ -2,7 +2,7 @@
 
 import { LogEntry } from '@/types/apm';
 import { FiX, FiClock, FiTag, FiLink } from 'react-icons/fi';
-import LevelBadge from '@/components/features/apps/services/[serviceId]/logs/LevelBadge';
+import LevelBadge from '@/components/features/services/[serviceId]/logs/LevelBadge';
 
 interface LogAnalysisProps {
   log: LogEntry | null;

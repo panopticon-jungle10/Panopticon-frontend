@@ -3,8 +3,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { DashboardEditor } from '@/components/features/apps/dashboard/DashboardEditor';
-import { mockDashboards } from '@/components/features/apps/dashboard/mock';
+import { DashboardEditor } from '@/components/features/dashboard/DashboardEditor';
+import { mockDashboards } from '@/components/features/dashboard/mock';
 
 export default function DashboardDetailPage() {
   const { dashboardId } = useParams();

@@ -3,7 +3,7 @@
 'use client';
 
 import SearchInput from '@/components/ui/SearchInput';
-import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
+import PageSizeSelect from '@/components/features/services/PageSizeSelect';
 import type { ServiceListFiltersProps } from '@/types/servicelist';
 
 export default function ServiceListFilters({

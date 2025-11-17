@@ -4,10 +4,10 @@
 
 import { useState } from 'react';
 import { mockDashboards } from './mock';
-import { Dashboard } from '../../../../src/types/dashboard';
+import { Dashboard } from '../../../src/types/dashboard';
 import { DashboardListItem } from './DashboardListItem';
 import { HiMagnifyingGlass, HiPlus } from 'react-icons/hi2';
-import Pagination from '@/components/features/apps/services/Pagination';
+import Pagination from '@/components/features/services/Pagination';
 
 const ITEMS_PER_PAGE = 10;
 

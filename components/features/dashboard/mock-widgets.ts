@@ -11,7 +11,7 @@ import {
   HiOutlineMap,
 } from 'react-icons/hi2';
 
-import type { DashboardWidget } from '../../../../src/types/dashboard';
+import type { DashboardWidget } from '../../../src/types/dashboard';
 
 export interface WidgetIcon {
   icon: React.ComponentType<{ className?: string }>;

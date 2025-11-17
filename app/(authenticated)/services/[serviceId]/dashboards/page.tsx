@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardList } from '@/components/features/apps/dashboard/DashboardList';
-import { DashboardEditor } from '@/components/features/apps/dashboard/DashboardEditor';
-import { mockDashboards } from '@/components/features/apps/dashboard/mock';
+import { DashboardList } from '@/components/features/dashboard/DashboardList';
+import { DashboardEditor } from '@/components/features/dashboard/DashboardEditor';
+import { mockDashboards } from '@/components/features/dashboard/mock';
 
 type View = 'list' | 'create' | 'view';
 

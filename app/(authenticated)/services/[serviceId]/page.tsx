@@ -1,10 +1,10 @@
 'use client';
 
-import LogsSection from '@/components/features/apps/services/[serviceId]/section/Logs';
-import TracesSection from '@/components/features/apps/services/[serviceId]/section/Traces';
-import ResourcesSection from '@/components/features/apps/services/[serviceId]/section/Resources';
+import LogsSection from '@/components/features/services/[serviceId]/section/Logs';
+import TracesSection from '@/components/features/services/[serviceId]/section/Traces';
+import ResourcesSection from '@/components/features/services/[serviceId]/section/Resources';
 import { useParams } from 'next/navigation';
-import OverviewSection from '@/components/features/apps/services/[serviceId]/section/Overview';
+import OverviewSection from '@/components/features/services/[serviceId]/section/Overview';
 
 export default function ServiceOverview() {
   const params = useParams();

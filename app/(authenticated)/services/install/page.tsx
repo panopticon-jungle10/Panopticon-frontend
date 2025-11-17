@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { platformsData } from '@/components/features/apps/install/platforms';
-import { frameworksData } from '@/components/features/apps/install/frameworks';
+import { platformsData } from '@/components/features/install/platforms';
+import { frameworksData } from '@/components/features/install/frameworks';
 import { PlatformType, FrameworkType } from '@/types/agent-install';
 
 export default function InstallPage() {

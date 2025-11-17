@@ -2,7 +2,7 @@
 
 'use client';
 
-import { DashboardEditor } from '@/components/features/apps/dashboard/DashboardEditor';
+import { DashboardEditor } from '@/components/features/dashboard/DashboardEditor';
 
 export default function CreateDashboardPage() {
   return <DashboardEditor mode="create" />;

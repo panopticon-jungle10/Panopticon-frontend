@@ -3,7 +3,7 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import type { CanvasWidget } from '../../../../src/types/dashboard';
+import type { CanvasWidget } from '../../../src/types/dashboard';
 
 interface Props {
   widgets: CanvasWidget[];

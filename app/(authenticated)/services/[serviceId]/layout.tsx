@@ -1,8 +1,8 @@
 'use client';
 
 import { ServiceHeaderNav } from '@/components/common/ServiceHeaderNav';
-import Sidebar from '@/components/features/apps/services/[serviceId]/Sidebar';
-import { SelectDate } from '@/components/features/apps/services/SelectDate';
+import Sidebar from '@/components/features/services/[serviceId]/Sidebar';
+import { SelectDate } from '@/components/features/services/SelectDate';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';

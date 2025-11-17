@@ -3,13 +3,13 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import ServiceListSidebar from '@/components/features/apps/services/servicelist/Sidebar';
+import ServiceListSidebar from '@/components/features/services/servicelist/Sidebar';
 import CategoryContent, {
   serviceListCategoryMeta,
-} from '@/components/features/apps/services/servicelist/CategoryContent';
-import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
-import CreateServiceModal from '@/components/features/apps/services/servicelist/CreateService';
-import { SelectDate } from '@/components/features/apps/services/SelectDate';
+} from '@/components/features/services/servicelist/CategoryContent';
+import ServiceListFilters from '@/components/features/services/servicelist/Filters';
+import CreateServiceModal from '@/components/features/services/servicelist/CreateService';
+import { SelectDate } from '@/components/features/services/SelectDate';
 import type { CreateServiceFormValues } from '@/types/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';

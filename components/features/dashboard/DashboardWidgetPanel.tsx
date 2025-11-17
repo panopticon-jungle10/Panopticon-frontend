@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { mockWidgets } from './mock-widgets';
-import { DashboardWidget } from '../../../../src/types/dashboard';
+import { DashboardWidget } from '../../../src/types/dashboard';
 
 interface Props {
   onSelectWidget: (widget: DashboardWidget) => void;
