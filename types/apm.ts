@@ -202,7 +202,12 @@ export interface GetTraceByIdResponse {
 /**
  * 메트릭 종류
  */
-export type MetricType = 'http_requests_total' | 'latency_p95_ms' | 'error_rate';
+export type MetricType =
+  | 'http_requests_total'
+  | 'latency_p95_ms'
+  | 'error_rate'
+  | 'latency_p90_ms'
+  | 'latency_p50_ms';
 
 /**
  * GET /services/{serviceName}/metrics - 쿼리 파라미터
@@ -265,16 +270,6 @@ export interface LogEntry {
   traceId: string;
   message: string;
   timestamp: string;
-}
-
-/**
- * 통계 아이템 (StatGrid, StatCard에서 사용)
- */
-export interface StatItem {
-  id: string;
-  label: string;
-  value: number | string;
-  tone: 'neutral' | 'info' | 'warning' | 'danger';
 }
 
 // ---------- GET /spans ----------
