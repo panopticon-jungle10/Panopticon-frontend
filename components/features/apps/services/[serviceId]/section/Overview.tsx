@@ -228,45 +228,48 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="chart"
-          height={250}
-          loadingMessage="메트릭을 불러오는 중..."
-          emptyMessage="표시할 메트릭 데이터가 없습니다"
-        >
-          <ReactECharts option={requestsOption} style={{ height: 250 }} />
-        </StateHandler>
-      </div>
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="chart"
-          height={250}
-          loadingMessage="메트릭을 불러오는 중..."
-          emptyMessage="표시할 에러 데이터가 없습니다"
-        >
-          <ReactECharts option={errorsOption} style={{ height: 250 }} />
-        </StateHandler>
-      </div>
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="chart"
-          height={250}
-          loadingMessage="레이턴시 데이터를 불러오는 중..."
-          emptyMessage="표시할 레이턴시 데이터가 없습니다"
-        >
-          <ReactECharts option={latencyOption} style={{ height: 250 }} />
-        </StateHandler>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">개요</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <StateHandler
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            type="chart"
+            height={250}
+            loadingMessage="메트릭을 불러오는 중..."
+            emptyMessage="표시할 메트릭 데이터가 없습니다"
+          >
+            <ReactECharts option={requestsOption} style={{ height: 250 }} />
+          </StateHandler>
+        </div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <StateHandler
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            type="chart"
+            height={250}
+            loadingMessage="메트릭을 불러오는 중..."
+            emptyMessage="표시할 에러 데이터가 없습니다"
+          >
+            <ReactECharts option={errorsOption} style={{ height: 250 }} />
+          </StateHandler>
+        </div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <StateHandler
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            type="chart"
+            height={250}
+            loadingMessage="레이턴시 데이터를 불러오는 중..."
+            emptyMessage="표시할 레이턴시 데이터가 없습니다"
+          >
+            <ReactECharts option={latencyOption} style={{ height: 250 }} />
+          </StateHandler>
+        </div>
       </div>
     </div>
   );

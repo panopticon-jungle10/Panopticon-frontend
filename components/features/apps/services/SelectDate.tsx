@@ -202,7 +202,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-48"
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-56"
         style={{ minHeight: '40px' }}
       >
         <FiClock className="w-4 h-4 text-gray-500" />
@@ -220,7 +220,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-48"
+            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-56"
           >
             {!showCalendar ? (
               <PresetDropdown

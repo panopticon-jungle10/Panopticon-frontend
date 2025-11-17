@@ -116,13 +116,14 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   };
 
   return (
-    <>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">에러 로그</h2>
       <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
         <LogList items={paginatedLogs} onItemClick={handleLogClick} />
         <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
       </section>
 
       <LogAnalysis log={selectedLog} isOpen={isPanelOpen} onClose={handleClosePanel} />
-    </>
+    </div>
   );
 }
