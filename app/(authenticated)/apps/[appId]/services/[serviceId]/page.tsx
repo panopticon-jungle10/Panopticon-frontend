@@ -24,9 +24,9 @@ export default function ServiceOverview() {
         <TracesSection serviceName={serviceId} />
       </section>
 
-      <section id="errors-logs" className="pt-4 scroll-mt-8">
+      {/* <section id="errors-logs" className="pt-4 scroll-mt-8">
         <LogsSection serviceName={serviceId} />
-      </section>
+      </section> */}
     </div>
   );
 }

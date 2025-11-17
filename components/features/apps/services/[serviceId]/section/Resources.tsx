@@ -10,6 +10,7 @@ import StateHandler from '@/components/ui/StateHandler';
 import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/apps/services/Pagination';
+import EndpointTraceAnalysis from '@/components/analysis/EndpointTraceAnalysis';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -110,6 +111,10 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
 
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
+
+  // 엔드포인트 트레이스 분석 패널 상태
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null);
+  const [isTracePanelOpen, setIsTracePanelOpen] = useState(false);
 
   // Dropdown 옵션 정의
   const metricOptions = [
@@ -337,6 +342,18 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     setCurrentPage(1);
   };
 
+  // 엔드포인트 클릭 핸들러
+  const handleEndpointClick = (endpointName: string) => {
+    setSelectedEndpoint(endpointName);
+    setIsTracePanelOpen(true);
+  };
+
+  // 트레이스 패널 닫기 핸들러
+  const handleTracePanelClose = () => {
+    setIsTracePanelOpen(false);
+    setTimeout(() => setSelectedEndpoint(null), 300);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -365,6 +382,15 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
               style={{ height: 350 }}
               notMerge={true}
               lazyUpdate={true}
+              onEvents={{
+                click: (params: { name?: string; dataIndex?: number }) => {
+                  const endpointName =
+                    params.name || (params.dataIndex !== undefined && topEndpoints[params.dataIndex]?.endpoint_name);
+                  if (endpointName) {
+                    handleEndpointClick(endpointName);
+                  }
+                },
+              }}
             />
           </div>
 
@@ -374,6 +400,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
               columns={ENDPOINT_TABLE_COLUMNS}
               data={paginatedEndpoints}
               className="w-full"
+              onRowClick={(row) => handleEndpointClick(row.endpoint_name)}
             />
           </div>
 
@@ -386,6 +413,17 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
           />
         </StateHandler>
       </div>
+
+      {/* Endpoint Trace Analysis Panel */}
+      {selectedEndpoint && (
+        <EndpointTraceAnalysis
+          key={selectedEndpoint}
+          isOpen={isTracePanelOpen}
+          onClose={handleTracePanelClose}
+          serviceName={serviceName}
+          endpointName={selectedEndpoint}
+        />
+      )}
     </div>
   );
 }

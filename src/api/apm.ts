@@ -175,7 +175,7 @@ export const getServiceErrors = async (
 };
 
 /**
- * GET /query/services/{serviceName}/endpoints/{endpointName}/traces
+ * GET /services/{serviceName}/endpoints/{endpointName}/traces
  * 특정 엔드포인트의 에러 또는 느린 트레이스 조회
  */
 export const getEndpointTraces = async (
@@ -184,6 +184,7 @@ export const getEndpointTraces = async (
   params: GetEndpointTracesParams,
 ): Promise<GetEndpointTracesResponse> => {
   const searchParams = buildSearchParams(params);
-  const url = `/query/services/${serviceName}/endpoints/${endpointName}/traces${toQueryString(searchParams)}`;
+  const encodedEndpointName = encodeURIComponent(endpointName);
+  const url = `/services/${serviceName}/endpoints/${encodedEndpointName}/traces${toQueryString(searchParams)}`;
   return fetchJson<GetEndpointTracesResponse>(url);
 };
