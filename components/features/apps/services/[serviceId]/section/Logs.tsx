@@ -9,6 +9,7 @@ import { LogLevel, LogEntry, LogItem } from '@/types/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
 import LogAnalysis from '@/components/analysis/LogAnalysis';
+import StateHandler from '@/components/ui/StateHandler';
 
 interface LogsSectionProps {
   serviceName: string;
@@ -18,7 +19,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   // const [level, setLevel] = useState<LogLevel | ''>('ERROR');
   const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
   const [page, setPage] = useState(1);
-  const pageSize = 15;
+  const pageSize = 10;
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -39,7 +40,11 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   });
 
   // 로그 목록 가져오기 (새 API)
-  const { data: logsData } = useQuery({
+  const {
+    data: logsData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['logs', serviceName, level, startTime, endTime],
     queryFn: () =>
       getLogs({
@@ -119,8 +124,19 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-gray-800">에러 로그</h2>
       <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
-        <LogList items={paginatedLogs} onItemClick={handleLogClick} />
-        <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
+        <StateHandler
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={logs.length === 0}
+          type="table"
+          height={200}
+          loadingMessage="에러 로그를 불러오는 중..."
+          errorMessage="에러 로그를 불러올 수 없습니다"
+          emptyMessage="에러 로그가 없습니다"
+        >
+          <LogList items={paginatedLogs} onItemClick={handleLogClick} />
+          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
+        </StateHandler>
       </section>
 
       <LogAnalysis log={selectedLog} isOpen={isPanelOpen} onClose={handleClosePanel} />
