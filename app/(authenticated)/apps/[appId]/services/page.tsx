@@ -10,7 +10,7 @@ import CategoryContent, {
 import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
 import CreateServiceModal, {
   CreateServiceFormValues,
-} from '@/components/features/apps/services/servicelist/serviceSetup';
+} from '@/components/features/apps/services/servicelist/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';
 import type { ServiceListCategory } from '@/types/servicelist';

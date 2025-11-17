@@ -6,12 +6,12 @@ import {
   SERVICE_ENVIRONMENT_OPTIONS,
   SERVICE_LANGUAGE_OPTIONS,
   getDefaultServiceFormValues,
-} from '@/types/serviceSetup';
+} from '@/types/CreateService';
 import type {
   CreateServiceFormValues,
   CreateServiceModalProps,
   ServiceModalMode,
-} from '@/types/serviceSetup';
+} from '@/types/CreateService';
 
 export default function CreateServiceModal({
   open,
@@ -20,10 +20,12 @@ export default function CreateServiceModal({
   onSubmit,
   initialValues,
 }: CreateServiceModalProps) {
+  // 폼 입력값
   const [formValues, setFormValues] = useState<CreateServiceFormValues>(
     getDefaultServiceFormValues(initialValues),
   );
 
+  // 모달이 열릴 때마다 form 값 초기화
   useEffect(() => {
     if (!open) return undefined;
     const raf = requestAnimationFrame(() => {
@@ -39,12 +41,15 @@ export default function CreateServiceModal({
     onSubmit?.(formValues);
   };
 
+  // submit 버튼 비활성 조건
   const isSubmitDisabled =
     !formValues.serviceName || (!formValues.collectLogs && !formValues.collectTraces);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      {/* 모달 컨테이너 */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        {/* 모달 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div>
             <p className="text-xs text-blue-500 font-semibold">Service List</p>
@@ -52,13 +57,20 @@ export default function CreateServiceModal({
               {mode === 'edit' ? '서비스 설정 수정' : '서비스 생성'}
             </h2>
           </div>
-          <button onClick={onClose} aria-label="닫기" className="text-gray-400 hover:text-gray-600 transition-colors">
+          {/* 닫기 버튼 */}
+          <button
+            onClick={onClose}
+            aria-label="닫기"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <HiXMark className="w-6 h-6" />
           </button>
         </div>
 
+        {/* 폼 시작 */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
+            {/* 서비스 이름 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 서비스 이름 <span className="text-red-500">*</span>
@@ -66,7 +78,9 @@ export default function CreateServiceModal({
               <input
                 type="text"
                 value={formValues.serviceName}
-                onChange={(event) => setFormValues((prev) => ({ ...prev, serviceName: event.target.value }))}
+                onChange={(event) =>
+                  setFormValues((prev) => ({ ...prev, serviceName: event.target.value }))
+                }
                 placeholder="예: user-service"
                 required
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -74,13 +88,16 @@ export default function CreateServiceModal({
               <p className="mt-1 text-xs text-gray-500">영문, 숫자, 하이픈(-)만 사용 가능합니다.</p>
             </div>
 
+            {/* 언어 선택 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 언어 <span className="text-red-500">*</span>
               </label>
               <select
                 value={formValues.language}
-                onChange={(event) => setFormValues((prev) => ({ ...prev, language: event.target.value }))}
+                onChange={(event) =>
+                  setFormValues((prev) => ({ ...prev, language: event.target.value }))
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 {SERVICE_LANGUAGE_OPTIONS.map((language) => (
@@ -91,13 +108,16 @@ export default function CreateServiceModal({
               </select>
             </div>
 
+            {/* 배포환경 선택 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 배포환경 <span className="text-red-500">*</span>
               </label>
               <select
                 value={formValues.environment}
-                onChange={(event) => setFormValues((prev) => ({ ...prev, environment: event.target.value }))}
+                onChange={(event) =>
+                  setFormValues((prev) => ({ ...prev, environment: event.target.value }))
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 {SERVICE_ENVIRONMENT_OPTIONS.map((environment) => (
@@ -108,11 +128,13 @@ export default function CreateServiceModal({
               </select>
             </div>
 
+            {/* 수집 대상 선택 (Logs, Traces) */}
             <div>
               <label className="block text-sm text-gray-700 mb-3">
                 수집객체 <span className="text-red-500">*</span>
               </label>
               <div className="space-y-3">
+                {/* Logs */}
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -124,6 +146,8 @@ export default function CreateServiceModal({
                   />
                   <span className="text-sm text-gray-700">로그 (Logs)</span>
                 </label>
+
+                {/* Traces */}
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -138,14 +162,17 @@ export default function CreateServiceModal({
               </div>
             </div>
 
+            {/* 안내 박스 */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="text-sm text-blue-900 mb-2">📦 Agent 설치 안내</h3>
               <p className="text-xs text-blue-700 leading-relaxed">
-                서비스 생성 후 Agent를 설치하셔야 데이터 수집이 시작됩니다. 설치 가이드는 생성 완료 페이지에서 확인하실 수 있습니다.
+                서비스 생성 후 Agent를 설치하셔야 데이터 수집이 시작됩니다. 설치 가이드는 생성 완료
+                페이지에서 확인하실 수 있습니다.
               </p>
             </div>
           </div>
 
+          {/* 제출 버튼 영역 */}
           <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
             <button
               type="button"
