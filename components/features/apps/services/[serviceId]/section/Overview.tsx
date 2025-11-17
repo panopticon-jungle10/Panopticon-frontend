@@ -228,7 +228,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">개요</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <StateHandler
           isLoading={isLoading}
@@ -267,6 +269,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         >
           <ReactECharts option={latencyOption} style={{ height: 250 }} />
         </StateHandler>
+      </div>
       </div>
     </div>
   );

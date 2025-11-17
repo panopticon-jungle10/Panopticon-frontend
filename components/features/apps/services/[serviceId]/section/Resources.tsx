@@ -244,21 +244,23 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
   }, [chartResources, topN, timeLabels, interval]);
 
   return (
-    <div className="bg-white p-5 rounded-lg border border-gray-200">
-      <StateHandler
-        isLoading={isLoading}
-        isError={isError}
-        isEmpty={isEmpty}
-        type="chart"
-        height={800}
-        loadingMessage="리소스 데이터를 불러오는 중..."
-        errorMessage="리소스 데이터를 불러올 수 없습니다"
-        emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
-      >
-        {/* 상단 컨트롤 */}
-        <div className="flex justify-end items-center mb-6">
-          <Dropdown value={topN} onChange={setTopN} options={topNOptions} />
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">리소스</h2>
+        <Dropdown value={topN} onChange={setTopN} options={topNOptions} />
+      </div>
+
+      <div className="bg-white p-5 rounded-lg border border-gray-200">
+        <StateHandler
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={isEmpty}
+          type="chart"
+          height={800}
+          loadingMessage="리소스 데이터를 불러오는 중..."
+          errorMessage="리소스 데이터를 불러올 수 없습니다"
+          emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
+        >
 
         {/* 차트 영역 - 3행 1열 */}
         <div className="space-y-6">
@@ -295,7 +297,8 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
             />
           </div>
         </div>
-      </StateHandler>
+        </StateHandler>
+      </div>
     </div>
   );
 }

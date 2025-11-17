@@ -354,8 +354,10 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-lg border border-gray-200">
-      <StateHandler
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">요청 추적</h2>
+      <div className="bg-white p-5 rounded-lg border border-gray-200">
+        <StateHandler
         isLoading={isLoading}
         isError={isError}
         isEmpty={isEmpty}
@@ -399,17 +401,18 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
           onPrev={handlePrevPage}
           onNext={handleNextPage}
         />
-      </StateHandler>
+        </StateHandler>
 
-      {/* Trace Analysis Panel */}
-      {selectedTraceId && (
-        <TraceAnalysis
-          key={selectedTraceId}
-          isOpen={isPanelOpen}
-          onClose={handleClosePanel}
-          traceId={selectedTraceId}
-        />
-      )}
+        {/* Trace Analysis Panel */}
+        {selectedTraceId && (
+          <TraceAnalysis
+            key={selectedTraceId}
+            isOpen={isPanelOpen}
+            onClose={handleClosePanel}
+            traceId={selectedTraceId}
+          />
+        )}
+      </div>
     </div>
   );
 }
