@@ -124,8 +124,8 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-gray-50 p-8 space-y-6">
       <section className="flex flex-col gap-6 lg:flex-row">
         {/* 좌측 사이드바 */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-4 lg:sticky lg:top-6 lg:self-start lg:z-10">
-          <div className="space-y-4">
+        <aside className="w-full lg:w-56 shrink-0 space-y-4 lg:sticky lg:top-6 lg:self-start lg:z-10">
+          <div className="space-y-4 w-full">
             <ServiceListSidebar value={category} onChange={handleCategoryChange} />
             <SelectDate className="w-full" />
           </div>
