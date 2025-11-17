@@ -42,7 +42,7 @@ export default function CreateServiceModal({
     !formValues.serviceName || (!formValues.collectLogs && !formValues.collectTraces);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
       {/* 모달 컨테이너 */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         {/* 모달 헤더 */}
@@ -138,7 +138,7 @@ export default function CreateServiceModal({
                     onChange={(event) =>
                       setFormValues((prev) => ({ ...prev, collectLogs: event.target.checked }))
                     }
-                    className="w-5 h-5 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500"
+                    className="w-5 h-5 border-gray-300 rounded accent-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700">로그 (Logs)</span>
                 </label>
@@ -151,7 +151,7 @@ export default function CreateServiceModal({
                     onChange={(event) =>
                       setFormValues((prev) => ({ ...prev, collectTraces: event.target.checked }))
                     }
-                    className="w-5 h-5 border-gray-300 rounded text-blue-600 focus:ring-2 focus:ring-blue-500"
+                    className="w-5 h-5 border-gray-300 rounded accent-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700">트레이스 (Traces)</span>
                 </label>

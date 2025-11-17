@@ -9,6 +9,7 @@ import CategoryContent, {
 } from '@/components/features/apps/services/servicelist/CategoryContent';
 import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
 import CreateServiceModal from '@/components/features/apps/services/servicelist/CreateService';
+import { SelectDate } from '@/components/features/apps/services/SelectDate';
 import type { CreateServiceFormValues } from '@/types/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';
@@ -113,9 +114,10 @@ export default function ServicesPage() {
     openServiceModal('edit');
   };
 
+  // 설치 시작 클릭 -> Install Agent 페이지
   const handleServiceModalSubmit = (values: CreateServiceFormValues) => {
-    // TODO: replace with real API integration
-    console.info('서비스 구성 정보 제출:', values, serviceModalMode);
+    setIsServiceModalOpen(false);
+    router.push(`/apps/${appId}/install`);
   };
 
   return (
@@ -123,7 +125,10 @@ export default function ServicesPage() {
       <section className="flex flex-col gap-6 lg:flex-row">
         {/* 좌측 사이드바 */}
         <aside className="w-full lg:w-64 shrink-0">
-          <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+          <div className="sticky top-6 space-y-4">
+            <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+            <SelectDate />
+          </div>
         </aside>
 
         <main className="flex-1 min-w-0 space-y-6">
