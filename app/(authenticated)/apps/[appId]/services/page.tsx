@@ -8,9 +8,8 @@ import CategoryContent, {
   serviceListCategoryMeta,
 } from '@/components/features/apps/services/servicelist/CategoryContent';
 import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
-import CreateServiceModal, {
-  CreateServiceFormValues,
-} from '@/components/features/apps/services/servicelist/CreateService';
+import CreateServiceModal from '@/components/features/apps/services/servicelist/CreateService';
+import type { CreateServiceFormValues } from '@/types/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';
 import type { ServiceListCategory } from '@/types/servicelist';
