@@ -27,14 +27,23 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
 
     // 루트 스팬 찾기
     const rootSpan = spans.find((s) => !s.parent_span_id);
-    if (!rootSpan) return { flameBlocks: [], maxDepth: 0 };
+    if (!rootSpan) {
+      return { flameBlocks: [], maxDepth: 0 };
+    }
+
+    // 모든 스팬 ID 목록 생성
+    const spanIds = new Set(spans.map((s) => s.span_id));
 
     const blocks: FlameBlock[] = [];
     let maxDepthFound = 0;
 
-    // 루트 스팬의 시작 시간과 duration을 기준으로 사용
-    const rootStartTime = new Date(rootSpan.timestamp).getTime();
-    const rootDuration = rootSpan.duration_ms;
+    // 전체 트레이스의 시작 시간과 종료 시간 계산 (모든 스팬을 포함)
+    const allStartTimes = spans.map((s) => new Date(s.timestamp).getTime());
+    const allEndTimes = spans.map((s) => new Date(s.timestamp).getTime() + s.duration_ms);
+
+    const traceStartTime = Math.min(...allStartTimes);
+    const traceEndTime = Math.max(...allEndTimes);
+    const traceDuration = traceEndTime - traceStartTime;
 
     // 재귀적으로 블록 생성
     const buildBlocks = (span: SpanItem, depth: number) => {
@@ -44,9 +53,9 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
       const spanStartTime = new Date(span.timestamp).getTime();
       const spanDuration = span.duration_ms;
 
-      // 루트 스팬 기준으로 상대적 위치와 너비 계산
-      const startOffset = (spanStartTime - rootStartTime) / rootDuration;
-      const widthRatio = spanDuration / rootDuration;
+      // 전체 트레이스 기준으로 상대적 위치와 너비 계산
+      const startOffset = (spanStartTime - traceStartTime) / traceDuration;
+      const widthRatio = spanDuration / traceDuration;
 
       // 현재 스팬의 블록 추가
       blocks.push({
@@ -57,7 +66,16 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
       });
 
       // 자식 스팬들 찾기
-      const children = spans.filter((s) => s.parent_span_id === span.span_id);
+      // 1. 직접적인 자식들 (parent_span_id가 현재 span_id와 일치)
+      const directChildren = spans.filter((s) => s.parent_span_id === span.span_id);
+
+      // 2. orphaned spans인 경우 루트의 자식으로 처리
+      const adoptedChildren =
+        span.span_id === rootSpan.span_id
+          ? spans.filter((s) => s.parent_span_id && !spanIds.has(s.parent_span_id))
+          : [];
+
+      const children = [...directChildren, ...adoptedChildren];
 
       // 자식들을 재귀적으로 처리
       children.forEach((child) => {
@@ -78,9 +96,12 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
   const option = useMemo(() => {
     if (flameBlocks.length === 0) return {};
 
-    // 루트 스팬의 duration을 전체 시간으로 사용
-    const rootSpan = spans.find((s) => !s.parent_span_id);
-    const totalDuration = rootSpan?.duration_ms || 0;
+    // 전체 트레이스의 duration 계산
+    const allStartTimes = spans.map((s) => new Date(s.timestamp).getTime());
+    const allEndTimes = spans.map((s) => new Date(s.timestamp).getTime() + s.duration_ms);
+    const traceStartTime = Math.min(...allStartTimes);
+    const traceEndTime = Math.max(...allEndTimes);
+    const totalDuration = traceEndTime - traceStartTime;
 
     // Custom 시리즈 data 생성 (0-totalDuration 범위로 변경)
     const seriesData = flameBlocks.map((block) => {
@@ -105,7 +126,7 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
       grid: {
         left: 10,
         right: 10,
-        top: 40,
+        top: 0,
         bottom: 10,
       },
       tooltip: {
@@ -166,7 +187,7 @@ export default function FlameGraphView({ spans, onSpanSelect }: FlameGraphViewPr
         type: 'value',
         min: 0,
         max: (maxDepth + 1) * (blockHeight + blockGap),
-        inverse: true, // Y축 반전 (위에서 아래로)
+        inverse: false, // Y축 반전 (위에서 아래로)
         show: false,
       },
       series: [
