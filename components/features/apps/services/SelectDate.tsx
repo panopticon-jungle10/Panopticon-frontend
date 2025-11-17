@@ -140,7 +140,7 @@ interface SelectDateProps {
   className?: string;
 }
 
-export const SelectDate = ({ value, onChange }: SelectDateProps) => {
+export const SelectDate = ({ value, onChange, className }: SelectDateProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedRange, setSelectedRange] = useState<TimeRange>(value || PRESET_RANGES[0]);
@@ -197,12 +197,12 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className={`relative w-48 ${className ?? ''}`}>
       {/* 선택된 범위 표시 버튼 */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-48"
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-full"
         style={{ minHeight: '40px' }}
       >
         <FiClock className="w-4 h-4 text-gray-500" />
