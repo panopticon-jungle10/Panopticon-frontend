@@ -75,11 +75,8 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
         let primaryValue = '';
         let secondaryValue = '';
         let tone: MetricTone = 'neutral';
-        let statusLabel = '';
+        const statusLabel = '';
         const rawValue = pickMetricValue(service, metric);
-        // trendPercent 계산: (현재 값 - 평균) / 평균 * 100
-        const trendPercent = average === 0 ? 0 : ((rawValue - average) / average) * 100;
-        let isPositiveGood = true;
 
         // metric 종류에 따라 카드 내용 커스터마이징
         if (metric === 'request_count') {
@@ -87,23 +84,15 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
           secondaryValue = `${service.request_count.toLocaleString()} requests`;
           const status = resolveRequestStatus(service.request_count, average);
           tone = status.tone;
-          statusLabel = status.label;
-          isPositiveGood = true;
         } else if (metric === 'error_rate') {
           const percent = service.error_rate * 100;
           primaryValue = `${percent.toFixed(2)}%`;
-          secondaryValue = '최근 1시간 에러율';
           const status = resolveErrorStatus(service.error_rate);
           tone = status.tone;
-          statusLabel = status.label;
-          isPositiveGood = false;
         } else {
           primaryValue = formatLatency(service.latency_p95_ms);
-          secondaryValue = 'P95 Latency';
           const status = resolveLatencyStatus(service.latency_p95_ms);
           tone = status.tone;
-          statusLabel = status.label;
-          isPositiveGood = false;
         }
 
         return (
@@ -115,8 +104,6 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
             secondaryValue={secondaryValue}
             statusLabel={statusLabel}
             tone={tone}
-            trendPercent={trendPercent}
-            isPositiveGood={isPositiveGood}
           />
         );
       })}

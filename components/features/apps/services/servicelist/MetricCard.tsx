@@ -3,7 +3,6 @@
 'use client';
 
 import type { MetricTone } from '@/types/servicelist';
-import { FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi';
 
 interface MetricCardProps {
   serviceName: string;
@@ -12,8 +11,6 @@ interface MetricCardProps {
   secondaryValue: string;
   statusLabel?: string;
   tone?: MetricTone;
-  trendPercent?: number;
-  isPositiveGood?: boolean;
 }
 
 // 카드 색상 톤 정의
@@ -36,22 +33,16 @@ export default function ServiceMetricCard({
   secondaryValue,
   statusLabel,
   tone = 'neutral',
-  trendPercent,
-  isPositiveGood = true,
 }: MetricCardProps) {
-  const trendValue = typeof trendPercent === 'number' ? trendPercent : null;
-  const arrowUp = (trendValue ?? 0) >= 0;
-  const isGoodChange =
-    trendValue === null
-      ? null
-      : (trendValue > 0 && isPositiveGood) || (trendValue < 0 && !isPositiveGood);
-  const trendColor =
-    isGoodChange === null ? 'text-gray-400' : isGoodChange ? 'text-emerald-500' : 'text-red-500';
   const toneClass = toneStyles[tone];
+  const trimmed = primaryValue.trim();
+  const match = trimmed.match(/^([\d.,]+)/);
+  const numberPart = match ? match[1] : trimmed;
+  const unitPart = match ? trimmed.slice(match[1].length) : '';
 
   return (
     <article
-      className={`rounded-2xl border ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
+      className={`w-full max-w-[16rem] rounded-2xl border-[2px] ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
@@ -63,23 +54,16 @@ export default function ServiceMetricCard({
         </div>
       </div>
       {/* 메인 값 */}
-      <div className={`text-3xl font-semibold ${toneClass.primary}`}>{primaryValue}</div>
+      <div className={`text-right font-semibold ${toneClass.primary}`}>
+        <span className="inline-flex items-end justify-end gap-1 leading-none">
+          <span className="text-7xl">{numberPart}</span>
+          {unitPart && <span className="text-2xl pb-1">{unitPart}</span>}
+        </span>
+      </div>
       {/* 보조 설명 */}
-      <p className="text-sm text-gray-600 mt-1">{secondaryValue}</p>
-
-      {/*하단 상태 표시: 상태 라벨 + 트렌드 퍼센트*/}
-      <div className="mt-4 flex items-center justify-between text-sm">
+      <p className="text-sm text-gray-600 mt-1 text-right">{secondaryValue}</p>
+      <div className="mt-4 text-right text-sm">
         <span className={`font-medium ${toneClass.status}`}>{statusLabel ?? '-'}</span>
-        {trendValue !== null && (
-          <span className={`inline-flex items-center gap-1 font-medium ${trendColor}`}>
-            {arrowUp ? (
-              <FiArrowUpRight className="w-4 h-4" />
-            ) : (
-              <FiArrowDownRight className="w-4 h-4" />
-            )}
-            {Math.abs(trendValue).toFixed(0)}%
-          </span>
-        )}
       </div>
     </article>
   );
