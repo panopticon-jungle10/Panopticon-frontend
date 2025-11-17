@@ -5,7 +5,6 @@
 import StateHandler from '@/components/ui/StateHandler';
 import ServiceListTable from './Table';
 import ServiceMetricGrid from './MetricGrid';
-import Pagination from '@/components/features/services/Pagination';
 
 import type { CategoryContentProps, MetricKey, ServiceListCategory } from '@/types/servicelist';
 
@@ -85,14 +84,6 @@ export default function CategoryContent({
             />
           )}
         </StateHandler>
-      )}
-      {pagination && category !== 'list' && (
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          onPrev={pagination.onPrev}
-          onNext={pagination.onNext}
-        />
       )}
     </>
   );

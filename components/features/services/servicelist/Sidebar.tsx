@@ -22,7 +22,7 @@ export default function ServiceListSidebar({ value, onChange }: ServiceListSideb
               key={key}
               type="button"
               onClick={() => onChange(key)}
-              className={`w-full px-3 py-2.5 text-left rounded-lg transition flex items-center gap-3 ${
+              className={`w-full px-3 py-2.5 text-left rounded-lg transition flex items-center gap-3 hover:cursor-pointer ${
                 active ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
