@@ -91,7 +91,7 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h2 className="text-xl font-semibold text-gray-900">
-                {rootSpan?.name || 'Trace Analysis'}
+                {rootSpan?.name || '추적 분석'}
               </h2>
               {rootSpan?.status && (
                 <span
@@ -105,7 +105,7 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <span className="font-medium">트레이스 ID:</span>
+                <span className="font-medium">ID:</span>
                 <span className="font-mono text-xs">{traceId}</span>
               </div>
               {rootSpan?.service_name && (
