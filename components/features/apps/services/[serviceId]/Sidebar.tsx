@@ -9,7 +9,7 @@ const apmItems = [
   { key: 'overview', label: '개요', icon: IoEyeSharp },
   { key: 'resources', label: '리소스', icon: IoCubeSharp },
   { key: 'traces', label: '요청 추적', icon: SiRelay },
-  { key: 'errors-logs', label: '에러 로그', icon: BiBug },
+  { key: 'errors', label: '에러 로그', icon: BiBug },
 ] as const;
 
 type SectionKey = (typeof apmItems)[number]['key'];
