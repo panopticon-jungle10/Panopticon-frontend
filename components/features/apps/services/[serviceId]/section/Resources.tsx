@@ -36,30 +36,30 @@ function getChartColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
+type MetricType = 'requests' | 'latency' | 'errors';
+
 export default function ResourcesSection({ serviceName }: ResourcesSectionProps) {
   // Zustand store에서 시간 정보 가져오기
   const { startTime, endTime, interval } = useTimeRangeStore();
 
-  // Top N 상태 (모든 차트에 공통으로 적용)
-  const [topN, setTopN] = useState<1 | 2 | 3 | 4 | 5>(3);
+  // 선택된 메트릭 타입 (기본값: 요청수)
+  const [selectedMetric, setSelectedMetric] = useState<MetricType>('requests');
 
   // Dropdown 옵션 정의
-  const topNOptions = [
-    { label: 'Top 1', value: 1 as const },
-    { label: 'Top 2', value: 2 as const },
-    { label: 'Top 3', value: 3 as const },
-    { label: 'Top 4', value: 4 as const },
-    { label: 'Top 5', value: 5 as const },
+  const metricOptions = [
+    { label: '요청수', value: 'requests' as const },
+    { label: 'p95 레이턴시', value: 'latency' as const },
+    { label: '에러수', value: 'errors' as const },
   ];
 
-  // API 데이터 가져오기
+  // API 데이터 가져오기 (선택된 메트릭에 따라 Top 3만 가져오기)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['serviceEndpoints', serviceName, startTime, endTime],
+    queryKey: ['serviceEndpoints', serviceName, startTime, endTime, selectedMetric],
     queryFn: () =>
       getServiceEndpoints(serviceName, {
         from: startTime,
         to: endTime,
-        limit: 100,
+        limit: 3,
       }),
     retry: false,
     throwOnError: false,
@@ -106,25 +106,96 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     return labels;
   }, [interval]);
 
-  // Requests 차트 옵션
-  const requestsChartOption = useMemo(() => {
-    const topResources = chartResources.slice(0, topN);
+  // 선택된 메트릭에 따라 차트 설정 결정
+  const chartConfig = useMemo(() => {
+    if (selectedMetric === 'requests') {
+      return {
+        title: 'Requests',
+        yAxisLabel: '',
+        chartType: 'bar' as const,
+        getData: (resource: (typeof chartResources)[0]) => resource.requests,
+      };
+    } else if (selectedMetric === 'latency') {
+      return {
+        title: 'p95 Latency',
+        yAxisLabel: 'ms',
+        chartType: 'line' as const,
+        getData: (resource: (typeof chartResources)[0]) => resource.latency,
+      };
+    } else {
+      return {
+        title: 'Errors',
+        yAxisLabel: '',
+        chartType: 'bar' as const,
+        getData: (resource: (typeof chartResources)[0]) => resource.errors,
+      };
+    }
+  }, [selectedMetric]);
+
+  // 단일 차트 옵션
+  const chartOption = useMemo(() => {
+    const topResources = chartResources.slice(0, 3);
     const seriesData = topResources.map((resource, idx: number) => ({
-      name: resource.name,
-      type: 'bar' as const,
-      stack: 'total',
-      data: timeLabels.map(() => Math.floor(Math.random() * 1000) + 100),
-      barWidth: getBarWidthForResources(interval),
+      name: `top ${idx + 1}`,
+      type: chartConfig.chartType,
+      ...(chartConfig.chartType === 'bar' ? { stack: 'total' } : {}),
+      data: timeLabels.map(() => {
+        const baseValue = chartConfig.getData(resource);
+        // 랜덤 변동을 추가하여 시계열 데이터처럼 보이게 함
+        return Math.floor(baseValue * (0.8 + Math.random() * 0.4));
+      }),
+      resourceName: resource.name, // 실제 엔드포인트 이름 추가
+      requests: resource.requests,
+      latency: resource.latency,
+      errors: resource.errors,
+      ...(chartConfig.chartType === 'bar' ? { barWidth: getBarWidthForResources(interval) } : {}),
+      ...(chartConfig.chartType === 'line' ? { smooth: true } : {}),
       itemStyle: {
         color: getChartColor(idx),
       },
+      lineStyle:
+        chartConfig.chartType === 'line'
+          ? {
+              width: 2,
+              color: getChartColor(idx),
+            }
+          : undefined,
     }));
 
     return {
       backgroundColor: 'transparent',
       tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        trigger: 'item',
+        formatter: (params: {
+          seriesName: string;
+          value: number;
+          dataIndex: number;
+          data: {
+            resourceName?: string;
+            requests?: number;
+            latency?: number;
+            errors?: number;
+          };
+        }) => {
+          const seriesName = params.seriesName; // "top 1", "top 2", "top 3"
+          const dataIndex = params.dataIndex;
+          const xAxisLabel = timeLabels[dataIndex];
+
+          // 시리즈에서 리소스 정보 가져오기
+          const seriesIndex = parseInt(seriesName.split(' ')[1]) - 1; // "top 1" -> 0
+          const resource = topResources[seriesIndex];
+
+          if (!resource) return '';
+
+          return `
+            <div style="font-weight:700;margin-bottom:6px;font-size:13px;">${seriesName}</div>
+            <div style="margin:2px 0;font-weight:600;color:#3b82f6;">${resource.name}</div>
+            <div style="margin:4px 0 2px 0;font-size:11px;color:#6b7280;">Time: ${xAxisLabel}</div>
+            <div style="margin:2px 0;font-size:11px;">Requests: ${resource.requests}</div>
+            <div style="margin:2px 0;font-size:11px;">p95 Latency: ${resource.latency}ms</div>
+            <div style="margin:2px 0;font-size:11px;">Errors: ${resource.errors}</div>
+          `;
+        },
       },
       legend: {
         bottom: 0,
@@ -144,110 +215,24 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
       },
       yAxis: {
         type: 'value',
-        axisLabel: { color: '#6b7280', fontSize: 10 },
-        splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-      },
-      series: seriesData,
-    };
-  }, [chartResources, topN, timeLabels, interval]);
-
-  // p95 Latency 차트 옵션
-  const latencyChartOption = useMemo(() => {
-    const topResources = chartResources.slice(0, topN);
-    const seriesData = topResources.map((resource, idx: number) => ({
-      name: resource.name,
-      type: 'line' as const,
-      data: timeLabels.map(() => Math.floor(Math.random() * 500) + 50),
-      smooth: true,
-      lineStyle: {
-        width: 2,
-        color: getChartColor(idx),
-      },
-      itemStyle: {
-        color: getChartColor(idx),
-      },
-    }));
-
-    return {
-      backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'axis',
-      },
-      legend: {
-        bottom: 0,
-        textStyle: { fontSize: 10 },
-      },
-      grid: { left: 60, right: 20, top: 20, bottom: 100 },
-      xAxis: {
-        type: 'category',
-        data: timeLabels,
         axisLabel: {
           color: '#6b7280',
           fontSize: 10,
-          interval: getXAxisIntervalForResources(interval, timeLabels.length),
-          rotate: 45,
+          formatter: chartConfig.yAxisLabel ? `{value}${chartConfig.yAxisLabel}` : '{value}',
         },
-        axisLine: { lineStyle: { color: '#e5e7eb' } },
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: { color: '#6b7280', fontSize: 10, formatter: '{value}ms' },
         splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
       },
       series: seriesData,
     };
-  }, [chartResources, topN, timeLabels, interval]);
-
-  // Errors 차트 옵션
-  const errorsChartOption = useMemo(() => {
-    const topResources = chartResources.slice(0, topN);
-    const seriesData = topResources.map((resource, idx: number) => ({
-      name: resource.name,
-      type: 'bar' as const,
-      stack: 'total',
-      data: timeLabels.map(() => Math.floor(Math.random() * 50)),
-      barWidth: getBarWidthForResources(interval),
-      itemStyle: {
-        color: getChartColor(idx),
-      },
-    }));
-
-    return {
-      backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-      },
-      legend: {
-        bottom: 0,
-        textStyle: { fontSize: 10 },
-      },
-      grid: { left: 60, right: 20, top: 20, bottom: 100 },
-      xAxis: {
-        type: 'category',
-        data: timeLabels,
-        axisLabel: {
-          color: '#6b7280',
-          fontSize: 10,
-          interval: getXAxisIntervalForResources(interval, timeLabels.length),
-          rotate: 45,
-        },
-        axisLine: { lineStyle: { color: '#e5e7eb' } },
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: { color: '#6b7280', fontSize: 10 },
-        splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-      },
-      series: seriesData,
-    };
-  }, [chartResources, topN, timeLabels, interval]);
+  }, [chartResources, timeLabels, interval, chartConfig]);
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800">리소스</h2>
-        <Dropdown value={topN} onChange={setTopN} options={topNOptions} />
+        <div className="w-32">
+          <Dropdown value={selectedMetric} onChange={setSelectedMetric} options={metricOptions} />
+        </div>
       </div>
 
       <div className="bg-white p-5 rounded-lg border border-gray-200">
@@ -256,47 +241,21 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
           isError={isError}
           isEmpty={isEmpty}
           type="chart"
-          height={800}
+          height={400}
           loadingMessage="리소스 데이터를 불러오는 중..."
           errorMessage="리소스 데이터를 불러올 수 없습니다"
           emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
         >
-
-        {/* 차트 영역 - 3행 1열 */}
-        <div className="space-y-6">
-          {/* Requests 차트 */}
+          {/* 단일 차트 */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <h4 className="text-md font-semibold text-gray-800 mb-3">Requests</h4>
+            <h4 className="text-md font-semibold text-gray-800 mb-3">{chartConfig.title}</h4>
             <ReactECharts
-              option={requestsChartOption}
-              style={{ height: 300 }}
+              option={chartOption}
+              style={{ height: 400 }}
               notMerge={true}
               lazyUpdate={true}
             />
           </div>
-
-          {/* p95 Latency 차트 */}
-          <div className="border border-gray-200 rounded-lg p-4">
-            <h4 className="text-md font-semibold text-gray-800 mb-3">p95 Latency</h4>
-            <ReactECharts
-              option={latencyChartOption}
-              style={{ height: 300 }}
-              notMerge={true}
-              lazyUpdate={true}
-            />
-          </div>
-
-          {/* Errors 차트 */}
-          <div className="border border-gray-200 rounded-lg p-4">
-            <h4 className="text-md font-semibold text-gray-800 mb-3">Errors</h4>
-            <ReactECharts
-              option={errorsChartOption}
-              style={{ height: 300 }}
-              notMerge={true}
-              lazyUpdate={true}
-            />
-          </div>
-        </div>
         </StateHandler>
       </div>
     </div>
