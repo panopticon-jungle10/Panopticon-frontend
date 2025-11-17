@@ -1,69 +1,28 @@
-'use client';
+﻿'use client';
 
-import Table from '@/components/ui/Table';
-import ViewModeSelectBox from '@/components/features/apps/services/ViewModeSelectBox';
-import PageSizeSelect from '@/components/features/apps/services/PageSizeSelect';
-import Pagination from '@/components/features/apps/services/Pagination';
-import { useState, useMemo } from 'react';
-import SearchInput from '@/components/ui/SearchInput';
-import { SelectDate } from '@/components/features/apps/services/SelectDate';
+import { useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import ServiceListSidebar from '@/components/features/apps/services/servicelist/Sidebar';
+import CategoryContent, {
+  serviceListCategoryMeta,
+} from '@/components/features/apps/services/servicelist/CategoryContent';
+import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
 import { getServices } from '@/src/api/apm';
-import { ServiceSummary } from '@/types/apm';
-import { useRouter, useParams } from 'next/navigation';
-import StateHandler from '@/components/ui/StateHandler';
-
-const columns = [
-  {
-    key: 'service_name' as keyof ServiceSummary,
-    header: 'Name',
-    width: '30%',
-  },
-  {
-    key: 'environment' as keyof ServiceSummary,
-    header: 'Environment',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (
-      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">{value as string}</span>
-    ),
-  },
-  {
-    key: 'request_count' as keyof ServiceSummary,
-    header: 'Requests',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (value as number).toLocaleString(),
-  },
-  {
-    key: 'error_rate' as keyof ServiceSummary,
-    header: 'Error Rate',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => {
-      const errorRate = (value as number) * 100;
-      return (
-        <span className={errorRate > 2 ? 'text-red-600 font-semibold' : ''}>
-          {errorRate.toFixed(2)}%
-        </span>
-      );
-    },
-  },
-  {
-    key: 'latency_p95_ms' as keyof ServiceSummary,
-    header: 'P95 Latency',
-    width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => <span>{value as number}ms</span>,
-  },
-];
+import type { ServiceSummary } from '@/types/apm';
+import type { ServiceListCategory } from '@/types/servicelist';
 
 export default function ServicesPage() {
   const router = useRouter();
   const params = useParams();
   const appId = params.appId as string;
 
-  const [viewType, setViewType] = useState<'list' | 'map'>('list');
+  const [category, setCategory] = useState<ServiceListCategory>('list');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // 지난 2주일의 시간 범위 (useMemo로 안정화)
+  // 시간 범위 생성
   const timeRange = useMemo(() => {
     const now = new Date();
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
@@ -73,71 +32,105 @@ export default function ServicesPage() {
     };
   }, []);
 
-  // API 데이터 가져오기
+  // 서비스 API 호출
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['services', appId, page, pageSize, timeRange],
+    queryKey: ['services', appId, timeRange],
     queryFn: () =>
       getServices({
-        limit: pageSize,
+        limit: 1000,
         ...timeRange,
       }),
   });
 
-  // 페이징 계산
-  const services = data?.services || [];
-  const total = services.length;
-  const totalPages = Math.ceil(total / pageSize);
-  const isEmpty = services.length === 0;
+  // 검색 필터 적용
+  const filteredServices = useMemo(() => {
+    const services = data?.services ?? [];
+    const keyword = searchKeyword.trim().toLowerCase();
+    if (!keyword) return services;
+    return services.filter(
+      (service) =>
+        service.service_name.toLowerCase().includes(keyword) ||
+        service.environment.toLowerCase().includes(keyword),
+    );
+  }, [data?.services, searchKeyword]);
 
-  // 페이지 변경 핸들러
-  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
-  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+  // 페이지네이션
+  const totalItems = filteredServices.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const currentPage = useMemo(() => Math.min(page, totalPages), [page, totalPages]);
 
-  // 테이블 행 클릭 핸들러
+  const paginatedServices = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredServices.slice(start, start + pageSize);
+  }, [filteredServices, currentPage, pageSize]);
+
+  const handlePrev = () => setPage(Math.max(1, currentPage - 1));
+  const handleNext = () => setPage(Math.min(totalPages, currentPage + 1));
+
+  // 카테고리 변경 시 초기화
+  const handleCategoryChange = (nextCategory: ServiceListCategory) => {
+    setCategory(nextCategory);
+    setPage(1);
+  };
+
+  // 서비스 클릭 시 상세 페이지 이동
   const handleServiceRowClick = (service: ServiceSummary) => {
     router.push(`/apps/${appId}/services/${service.service_name}`);
   };
 
+  // categoryMeta
+  const categoryMeta = serviceListCategoryMeta[category];
+  const isEmpty = !isLoading && filteredServices.length === 0;
+
   return (
-    <div id="apm-services-container" className="p-8">
-      <h1 className="text-2xl font-bold mb-6">서비스 목록</h1>
+    <div className="min-h-screen bg-gray-50 p-8 space-y-6">
+      <section className="flex flex-col gap-6 lg:flex-row">
+        {/* 좌측 사이드바 */}
+        <aside className="w-full lg:w-64 shrink-0">
+          <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+        </aside>
 
-      <SearchInput placeholder="서비스 검색..." className="mb-4 w-80 h-10" />
+        <main className="flex-1 min-w-0 space-y-6">
+          <div>
+            <div className="flex items-baseline gap-3">
+              {/* 상단 제목 + 설명 */}
+              <h2 className="text-xl font-semibold text-gray-900">{categoryMeta.title}</h2>
+              <span className="text-xs text-gray-400">{filteredServices.length}개 서비스</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">{categoryMeta.subtitle}</p>
+          </div>
 
-      <div className="flex justify-start items-center mb-2 gap-3">
-        <SelectDate />
-        <ViewModeSelectBox selected={viewType} onSelect={setViewType} />
-        <PageSizeSelect
-          value={pageSize}
-          onChange={(v) => {
-            setPageSize(v);
-            setPage(1);
-          }}
-        />
-      </div>
-
-      {viewType === 'list' ? (
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="table"
-          height={500}
-          loadingMessage="서비스 목록을 불러오는 중..."
-          errorMessage="서비스 목록을 불러올 수 없습니다"
-          emptyMessage="표시할 서비스가 없습니다"
-        >
-          <Table<ServiceSummary>
-            columns={columns}
-            data={services}
-            showFavorite={true}
-            onRowClick={handleServiceRowClick}
+          {/* 필터 (검색 / 시간 / 페이지당 개수) */}
+          <ServiceListFilters
+            searchValue={searchKeyword}
+            onSearchChange={(value) => {
+              setSearchKeyword(value);
+              setPage(1);
+            }}
+            pageSize={pageSize}
+            onPageSizeChange={(value) => {
+              setPageSize(value);
+              setPage(1);
+            }}
           />
-          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
-        </StateHandler>
-      ) : (
-        <div>맵 뷰 구현 예정...</div>
-      )}
+
+          {/* 카테고리별 콘텐츠 */}
+          <CategoryContent
+            category={category}
+            services={paginatedServices}
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={isEmpty}
+            onRowClick={handleServiceRowClick}
+            pagination={{
+              page: currentPage,
+              totalPages,
+              onPrev: handlePrev,
+              onNext: handleNext,
+            }}
+          />
+        </main>
+      </section>
     </div>
   );
 }
