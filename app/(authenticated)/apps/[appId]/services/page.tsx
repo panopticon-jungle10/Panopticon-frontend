@@ -89,7 +89,10 @@ export default function ServicesPage() {
   const categoryMeta = serviceListCategoryMeta[category];
   const isEmpty = !isLoading && filteredServices.length === 0;
 
-  const openServiceModal = (mode: 'create' | 'edit', initialValues?: Partial<CreateServiceFormValues>) => {
+  const openServiceModal = (
+    mode: 'create' | 'edit',
+    initialValues?: Partial<CreateServiceFormValues>,
+  ) => {
     setServiceModalMode(mode);
     setServiceModalInitialValues(initialValues);
     setIsServiceModalOpen(true);
