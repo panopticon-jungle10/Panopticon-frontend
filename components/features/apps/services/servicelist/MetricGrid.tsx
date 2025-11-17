@@ -69,7 +69,7 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
   const average = values.length ? values.reduce((sum, item) => sum + item, 0) / values.length : 0;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
       {sorted.map((service) => {
         // 카드에 표시되는 값들
         let primaryValue = '';
