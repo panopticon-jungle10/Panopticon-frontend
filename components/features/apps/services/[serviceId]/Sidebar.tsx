@@ -68,7 +68,7 @@ export default function Sidebar() {
   }, [activeSection]);
 
   return (
-    <aside className="w-56 flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm h-fit sticky top-6">
+    <aside className="w-56 flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm h-fit">
       <nav className="p-3">
         <div className="flex flex-col gap-1">
           {apmItems.map(({ key, label, icon: Icon }) => {
