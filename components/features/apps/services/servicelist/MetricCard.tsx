@@ -48,7 +48,9 @@ export default function ServiceMetricCard({
       tabIndex={isInteractive ? 0 : undefined}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={`w-full max-w-[16rem] rounded-2xl border-[2px] ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+      className={`w-full max-w-[16rem] rounded-2xl border-[2px] ${
+        toneClass.border
+      } bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
         isInteractive
           ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
           : ''
