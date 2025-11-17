@@ -7,231 +7,342 @@ import { useQuery } from '@tanstack/react-query';
 import { getServiceEndpoints } from '@/src/api/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
-import {
-  formatChartTimeLabel,
-  getBarWidthForResources,
-  getXAxisIntervalForResources,
-} from '@/src/utils/chartFormatter';
+import { EndpointSortBy } from '@/types/apm';
+import Table from '@/components/ui/Table';
+import Pagination from '@/components/features/apps/services/Pagination';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
+
+// 페이지당 아이템 수 (리스트용)
+const ITEMS_PER_PAGE = 10;
+// API에서 가져올 총 엔드포인트 수
+const TOTAL_ENDPOINTS_LIMIT = 40;
+
+// ECharts Bar tooltip params 타입
+interface BarTooltipParams {
+  dataIndex: number;
+  name: string;
+  value: number;
+}
+
+// 차트 색상 팔레트 (차이가 확연히 보이도록 수정)
+const CHART_COLORS = [
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#10b981', // emerald
+];
+
+type MetricType = 'requests' | 'latency' | 'error_rate';
+
+// 엔드포인트 테이블용 데이터 타입
+interface EndpointTableData {
+  endpoint_name: string;
+  request_count: number;
+  latency_p95_ms: number;
+  error_rate: number;
+  errors: number;
+}
+
+// 테이블 컬럼 정의
+const ENDPOINT_TABLE_COLUMNS: Array<{
+  key: keyof EndpointTableData;
+  header: string;
+  width?: string;
+  render?: (
+    value: EndpointTableData[keyof EndpointTableData],
+    row: EndpointTableData,
+  ) => React.ReactNode;
+}> = [
+  {
+    key: 'endpoint_name',
+    header: '엔드포인트',
+    width: '40%',
+  },
+  {
+    key: 'request_count',
+    header: '요청수',
+    width: '15%',
+    render: (value: EndpointTableData[keyof EndpointTableData]) => {
+      return Number(value).toLocaleString();
+    },
+  },
+  {
+    key: 'latency_p95_ms',
+    header: 'P95 레이턴시',
+    width: '15%',
+    render: (value: EndpointTableData[keyof EndpointTableData]) => {
+      const ms = Number(value);
+      if (ms >= 1000) {
+        return `${(ms / 1000).toFixed(2)}s`;
+      }
+      return `${ms.toFixed(2)}ms`;
+    },
+  },
+  {
+    key: 'error_rate',
+    header: '에러율',
+    width: '15%',
+    render: (value: EndpointTableData[keyof EndpointTableData]) => {
+      const rate = Number(value) * 100;
+      return `${rate.toFixed(2)}%`;
+    },
+  },
+  {
+    key: 'errors',
+    header: '에러수',
+    width: '15%',
+    render: (value: EndpointTableData[keyof EndpointTableData]) => {
+      return Number(value).toLocaleString();
+    },
+  },
+];
 
 interface ResourcesSectionProps {
   serviceName: string;
 }
 
-// 차트 색상 팔레트
-const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#f59e0b', // amber
-  '#10b981', // emerald
-  '#06b6d4', // cyan
-  '#f97316', // orange
-  '#84cc16', // lime
-];
-
-// 색상 선택 함수
-function getChartColor(index: number): string {
-  return CHART_COLORS[index % CHART_COLORS.length];
-}
-
-type MetricType = 'requests' | 'latency' | 'errors';
-
 export default function ResourcesSection({ serviceName }: ResourcesSectionProps) {
   // Zustand store에서 시간 정보 가져오기
-  const { startTime, endTime, interval } = useTimeRangeStore();
+  const { startTime, endTime } = useTimeRangeStore();
 
   // 선택된 메트릭 타입 (기본값: 요청수)
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('requests');
 
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Dropdown 옵션 정의
   const metricOptions = [
     { label: '요청수', value: 'requests' as const },
+    { label: '에러율', value: 'error_rate' as const },
     { label: 'p95 레이턴시', value: 'latency' as const },
-    { label: '에러수', value: 'errors' as const },
   ];
 
-  // API 데이터 가져오기 (선택된 메트릭에 따라 Top 3만 가져오기)
+  // selectedMetric을 EndpointSortBy로 변환
+  const sortBy = useMemo<EndpointSortBy>(() => {
+    if (selectedMetric === 'requests') return 'request_count';
+    if (selectedMetric === 'error_rate') return 'error_rate';
+    return 'latency_p95_ms';
+  }, [selectedMetric]);
+
+  // API 데이터 가져오기 (40개 엔드포인트, 선택된 메트릭으로 정렬)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['serviceEndpoints', serviceName, startTime, endTime, selectedMetric],
+    queryKey: ['serviceEndpoints', serviceName, startTime, endTime, sortBy],
     queryFn: () =>
       getServiceEndpoints(serviceName, {
         from: startTime,
         to: endTime,
-        limit: 3,
+        limit: TOTAL_ENDPOINTS_LIMIT,
+        sort_by: sortBy,
       }),
     retry: false,
     throwOnError: false,
   });
 
-  // 차트용 데이터 변환
-  const chartResources = useMemo(() => {
+  // 전체 엔드포인트 데이터 (테이블용)
+  const allEndpoints = useMemo<EndpointTableData[]>(() => {
     if (!data?.endpoints) return [];
     return data.endpoints.map((endpoint) => ({
-      name: endpoint.endpoint_name,
-      requests: endpoint.request_count,
-      latency: endpoint.latency_p95_ms,
+      endpoint_name: endpoint.endpoint_name,
+      request_count: endpoint.request_count,
+      latency_p95_ms: endpoint.latency_p95_ms,
+      error_rate: endpoint.error_rate,
       errors: Math.round(endpoint.request_count * endpoint.error_rate),
     }));
   }, [data]);
 
-  const isEmpty = chartResources.length === 0;
+  // 상위 3개 엔드포인트 (차트용)
+  const topEndpoints = useMemo(() => {
+    return allEndpoints.slice(0, 3);
+  }, [allEndpoints]);
 
-  // 시간대 레이블 생성 (interval에 따라 동적으로 생성)
-  const timeLabels = useMemo(() => {
-    const labels: string[] = [];
-    const now = new Date();
+  const isEmpty = allEndpoints.length === 0;
 
-    // interval에 따른 라벨 개수 결정
-    let labelCount = 24; // 기본값
-    if (['5m', '10m'].includes(interval)) {
-      labelCount = 12; // 짧은 간격: 12개 라벨
-    } else if (['30m', '1h'].includes(interval)) {
-      labelCount = 12;
-    } else if (['2h', '12h'].includes(interval)) {
-      labelCount = 8;
-    } else if (['1d', '2d'].includes(interval)) {
-      labelCount = 6;
-    }
+  // 현재 페이지의 데이터만 추출 (테이블용)
+  const paginatedEndpoints = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return allEndpoints.slice(startIndex, endIndex);
+  }, [allEndpoints, currentPage]);
 
-    // 시간 레이블 생성
-    const timeStep = Math.ceil(24 / labelCount);
-    for (let i = 23; i >= 0; i--) {
-      if ((23 - i) % timeStep === 0) {
-        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
-        labels.push(formatChartTimeLabel(time, interval));
-      }
-    }
-    return labels;
-  }, [interval]);
-
-  // 선택된 메트릭에 따라 차트 설정 결정
-  const chartConfig = useMemo(() => {
-    if (selectedMetric === 'requests') {
-      return {
-        title: 'Requests',
-        yAxisLabel: '',
-        chartType: 'bar' as const,
-        getData: (resource: (typeof chartResources)[0]) => resource.requests,
-      };
-    } else if (selectedMetric === 'latency') {
-      return {
-        title: 'p95 Latency',
-        yAxisLabel: 'ms',
-        chartType: 'line' as const,
-        getData: (resource: (typeof chartResources)[0]) => resource.latency,
-      };
-    } else {
-      return {
-        title: 'Errors',
-        yAxisLabel: '',
-        chartType: 'bar' as const,
-        getData: (resource: (typeof chartResources)[0]) => resource.errors,
-      };
-    }
-  }, [selectedMetric]);
-
-  // 단일 차트 옵션
+  // 차트 옵션
   const chartOption = useMemo(() => {
-    const topResources = chartResources.slice(0, 3);
-    const seriesData = topResources.map((resource, idx: number) => ({
-      name: `top ${idx + 1}`,
-      type: chartConfig.chartType,
-      ...(chartConfig.chartType === 'bar' ? { stack: 'total' } : {}),
-      data: timeLabels.map(() => {
-        const baseValue = chartConfig.getData(resource);
-        // 랜덤 변동을 추가하여 시계열 데이터처럼 보이게 함
-        return Math.floor(baseValue * (0.8 + Math.random() * 0.4));
-      }),
-      resourceName: resource.name, // 실제 엔드포인트 이름 추가
-      requests: resource.requests,
-      latency: resource.latency,
-      errors: resource.errors,
-      ...(chartConfig.chartType === 'bar' ? { barWidth: getBarWidthForResources(interval) } : {}),
-      ...(chartConfig.chartType === 'line' ? { smooth: true } : {}),
-      itemStyle: {
-        color: getChartColor(idx),
-      },
-      lineStyle:
-        chartConfig.chartType === 'line'
-          ? {
-              width: 2,
-              color: getChartColor(idx),
-            }
-          : undefined,
-    }));
+    // 파이차트 (요청수, 에러수)
+    if (selectedMetric === 'requests' || selectedMetric === 'error_rate') {
+      const pieData = topEndpoints.map((endpoint, idx) => ({
+        name: endpoint.endpoint_name,
+        value: selectedMetric === 'requests' ? endpoint.request_count : endpoint.errors,
+        itemStyle: {
+          color: CHART_COLORS[idx],
+        },
+        // 전체 엔드포인트 정보를 추가로 저장
+        endpointData: endpoint,
+      }));
+
+      return {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderColor: 'transparent',
+          textStyle: { color: '#f9fafb', fontSize: 12 },
+          padding: 10,
+          formatter: (params: {
+            name: string;
+            value: number;
+            percent: number;
+            data: { endpointData: EndpointTableData };
+          }) => {
+            const endpoint = params.data.endpointData;
+            return `
+              <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${params.name}</div>
+              <div style="margin:4px 0;font-size:12px;">
+                ${
+                  selectedMetric === 'requests' ? 'Requests' : 'Errors'
+                }: ${params.value.toLocaleString()} (${params.percent}%)
+              </div>
+              <div style="margin:4px 0;font-size:12px;">p95 Latency: ${endpoint.latency_p95_ms.toFixed(
+                2,
+              )}ms</div>
+              <div style="margin:4px 0;font-size:12px;">Error Rate: ${(
+                endpoint.error_rate * 100
+              ).toFixed(2)}%</div>
+            `;
+          },
+        },
+        legend: {
+          orient: 'horizontal',
+          bottom: 0,
+          data: topEndpoints.map((e) => e.endpoint_name),
+          textStyle: { fontSize: 11, color: '#6b7280' },
+          type: 'scroll',
+        },
+        series: [
+          {
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '45%'],
+            data: pieData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)',
+              },
+            },
+            label: {
+              show: true,
+              formatter: '{d}%',
+              fontSize: 12,
+              color: '#374151',
+            },
+            labelLine: {
+              show: true,
+            },
+          },
+        ],
+      };
+    }
+
+    // p95 레이턴시: 가로 막대(horizontal bar) 차트, y축에 엔드포인트 이름
+    const yAxisData = topEndpoints.map((e) => e.endpoint_name);
+    const barData = topEndpoints.map((e) => e.latency_p95_ms);
 
     return {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        formatter: (params: {
-          seriesName: string;
-          value: number;
-          dataIndex: number;
-          data: {
-            resourceName?: string;
-            requests?: number;
-            latency?: number;
-            errors?: number;
-          };
-        }) => {
-          const seriesName = params.seriesName; // "top 1", "top 2", "top 3"
-          const dataIndex = params.dataIndex;
-          const xAxisLabel = timeLabels[dataIndex];
-
-          // 시리즈에서 리소스 정보 가져오기
-          const seriesIndex = parseInt(seriesName.split(' ')[1]) - 1; // "top 1" -> 0
-          const resource = topResources[seriesIndex];
-
-          if (!resource) return '';
-
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: 'transparent',
+        textStyle: { color: '#f9fafb', fontSize: 12 },
+        padding: 10,
+        formatter: (params: BarTooltipParams) => {
+          const idx = params.dataIndex;
+          const endpoint = topEndpoints[idx];
+          if (!endpoint) return '';
           return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:13px;">${seriesName}</div>
-            <div style="margin:2px 0;font-weight:600;color:#3b82f6;">${resource.name}</div>
-            <div style="margin:4px 0 2px 0;font-size:11px;color:#6b7280;">Time: ${xAxisLabel}</div>
-            <div style="margin:2px 0;font-size:11px;">Requests: ${resource.requests}</div>
-            <div style="margin:2px 0;font-size:11px;">p95 Latency: ${resource.latency}ms</div>
-            <div style="margin:2px 0;font-size:11px;">Errors: ${resource.errors}</div>
+            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${
+              endpoint.endpoint_name
+            }</div>
+            <div style="margin:4px 0;font-size:12px;">p95 Latency: ${endpoint.latency_p95_ms.toFixed(
+              2,
+            )}ms</div>
+            <div style="margin:4px 0;font-size:12px;">Requests: ${endpoint.request_count.toLocaleString()}</div>
+            <div style="margin:4px 0;font-size:12px;">Error Rate: ${(
+              endpoint.error_rate * 100
+            ).toFixed(2)}%</div>
           `;
         },
       },
       legend: {
-        bottom: 0,
-        textStyle: { fontSize: 10 },
+        show: false,
       },
-      grid: { left: 60, right: 20, top: 20, bottom: 100 },
+      grid: { left: 100, right: 20, top: 40, bottom: 80 },
       xAxis: {
-        type: 'category',
-        data: timeLabels,
-        axisLabel: {
-          color: '#6b7280',
-          fontSize: 10,
-          interval: getXAxisIntervalForResources(interval, timeLabels.length),
-          rotate: 45,
-        },
-        axisLine: { lineStyle: { color: '#e5e7eb' } },
-      },
-      yAxis: {
         type: 'value',
         axisLabel: {
           color: '#6b7280',
-          fontSize: 10,
-          formatter: chartConfig.yAxisLabel ? `{value}${chartConfig.yAxisLabel}` : '{value}',
+          fontSize: 11,
+          formatter: '{value}ms',
         },
         splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
       },
-      series: seriesData,
+      yAxis: {
+        type: 'category',
+        data: yAxisData,
+        axisLabel: {
+          color: '#6b7280',
+          fontSize: 12,
+        },
+        axisLine: { lineStyle: { color: '#e5e7eb' } },
+      },
+      series: [
+        {
+          type: 'bar',
+          data: barData.map((value, idx) => ({ value, itemStyle: { color: CHART_COLORS[idx] } })),
+          barWidth: 24,
+          label: {
+            show: true,
+            position: 'right',
+            formatter: function (v: { value: number }) {
+              return `${v.value.toFixed(2)}ms`;
+            },
+            color: '#374151',
+            fontSize: 11,
+          },
+        },
+      ],
     };
-  }, [chartResources, timeLabels, interval, chartConfig]);
+  }, [topEndpoints, selectedMetric]);
+
+  // 페이지네이션 계산
+  const totalPages = Math.max(1, Math.ceil(allEndpoints.length / ITEMS_PER_PAGE));
+
+  // 페이지네이션 핸들러
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // 메트릭 변경 시 페이지를 1로 리셋
+  const handleMetricChange = (metric: MetricType) => {
+    setSelectedMetric(metric);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800">리소스</h2>
         <div className="w-32">
-          <Dropdown value={selectedMetric} onChange={setSelectedMetric} options={metricOptions} />
+          <Dropdown value={selectedMetric} onChange={handleMetricChange} options={metricOptions} />
         </div>
       </div>
 
@@ -241,21 +352,38 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
           isError={isError}
           isEmpty={isEmpty}
           type="chart"
-          height={400}
+          height={600}
           loadingMessage="리소스 데이터를 불러오는 중..."
           errorMessage="리소스 데이터를 불러올 수 없습니다"
           emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
         >
-          {/* 단일 차트 */}
-          <div className="border border-gray-200 rounded-lg p-4">
-            <h4 className="text-md font-semibold text-gray-800 mb-3">{chartConfig.title}</h4>
+          {/* 차트 영역 */}
+          <div className="border border-gray-200 rounded-lg p-4 mb-6">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">상위 3개 엔드포인트</h4>
             <ReactECharts
               option={chartOption}
-              style={{ height: 400 }}
+              style={{ height: 350 }}
               notMerge={true}
               lazyUpdate={true}
             />
           </div>
+
+          {/* 테이블 영역 */}
+          <div className="mt-6">
+            <Table<EndpointTableData>
+              columns={ENDPOINT_TABLE_COLUMNS}
+              data={paginatedEndpoints}
+              className="w-full"
+            />
+          </div>
+
+          {/* 페이지네이션 */}
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            onPrev={handlePrevPage}
+            onNext={handleNextPage}
+          />
         </StateHandler>
       </div>
     </div>
