@@ -5,17 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiClock, FiCalendar, FiChevronDown } from 'react-icons/fi';
 import { TimeRange } from '@/types/time';
 import { toast } from 'react-toastify';
-
-const PRESET_RANGES: TimeRange[] = [
-  { label: '지난 1시간', value: '1h', hours: 1 },
-  { label: '지난 3시간', value: '3h', hours: 3 },
-  { label: '지난 6시간', value: '6h', hours: 6 },
-  { label: '지난 12시간', value: '12h', hours: 12 },
-  { label: '지난 하루', value: '1d', hours: 24 },
-  { label: '지난 1주일', value: '1w', hours: 24 * 7 },
-  { label: '지난 2주일', value: '2w', hours: 24 * 14 },
-  { label: '지난 한 달', value: '1M', hours: 24 * 30 },
-];
+import { PRESET_RANGES } from '@/src/constants/timeRanges';
 
 // 날짜 포맷팅 유틸리티
 const formatDate = (date: Date) => {
@@ -150,7 +140,7 @@ interface SelectDateProps {
   className?: string;
 }
 
-export const SelectDate = ({ value, onChange }: SelectDateProps) => {
+export const SelectDate = ({ value, onChange, className }: SelectDateProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedRange, setSelectedRange] = useState<TimeRange>(value || PRESET_RANGES[0]);
@@ -207,12 +197,12 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className={`relative w-48 ${className ?? ''}`}>
       {/* 선택된 범위 표시 버튼 */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-48"
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 w-56"
         style={{ minHeight: '40px' }}
       >
         <FiClock className="w-4 h-4 text-gray-500" />
@@ -230,7 +220,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-48"
+            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-56"
           >
             {!showCalendar ? (
               <PresetDropdown

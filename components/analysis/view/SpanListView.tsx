@@ -15,7 +15,6 @@ export default function SpanListView({ spans, onSpanSelect, selectedSpanId }: Sp
 
   return (
     <div className="space-y-2">
-      <div className="text-sm text-gray-600">Span List</div>
       <div className="divide-y divide-gray-100 rounded-md border border-gray-50 overflow-hidden">
         {spans.map((s) => (
           <div

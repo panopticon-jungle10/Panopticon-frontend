@@ -52,6 +52,16 @@ export type SpanKind = 'SERVER' | 'CLIENT' | 'INTERNAL';
 export type Status = 'OK' | 'ERROR';
 
 /**
+ * 트레이스 상태 필터 (에러 또는 느린 트레이스)
+ */
+export type TraceStatusFilter = 'ERROR' | 'SLOW';
+
+/**
+ * 느린 트레이스 판단 백분위수
+ */
+export type SlowPercentile = 50 | 90 | 95;
+
+/**
  * 로그 레벨
  */
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
@@ -202,7 +212,12 @@ export interface GetTraceByIdResponse {
 /**
  * 메트릭 종류
  */
-export type MetricType = 'http_requests_total' | 'latency_p95_ms' | 'error_rate';
+export type MetricType =
+  | 'http_requests_total'
+  | 'latency_p95_ms'
+  | 'error_rate'
+  | 'latency_p90_ms'
+  | 'latency_p50_ms';
 
 /**
  * GET /services/{serviceName}/metrics - 쿼리 파라미터
@@ -265,16 +280,6 @@ export interface LogEntry {
   traceId: string;
   message: string;
   timestamp: string;
-}
-
-/**
- * 통계 아이템 (StatGrid, StatCard에서 사용)
- */
-export interface StatItem {
-  id: string;
-  label: string;
-  value: number | string;
-  tone: 'neutral' | 'info' | 'warning' | 'danger';
 }
 
 // ---------- GET /spans ----------
@@ -411,3 +416,32 @@ export interface GetServiceErrorsResponse extends TimeRangeParams {
   environment: string;
   errors: ErrorItem[];
 }
+
+// ---------- GET /services/{serviceName}/endpoints/{endpointName}/traces ----------
+
+/**
+ * 엔드포인트 트레이스 아이템
+ */
+export interface EndpointTraceItem {
+  traceId: string;
+  spanId: string;
+  timestamp: string; // ISO 8601 date-time
+  durationMs: number;
+  status: TraceStatusFilter;
+  serviceName: string;
+  environment: string;
+}
+
+/**
+ * GET /services/{serviceName}/endpoints/{endpointName}/traces - 쿼리 파라미터
+ */
+export interface GetEndpointTracesParams extends TimeRangeParams {
+  slow_percentile?: SlowPercentile; // 기본값: 95
+  limit?: number; // 기본값: 20
+  status: TraceStatusFilter; // 필수
+}
+
+/**
+ * GET /services/{serviceName}/endpoints/{endpointName}/traces - 응답
+ */
+export type GetEndpointTracesResponse = EndpointTraceItem[];

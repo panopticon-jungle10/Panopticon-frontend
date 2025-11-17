@@ -65,7 +65,7 @@ const TRACE_TABLE_COLUMNS: Array<{
       if (ms >= 1000) {
         return `${(ms / 1000).toFixed(2)}s`;
       }
-      return `${ms}ms`;
+      return `${ms.toFixed(2)}ms`;
     },
   },
   {
@@ -266,7 +266,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
           <div style="margin:2px 0;">Service: ${trace.service}</div>
           <div style="margin:2px 0;">Resource: ${trace.resource}</div>
           <div style="margin:2px 0;">Time: ${time}</div>
-          <div style="margin:2px 0;">Duration: ${duration} ms</div>
+          <div style="margin:2px 0;">Duration: ${duration.toFixed(2)} ms</div>
           <div style="margin-top:8px;color:#3b82f6;font-size:11px;">Click to view details</div>
         `;
       },
@@ -354,62 +354,65 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-lg border border-gray-200">
-      <StateHandler
-        isLoading={isLoading}
-        isError={isError}
-        isEmpty={isEmpty}
-        type="chart"
-        height={600}
-        loadingMessage="트레이스 데이터를 불러오는 중..."
-        errorMessage="트레이스 데이터를 불러올 수 없습니다"
-        emptyMessage="선택한 시간 범위에 트레이스가 없습니다"
-      >
-        {/* 차트 */}
-        <ReactECharts
-          option={option}
-          style={{ height: 400 }}
-          onEvents={{
-            click: (params: { seriesName: string; dataIndex: number }) => {
-              const status = params.seriesName.toLowerCase();
-              const trace = allTraces.filter((t: TracePoint) => t.status === status)[
-                params.dataIndex
-              ];
-              if (trace) {
-                handleTraceClick(trace.traceId);
-              }
-            },
-          }}
-        />
-
-        {/* 테이블 */}
-        <div className="mt-6">
-          <Table<TracePoint>
-            columns={TRACE_TABLE_COLUMNS}
-            data={traces}
-            className="w-full"
-            onRowClick={(row) => handleTraceClick(row.traceId)}
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">요청 추적</h2>
+      <div className="bg-white p-5 rounded-lg border border-gray-200">
+        <StateHandler
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={isEmpty}
+          type="chart"
+          height={600}
+          loadingMessage="트레이스 데이터를 불러오는 중..."
+          errorMessage="트레이스 데이터를 불러올 수 없습니다"
+          emptyMessage="선택한 시간 범위에 트레이스가 없습니다"
+        >
+          {/* 차트 */}
+          <ReactECharts
+            option={option}
+            style={{ height: 400 }}
+            onEvents={{
+              click: (params: { seriesName: string; dataIndex: number }) => {
+                const status = params.seriesName.toLowerCase();
+                const trace = allTraces.filter((t: TracePoint) => t.status === status)[
+                  params.dataIndex
+                ];
+                if (trace) {
+                  handleTraceClick(trace.traceId);
+                }
+              },
+            }}
           />
-        </div>
 
-        {/* 페이지네이션 */}
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          onPrev={handlePrevPage}
-          onNext={handleNextPage}
-        />
-      </StateHandler>
+          {/* 테이블 */}
+          <div className="mt-6">
+            <Table<TracePoint>
+              columns={TRACE_TABLE_COLUMNS}
+              data={traces}
+              className="w-full"
+              onRowClick={(row) => handleTraceClick(row.traceId)}
+            />
+          </div>
 
-      {/* Trace Analysis Panel */}
-      {selectedTraceId && (
-        <TraceAnalysis
-          key={selectedTraceId}
-          isOpen={isPanelOpen}
-          onClose={handleClosePanel}
-          traceId={selectedTraceId}
-        />
-      )}
+          {/* 페이지네이션 */}
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            onPrev={handlePrevPage}
+            onNext={handleNextPage}
+          />
+        </StateHandler>
+
+        {/* Trace Analysis Panel */}
+        {selectedTraceId && (
+          <TraceAnalysis
+            key={selectedTraceId}
+            isOpen={isPanelOpen}
+            onClose={handleClosePanel}
+            traceId={selectedTraceId}
+          />
+        )}
+      </div>
     </div>
   );
 }
