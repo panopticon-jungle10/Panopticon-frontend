@@ -8,6 +8,9 @@ import CategoryContent, {
   serviceListCategoryMeta,
 } from '@/components/features/apps/services/servicelist/CategoryContent';
 import ServiceListFilters from '@/components/features/apps/services/servicelist/Filters';
+import CreateServiceModal from '@/components/features/apps/services/servicelist/CreateService';
+import { SelectDate } from '@/components/features/apps/services/SelectDate';
+import type { CreateServiceFormValues } from '@/types/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';
 import type { ServiceListCategory } from '@/types/servicelist';
@@ -21,6 +24,10 @@ export default function ServicesPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [serviceModalMode, setServiceModalMode] = useState<'create' | 'edit'>('create');
+  const [serviceModalInitialValues, setServiceModalInitialValues] =
+    useState<Partial<CreateServiceFormValues>>();
 
   // 시간 범위 생성
   const timeRange = useMemo(() => {
@@ -82,12 +89,46 @@ export default function ServicesPage() {
   const categoryMeta = serviceListCategoryMeta[category];
   const isEmpty = !isLoading && filteredServices.length === 0;
 
+  const openServiceModal = (
+    mode: 'create' | 'edit',
+    initialValues?: Partial<CreateServiceFormValues>,
+  ) => {
+    setServiceModalMode(mode);
+    setServiceModalInitialValues(initialValues);
+    setIsServiceModalOpen(true);
+  };
+
+  const handleCreateClick = () => {
+    openServiceModal('create');
+  };
+
+  const handleEditClick = () => {
+    const targetService = filteredServices[0];
+    if (targetService) {
+      openServiceModal('edit', {
+        serviceName: targetService.service_name,
+        environment: targetService.environment,
+      });
+      return;
+    }
+    openServiceModal('edit');
+  };
+
+  // 설치 시작 클릭 -> Install Agent 페이지
+  const handleServiceModalSubmit = () => {
+    setIsServiceModalOpen(false);
+    router.push(`/apps/${appId}/install`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 space-y-6">
       <section className="flex flex-col gap-6 lg:flex-row">
         {/* 좌측 사이드바 */}
-        <aside className="w-full lg:w-64 shrink-0">
-          <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+        <aside className="w-full lg:w-56 shrink-0 space-y-4 lg:sticky lg:top-6 lg:self-start lg:z-10">
+          <div className="space-y-4 w-full">
+            <ServiceListSidebar value={category} onChange={handleCategoryChange} />
+            <SelectDate className="w-full" />
+          </div>
         </aside>
 
         <main className="flex-1 min-w-0 space-y-6">
@@ -112,6 +153,8 @@ export default function ServicesPage() {
               setPageSize(value);
               setPage(1);
             }}
+            onEditClick={handleEditClick}
+            onCreateClick={handleCreateClick}
           />
 
           {/* 카테고리별 콘텐츠 */}
@@ -131,6 +174,13 @@ export default function ServicesPage() {
           />
         </main>
       </section>
+      <CreateServiceModal
+        open={isServiceModalOpen}
+        mode={serviceModalMode}
+        initialValues={serviceModalInitialValues}
+        onClose={() => setIsServiceModalOpen(false)}
+        onSubmit={handleServiceModalSubmit}
+      />
     </div>
   );
 }

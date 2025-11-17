@@ -140,7 +140,7 @@ interface SelectDateProps {
   className?: string;
 }
 
-export const SelectDate = ({ value, onChange }: SelectDateProps) => {
+export const SelectDate = ({ value, onChange, className }: SelectDateProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedRange, setSelectedRange] = useState<TimeRange>(value || PRESET_RANGES[0]);
@@ -197,7 +197,7 @@ export const SelectDate = ({ value, onChange }: SelectDateProps) => {
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className={`relative w-48 ${className ?? ''}`}>
       {/* 선택된 범위 표시 버튼 */}
       <button
         type="button"

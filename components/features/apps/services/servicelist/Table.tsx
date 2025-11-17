@@ -39,7 +39,10 @@ const columns = [
     key: 'latency_p95_ms' as keyof ServiceSummary,
     header: 'P95 Latency',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => <span>{value as number}ms</span>,
+    render: (value: ServiceSummary[keyof ServiceSummary]) => {
+      const latency = (value as number).toFixed(2);
+      return <span>{latency}ms</span>;
+    },
   },
 ];
 

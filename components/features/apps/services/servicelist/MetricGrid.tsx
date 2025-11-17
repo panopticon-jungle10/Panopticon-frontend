@@ -57,9 +57,10 @@ function pickMetricValue(service: ServiceSummary, metric: MetricKey) {
 interface MetricGridProps {
   services: ServiceSummary[];
   metric: MetricKey;
+  onCardClick?: (service: ServiceSummary) => void;
 }
 
-export default function ServiceMetricGrid({ services, metric }: MetricGridProps) {
+export default function ServiceMetricGrid({ services, metric, onCardClick }: MetricGridProps) {
   // 서비스 내림차순 정렬 + 평균 계산
   const sorted = useMemo(
     () => [...services].sort((a, b) => pickMetricValue(b, metric) - pickMetricValue(a, metric)),
@@ -69,7 +70,7 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
   const average = values.length ? values.reduce((sum, item) => sum + item, 0) / values.length : 0;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
       {sorted.map((service) => {
         // 카드에 표시되는 값들
         let primaryValue = '';
@@ -103,6 +104,7 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
             secondaryValue={secondaryValue}
             statusLabel={statusLabel}
             tone={tone}
+            onClick={onCardClick ? () => onCardClick(service) : undefined}
           />
         );
       })}
