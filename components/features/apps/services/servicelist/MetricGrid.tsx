@@ -57,9 +57,10 @@ function pickMetricValue(service: ServiceSummary, metric: MetricKey) {
 interface MetricGridProps {
   services: ServiceSummary[];
   metric: MetricKey;
+  onCardClick?: (service: ServiceSummary) => void;
 }
 
-export default function ServiceMetricGrid({ services, metric }: MetricGridProps) {
+export default function ServiceMetricGrid({ services, metric, onCardClick }: MetricGridProps) {
   // 서비스 내림차순 정렬 + 평균 계산
   const sorted = useMemo(
     () => [...services].sort((a, b) => pickMetricValue(b, metric) - pickMetricValue(a, metric)),
@@ -103,6 +104,7 @@ export default function ServiceMetricGrid({ services, metric }: MetricGridProps)
             secondaryValue={secondaryValue}
             statusLabel={statusLabel}
             tone={tone}
+            onClick={onCardClick ? () => onCardClick(service) : undefined}
           />
         );
       })}

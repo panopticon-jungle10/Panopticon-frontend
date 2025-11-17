@@ -2,6 +2,7 @@
 
 'use client';
 
+import { KeyboardEvent } from 'react';
 import type { MetricCardProps, MetricTone } from '@/types/servicelist';
 
 // 카드 색상 톤 정의
@@ -24,16 +25,34 @@ export default function ServiceMetricCard({
   secondaryValue,
   statusLabel,
   tone = 'neutral',
+  onClick,
 }: MetricCardProps) {
   const toneClass = toneStyles[tone];
   const trimmed = primaryValue.trim();
   const match = trimmed.match(/^([\d.,]+)/);
   const numberPart = match ? match[1] : trimmed;
   const unitPart = match ? trimmed.slice(match[1].length) : '';
+  const isInteractive = typeof onClick === 'function';
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!isInteractive) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
 
   return (
     <article
-      className={`w-full max-w-[16rem] rounded-2xl border-[2px] ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md`}
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      className={`w-full max-w-[16rem] rounded-2xl border-[2px] ${toneClass.border} bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+        isInteractive
+          ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+          : ''
+      }`}
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">

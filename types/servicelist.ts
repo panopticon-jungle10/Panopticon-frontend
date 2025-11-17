@@ -24,6 +24,7 @@ export interface CategoryContentProps {
   isError: boolean;
   isEmpty: boolean;
   onRowClick: (service: ServiceSummary) => void;
+  onCardClick?: (service: ServiceSummary) => void;
   pagination?: PaginationControls;
 }
 
@@ -43,6 +44,7 @@ export interface MetricCardProps {
   secondaryValue: string;
   statusLabel?: string;
   tone?: MetricTone;
+  onClick?: () => void;
 }
 
 export interface ServiceListSidebarProps {

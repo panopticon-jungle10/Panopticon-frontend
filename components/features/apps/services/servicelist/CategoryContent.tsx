@@ -45,9 +45,11 @@ export default function CategoryContent({
   isError,
   isEmpty,
   onRowClick,
+  onCardClick,
   pagination,
 }: CategoryContentProps) {
   const meta = serviceListCategoryMeta[category];
+  const cardClickHandler = onCardClick ?? onRowClick;
 
   return (
     <>
@@ -75,7 +77,13 @@ export default function CategoryContent({
           errorMessage="서비스 지표를 불러올 수 없습니다"
           emptyMessage="표시할 서비스가 없습니다"
         >
-          {meta.metricKey && <ServiceMetricGrid services={services} metric={meta.metricKey} />}
+          {meta.metricKey && (
+            <ServiceMetricGrid
+              services={services}
+              metric={meta.metricKey}
+              onCardClick={cardClickHandler}
+            />
+          )}
         </StateHandler>
       )}
       {pagination && category !== 'list' && (
