@@ -20,30 +20,36 @@ export interface CreateServiceModalProps {
 }
 
 export const SERVICE_TYPE_OPTIONS = [
-  { label: 'UI', value: 'ui' },
-  { label: 'API', value: 'api' },
+  { label: 'Frontend (UI / Browser)', value: 'ui' },
+  { label: 'Backend (API / Server)', value: 'api' },
 ] as const;
 
-export const SERVICE_FRAMEWORK_OPTIONS: Record<ServiceType, { label: string; value: string }[]> = {
+export interface ServiceFrameworkOption {
+  label: string;
+  value: string;
+  runtime: string;
+}
+
+export const SERVICE_FRAMEWORK_OPTIONS: Record<ServiceType, ServiceFrameworkOption[]> = {
   ui: [
-    { label: 'Next.js', value: 'nextjs' },
-    { label: 'React', value: 'react' },
-    { label: 'Vue.js', value: 'vue' },
-    { label: 'Svelte', value: 'svelte' },
+    { label: 'Next.js', value: 'nextjs', runtime: 'Node.js' },
+    { label: 'React', value: 'react', runtime: 'JavaScript (Browser)' },
+    { label: 'Vue.js', value: 'vue', runtime: 'JavaScript (Browser)' },
+    { label: 'Svelte', value: 'svelte', runtime: 'JavaScript (Browser)' },
   ],
   api: [
-    { label: 'NestJS', value: 'nestjs' },
-    { label: 'Express', value: 'express' },
-    { label: 'FastAPI', value: 'fastapi' },
-    { label: 'Spring Boot', value: 'springboot' },
+    { label: 'NestJS', value: 'nestjs', runtime: 'Node.js' },
+    { label: 'Express', value: 'express', runtime: 'Node.js' },
+    { label: 'FastAPI', value: 'fastapi', runtime: 'Python' },
+    { label: 'Spring Boot', value: 'springboot', runtime: 'Java' },
   ],
 };
 
 export const SERVICE_ENVIRONMENT_OPTIONS = [
   { label: 'Docker', value: 'docker' },
   { label: 'Kubernetes', value: 'kubernetes' },
-  { label: 'Serverless', value: 'serverless' },
   { label: 'VM (EC2 등)', value: 'vm' },
+  { label: 'Bare Metal', value: 'bare-metal' },
 ] as const;
 
 export const getDefaultServiceFormValues = (

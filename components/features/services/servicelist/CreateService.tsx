@@ -48,6 +48,12 @@ export default function CreateServiceModal({
 
   // 현재 선택된 서비스 타입(UI/API)에 따라 프레임워크 목록 결정
   const availableFrameworks = SERVICE_FRAMEWORK_OPTIONS[formValues.serviceType];
+  const selectedFramework =
+    availableFrameworks.find((framework) => framework.value === formValues.framework) ??
+    availableFrameworks[0];
+  const runtimeDescription = selectedFramework
+    ? `선택하신 ${selectedFramework.label} 프레임워크에 맞는 ${selectedFramework.runtime} 런타임이 자동으로 설정됩니다.`
+    : '선택하신 프레임워크에 맞는 런타임이 자동으로 설정됩니다.';
   const isApiService = formValues.serviceType === 'api';
 
   // 서비스 종류(UI/API) 변경 핸들러
@@ -97,7 +103,7 @@ export default function CreateServiceModal({
         {/* form 영역 */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
-            {/* 1) 서비스 종류 선택 (UI / API) */}
+            {/* 서비스 종류 선택 (UI / API) */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 서비스 종류 <span className="text-red-500">*</span>
@@ -121,7 +127,7 @@ export default function CreateServiceModal({
               </div>
             </div>
 
-            {/* 2) 서비스 이름 입력 */}
+            {/* 서비스 이름 입력 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 서비스 이름 <span className="text-red-500">*</span>
@@ -137,11 +143,11 @@ export default function CreateServiceModal({
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-xs text-gray-500">
-                입력한 서비스 이름은 이후 모든 화면에서 서비스 식별용으로 사용됩니다.
+                입력한 서비스 이름은 이후 모든 화면에서 서비스 식별용으로 사용됩니다.{' '}
               </p>
             </div>
 
-            {/* 3) 프레임워크 선택 (서비스 타입에 따라 옵션 변경) */}
+            {/* 프레임워크 선택 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 프레임워크 <span className="text-red-500">*</span>
@@ -165,16 +171,13 @@ export default function CreateServiceModal({
               </div>
             </div>
 
-            {/* 4) 런타임 안내 (자동 설정) */}
+            {/* 런타임 안내 (자동 설정) */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <p className="text-sm font-semibold text-gray-800">런타임(Runtime)</p>
-              <p className="mt-1 text-xs text-gray-600">
-                선택한 프레임워크에 따라 런타임 환경이 자동으로 설정됩니다. (예: Next.js → Node,
-                FastAPI → Python)
-              </p>
+              <p className="mt-1 text-xs text-gray-600">{runtimeDescription}</p>
             </div>
 
-            {/* 5) 실행환경 (Docker/K8s/Serverless/VM) */}
+            {/* 실행환경 선택 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 실행환경 <span className="text-red-500">*</span>
@@ -198,7 +201,7 @@ export default function CreateServiceModal({
               </div>
             </div>
 
-            {/* 6) 수집 데이터 종류 (UI: Trace / API: Trace + Log) */}
+            {/* 수집 대상 선택 (Logs, Traces) */}
             <div>
               <label className="block text-sm text-gray-700 mb-3">
                 수집 데이터 종류 <span className="text-red-500">*</span>
@@ -229,20 +232,27 @@ export default function CreateServiceModal({
                   />
                   <span className="text-sm text-gray-700">Trace</span>
                 </label>
+
+                {!isApiService && (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
+                    브라우저 기반 UI 서비스는 로그(Log) 수집을 지원하지 않습니다.
+                  </div>
+                )}
               </div>
             </div>
 
             {/* 안내 박스 */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm text-blue-900 mb-2"> 📦 에이전트 설치 안내</h3>
+              <h3 className="text-sm text-blue-900 mb-2">📦 에이전트 설치 안내</h3>
               <p className="text-xs text-blue-700 leading-relaxed">
-                서비스 생성 후 안내되는 Agent 설치 가이드를 참고해 데이터 수집 환경 설정을 완료해
-                주세요.
+                서비스 생성이 완료되면 설치 가이드가 제공됩니다.
+                <br />
+                안내에 따라 에이전트를 설치해 데이터 수집을 시작하세요.
               </p>
             </div>
           </div>
 
-          {/* 버튼 영역 */}
+          {/* 제출 버튼 영역 */}
           <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
             <button
               type="button"
