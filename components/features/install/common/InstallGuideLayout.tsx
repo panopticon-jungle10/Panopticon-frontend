@@ -14,7 +14,7 @@ export default function InstallGuideLayout({ steps, icon }) {
   const [currentStep, setCurrentStep] = useState(1);
 
   const totalSteps = steps.length;
-  const activeStep = useMemo(() => steps[currentStep - 1], [currentStep]);
+  const activeStep = useMemo(() => steps[currentStep - 1], [currentStep, steps]);
 
   // scroll function
   const scrollToTop = () => {
