@@ -9,14 +9,14 @@ export const AuthenticatedHeader = () => {
   // Setting 드롭다운 아이템
   const settingItems = [
     {
-      href: '/services',
-      label: 'App Register',
-      ariaLabel: 'Go to App Register page',
+      href: '/services/settings/notifications',
+      label: '알림 설정',
+      ariaLabel: '알림 설정 페이지로 이동',
     },
     {
-      href: '/services/install',
-      label: 'Install Agents',
-      ariaLabel: 'Go to Install Agents page',
+      href: '/services/settings/install',
+      label: '에이전트 설치',
+      ariaLabel: '에이전트 설치 페이지로 이동',
     },
   ];
 
@@ -24,13 +24,8 @@ export const AuthenticatedHeader = () => {
   const apmItems = [
     {
       href: '/services',
-      label: 'Service list',
-      ariaLabel: 'Go to the service list for this app',
-    },
-    {
-      href: '/services/user-service',
-      label: 'Summary',
-      ariaLabel: 'Go to the summary view for user-service',
+      label: '서비스 목록',
+      ariaLabel: '이 앱의 서비스 목록으로 이동',
     },
   ];
 
