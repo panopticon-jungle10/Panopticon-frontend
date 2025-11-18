@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
         ? `${protocol}://${host}`
         : request.url.replace(/\/api\/auth\/github\/callback.*$/, '');
 
-    const response = NextResponse.redirect(`${baseUrl}/apps`);
+    const response = NextResponse.redirect(`${baseUrl}/services`);
     response.cookies.set('auth-token', jwt, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
