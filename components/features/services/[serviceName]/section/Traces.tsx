@@ -143,6 +143,8 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
         size: 200, // 현재 200개가 최대
       }),
     refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true, // 백그라운드에서도 갱신
+    staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청
   });
 
   // 전체 트레이스 데이터 변환 (최신순 정렬)
@@ -371,6 +373,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
           <ReactECharts
             option={option}
             style={{ height: 400 }}
+            notMerge={true}
             onEvents={{
               click: (params: { seriesName: string; dataIndex: number }) => {
                 const status = params.seriesName.toLowerCase();

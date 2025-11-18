@@ -26,6 +26,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         interval: interval,
       }),
     refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true, // 백그라운드에서도 갱신
+    staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청
   });
 
   // 차트 데이터 변환 (새로운 API 응답 형식: 배열 또는 단일 객체)
@@ -98,11 +100,11 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
     },
   };
 
-  /* -------------------- Requests & Errors -------------------- */
+  /* -------------------- Requests -------------------- */
   const requestsOption = {
     ...baseStyle,
     title: {
-      text: 'Requests & Errors',
+      text: 'Requests',
       left: 'center',
       textStyle: { fontSize: 14, color: '#374151', fontWeight: 600 },
     },
@@ -114,17 +116,6 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         barWidth: getBarWidth(interval),
         itemStyle: {
           color: '#2563eb',
-          opacity: 0.65,
-          borderRadius: [0, 0, 0, 0],
-        },
-      },
-      {
-        name: 'Errors',
-        type: 'bar',
-        data: chartData.errors,
-        barWidth: getBarWidth(interval),
-        itemStyle: {
-          color: '#ef4444',
           opacity: 0.65,
           borderRadius: [0, 0, 0, 0],
         },
@@ -156,6 +147,13 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   };
 
   /* -------------------- Latency -------------------- */
+  // 레이턴시 차트 색상 정의 (라벨과 선 동기화)
+  const latencyColors = {
+    p95: '#dc2626', // 빨강 (더 진한 빨강)
+    p90: '#f59e0b', // 주황 (더 진한 주황)
+    p50: '#10b981', // 초록 (에메랄드 그린)
+  };
+
   const latencyOption = {
     ...baseStyle,
     title: {
@@ -205,7 +203,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p95,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#ef4444' },
+        lineStyle: { width: 2, color: latencyColors.p95 },
+        itemStyle: { color: latencyColors.p95 },
       },
       {
         name: 'p90',
@@ -213,7 +212,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p90,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#f97316' },
+        lineStyle: { width: 2, color: latencyColors.p90 },
+        itemStyle: { color: latencyColors.p90 },
       },
       {
         name: 'p50',
@@ -221,7 +221,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p50,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#10b981' },
+        lineStyle: { width: 2, color: latencyColors.p50 },
+        itemStyle: { color: latencyColors.p50 },
       },
     ],
   };
@@ -240,7 +241,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 메트릭 데이터가 없습니다"
           >
-            <ReactECharts option={requestsOption} style={{ height: 250 }} />
+            <ReactECharts option={requestsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -253,7 +254,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 에러 데이터가 없습니다"
           >
-            <ReactECharts option={errorsOption} style={{ height: 250 }} />
+            <ReactECharts option={errorsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -266,7 +267,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="레이턴시 데이터를 불러오는 중..."
             emptyMessage="표시할 레이턴시 데이터가 없습니다"
           >
-            <ReactECharts option={latencyOption} style={{ height: 250 }} />
+            <ReactECharts option={latencyOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
       </div>

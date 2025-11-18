@@ -5,7 +5,7 @@ import Dropdown from '@/components/ui/Dropdown';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceEndpoints } from '@/src/api/apm';
-import { useTimeRangeStore } from '@/src/store/timeRangeStore';
+import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
 import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
@@ -17,7 +17,7 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 // 페이지당 아이템 수 (리스트용)
 const ITEMS_PER_PAGE = 10;
 // API에서 가져올 총 엔드포인트 수
-const TOTAL_ENDPOINTS_LIMIT = 40;
+const TOTAL_ENDPOINTS_LIMIT = 200;
 
 // ECharts Bar tooltip params 타입
 interface BarTooltipParams {
@@ -130,7 +130,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     return 'latency_p95_ms';
   }, [selectedMetric]);
 
-  // API 데이터 가져오기 (40개 엔드포인트, 선택된 메트릭으로 정렬)
+  // API 데이터 가져오기 (200개 엔드포인트, 선택된 메트릭으로 정렬, 10초마다 폴링)
   const { data, isLoading, isError } = useQuery({
     queryKey: ['serviceEndpoints', serviceName, startTime, endTime, sortBy],
     queryFn: () =>
@@ -140,6 +140,9 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
         limit: TOTAL_ENDPOINTS_LIMIT,
         sort_by: sortBy,
       }),
+    refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true, // 백그라운드에서도 갱신
+    staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청
     retry: false,
     throwOnError: false,
   });
