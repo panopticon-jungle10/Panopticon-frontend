@@ -14,9 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # ⭐ PR merge ref fetching 문제 해결
-          persist-credentials: true # optional but recommended
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
