@@ -1,7 +1,9 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useMemo, type ComponentType } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
 import FrontendTraceGuide from '@/components/features/install/FrontendTrace';
 import BackendLogGuide from '@/components/features/install/BackendLog';
 import BackendTraceGuide from '@/components/features/install/BackendTrace';
@@ -54,26 +56,27 @@ export default function InstallPage() {
   const scenario = useMemo(() => {
     const params = new URLSearchParams(searchParamsString);
     const forcedScenario = params.get('scenario') ?? params.get('variant');
-    if (isInstallScenario(forcedScenario)) {
-      return forcedScenario;
-    }
+    if (isInstallScenario(forcedScenario)) return forcedScenario;
 
     const serviceType = params.get('serviceType');
     const collectLogs = normalizeBoolean(params.get('collectLogs'));
     const collectTraces = normalizeBoolean(params.get('collectTraces'));
+
     return deriveScenarioFromFlags(serviceType, collectLogs, collectTraces);
   }, [searchParamsString]);
 
-  // Keep URL canonical by persisting the resolved scenario.
+  // URL 정규화
   useEffect(() => {
     if (!scenario) return;
+
     const params = new URLSearchParams(searchParamsString);
     const currentScenario = params.get('scenario') ?? params.get('variant');
-    if (currentScenario === scenario) return;
 
-    params.set('scenario', scenario);
-    router.replace(`/services/install?${params.toString()}`, { scroll: false });
-  }, [router, scenario, searchParamsString]);
+    if (currentScenario !== scenario) {
+      params.set('scenario', scenario);
+      router.replace(`/services/install?${params.toString()}`, { scroll: false });
+    }
+  }, [scenario, searchParamsString, router]);
 
   if (!scenario) {
     return (
