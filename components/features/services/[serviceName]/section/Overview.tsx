@@ -24,7 +24,6 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         from: startTime,
         to: endTime,
         interval: interval,
-        environment: 'prod',
       }),
     refetchInterval: POLLING_INTERVAL,
   });
