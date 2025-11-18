@@ -3,8 +3,12 @@
 import { ReactNode, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PiMonitorLight } from 'react-icons/pi';
+
 import { StepIndicator } from './common/StepIndicator';
-import { CopyableCodeBlock } from './common/CopyableCodeBlock';
+import { StepContainer } from './common/StepContainer';
+import { StepHeader } from './common/StepHeader';
+import { InstallSection } from './common/InstallSection';
+import { StepChecklist } from './common/StepChecklist';
 
 type StepSection = {
   heading?: string;
@@ -111,7 +115,6 @@ registerInstrumentations({
     }),
   ],
 });
-
 `,
         language: 'typescript',
       },
@@ -144,6 +147,7 @@ export default function OtelProvider({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
+
 `,
         language: 'typescript',
       },
@@ -165,9 +169,7 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
-
-`,
+}`,
         language: 'typescript',
       },
     ],
@@ -189,13 +191,12 @@ NEXT_PUBLIC_SERVICE_NAME=your-frontend-service      # UI 서비스 이름
 NEXT_PUBLIC_DEPLOYMENT_ENV=production               # 환경 이름 (예: development / staging / production)
 NEXT_PUBLIC_OTEL_EXPORTER_OTLP_URL=https://api.jungle-panopticon.cloud/producer/v1/traces
 # Panopticon 데이터 수집 서버 엔드포인트
-
 `,
         language: 'bash',
       },
     ],
     checklist: [
-      '프론트엔드 서버를 재시작합니다. -> Docker: `docker compose restart frontend`',
+      '프론트엔드 서버를 재시작합니다.\nDocker: `docker compose restart frontend`',
       '브라우저를 새로고침하고 페이지 이동 · 버튼 클릭 등 사용자 액션을 1회 이상 수행합니다.',
       'Panopticon 대시보드에서 프론트엔드 서비스 이름으로 Trace가 생성되는지 확인합니다.',
     ],
@@ -224,69 +225,30 @@ export default function FrontendTraceGuide() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50">
       <div className="mx-auto max-w-4xl px-6 py-16">
-        {/* StepIndicator (버튼 포함됨) */}
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} className="mb-12" />
 
-        {/* MAIN CONTAINER */}
-        <div className="rounded-2xl border border-blue-100 bg-white/95 p-8 shadow-xl shadow-blue-100/40">
-          {/* HEADER AREA */}
-          <div className="flex flex-wrap items-start gap-4 border-b border-blue-50 pb-6">
-            <div className="rounded-2xl bg-blue-50 p-3 text-blue-600">
-              <PiMonitorLight className="h-10 w-10" />
-            </div>
+        <StepContainer>
+          <StepHeader
+            icon={<PiMonitorLight className="h-10 w-10" />}
+            subtitle={activeStep.subtitle}
+            title={activeStep.title}
+            meta={activeStep.meta}
+          />
 
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-blue-500">{activeStep.subtitle}</p>
-
-              <h1 className="mt-1 text-3xl font-bold text-gray-900">{activeStep.title}</h1>
-
-              {/* STEP-LEVEL META (STEP 3에서는 없음) */}
-              {activeStep.meta && (
-                <p className="mt-2 text-sm font-semibold text-gray-500">{activeStep.meta}</p>
-              )}
-            </div>
-          </div>
-
-          {/* STEP DESCRIPTION */}
           <p className="mt-6 whitespace-pre-line text-base text-gray-700">
             {activeStep.description}
           </p>
 
-          {/* STEP SECTIONS */}
           <div className="mt-8 space-y-10">
             {activeStep.sections.map((section, index) => (
-              <div key={index}>
-                {/* 섹션 제목 */}
-                {section.heading && (
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{section.heading}</h3>
-                )}
-
-                {/* 섹션별 작업 유형 표시 */}
-                {section.description && (
-                  <p className="text-sm text-gray-600 mb-3">{section.description}</p>
-                )}
-
-                {/* 코드 블록 박스 */}
-                <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-5">
-                  <CopyableCodeBlock code={section.code} language={section.language} />
-                </div>
-              </div>
+              <InstallSection key={index} {...section} />
             ))}
           </div>
 
-          {/* STEP 4 CHECKLIST */}
           {currentStep === totalSteps && activeStep.checklist && (
-            <div className="mt-10 rounded-xl border border-green-200 bg-green-50 p-6">
-              <h3 className="text-lg font-semibold text-green-900">{'설정 확인'}</h3>
-              <ol className="mt-3 list-decimal space-y-2 pl-6 text-sm text-green-800">
-                {activeStep.checklist.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ol>
-            </div>
+            <StepChecklist title="설정 확인" items={activeStep.checklist} />
           )}
 
-          {/* BUTTONS */}
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               onClick={handlePrev}
@@ -303,7 +265,7 @@ export default function FrontendTraceGuide() {
               {currentStep === totalSteps ? '대시보드로 이동' : '다음 단계'}
             </button>
           </div>
-        </div>
+        </StepContainer>
       </div>
     </div>
   );
