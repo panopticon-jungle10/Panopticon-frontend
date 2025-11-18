@@ -16,25 +16,40 @@ export default function InstallGuideLayout({ steps, icon }) {
   const totalSteps = steps.length;
   const activeStep = useMemo(() => steps[currentStep - 1], [currentStep]);
 
-  const handlePrev = () => setCurrentStep((prev) => Math.max(1, prev - 1));
+  // scroll function
+  const scrollToTop = () => {
+    const el = document.getElementById('top');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+    scrollToTop();
+  };
 
   const handleNext = () => {
     if (currentStep === totalSteps) {
       router.push('/services');
     } else {
       setCurrentStep((prev) => Math.min(totalSteps, prev + 1));
+      scrollToTop();
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50">
+
+      {/* scroll target */}
+      <div id="top"></div>
+
       <div className="mx-auto max-w-4xl px-6 py-16">
 
-        {/* 인디케이터 */}
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} className="mb-12" />
 
-        {/* 컨테이너 */}
         <StepContainer>
+
           <StepHeader
             icon={icon}
             subtitle={activeStep.subtitle}
@@ -57,6 +72,8 @@ export default function InstallGuideLayout({ steps, icon }) {
           )}
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-between">
+
+            {/* 이전 단계 */}
             <button
               onClick={handlePrev}
               disabled={currentStep === 1}
@@ -65,6 +82,7 @@ export default function InstallGuideLayout({ steps, icon }) {
               이전 단계
             </button>
 
+            {/* 다음 단계 */}
             <button
               onClick={handleNext}
               className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
@@ -72,6 +90,7 @@ export default function InstallGuideLayout({ steps, icon }) {
               {currentStep === totalSteps ? '대시보드로 이동' : '다음 단계'}
             </button>
           </div>
+
         </StepContainer>
       </div>
     </div>
