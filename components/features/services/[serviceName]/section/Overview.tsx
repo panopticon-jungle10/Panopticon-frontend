@@ -1,10 +1,12 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { getServiceMetrics } from '@/src/api/apm';
-import { formatChartTimeLabel, getBarWidth } from '@/src/utils/chartFormatter';
 import StateHandler from '@/components/ui/StateHandler';
 import { POLLING_INTERVAL, useTimeRangeStore } from '@/src/store/timeRangeStore';
+import { convertTimeRangeToParams, TIME_RANGE_DURATION_MS } from '@/src/utils/timeRange';
+import { getTimeAxisFormatter, getBarMaxWidthForTimeAxis } from '@/src/utils/chartFormatter';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
@@ -13,52 +15,73 @@ interface OverviewSectionProps {
 }
 
 export default function OverviewSection({ serviceName }: OverviewSectionProps) {
-  // Zustand store에서 시간 정보 가져오기
-  const { startTime, endTime, interval } = useTimeRangeStore();
+  // Zustand store에서 시간 정보 가져오기 (timeRange만 사용)
+  const { timeRange, interval } = useTimeRangeStore();
 
-  // API 데이터 가져오기 (10초마다 폴링)
+  // API 데이터 가져오기 (10초마다 폴링, 매번 최신 시간 범위로 요청)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['serviceMetrics', serviceName, startTime, endTime, interval],
-    queryFn: () =>
-      getServiceMetrics(serviceName, {
-        from: startTime,
-        to: endTime,
+    queryKey: ['serviceMetrics', serviceName, timeRange, interval],
+    queryFn: () => {
+      // 폴링할 때마다 현재 시간 기준으로 시간 범위 재계산
+      const { start_time, end_time } = convertTimeRangeToParams(timeRange);
+
+      return getServiceMetrics(serviceName, {
+        from: start_time,
+        to: end_time,
         interval: interval,
-        environment: 'prod',
-      }),
+      });
+    },
     refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true, // 백그라운드에서도 갱신
+    staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청
   });
 
   // 차트 데이터 변환 (새로운 API 응답 형식: 배열 또는 단일 객체)
-  const metricsArray = Array.isArray(data) ? data : data ? [data] : [];
+  const metricsArray = useMemo(() => (Array.isArray(data) ? data : data ? [data] : []), [data]);
 
   // 데이터 없음 체크
   const isEmpty = metricsArray.length === 0 || !metricsArray[0]?.points.length;
 
-  const chartData = {
-    timestamps:
-      metricsArray[0]?.points.map((item) =>
-        formatChartTimeLabel(new Date(item.timestamp), interval),
-      ) || [],
-    requests:
-      metricsArray
-        .find((m) => m.metric_name === 'http_requests_total')
-        ?.points.map((p) => p.value) || [],
-    errors:
-      metricsArray.find((m) => m.metric_name === 'error_rate')?.points.map((p) => p.value * 100) ||
-      [],
-    latency: {
-      p95:
-        metricsArray.find((m) => m.metric_name === 'latency_p95_ms')?.points.map((p) => p.value) ||
-        [],
-      p90:
-        metricsArray.find((m) => m.metric_name === 'latency_p90_ms')?.points.map((p) => p.value) ||
-        [],
-      p50:
-        metricsArray.find((m) => m.metric_name === 'latency_p50_ms')?.points.map((p) => p.value) ||
-        [],
-    },
-  };
+  // X축 고정 범위 계산 및 차트 데이터 변환
+  const { xAxisMin, xAxisMax, chartData } = useMemo(() => {
+    // 데이터에서 가장 최근 timestamp를 기준으로 현재 시각 추정
+    const latestTimestamp =
+      metricsArray[0]?.points.length > 0
+        ? Math.max(...metricsArray[0].points.map((p) => new Date(p.timestamp).getTime()))
+        : new Date().getTime();
+
+    const timeRangeDuration = TIME_RANGE_DURATION_MS[timeRange];
+    const xAxisMax = latestTimestamp;
+    const xAxisMin = latestTimestamp - timeRangeDuration;
+
+    // 시간 기반 X축을 위한 timestamp-value 페어
+    const chartData = {
+      requests:
+        metricsArray
+          .find((m) => m.metric_name === 'http_requests_total')
+          ?.points.map((p) => [new Date(p.timestamp).getTime(), p.value]) || [],
+      errors:
+        metricsArray
+          .find((m) => m.metric_name === 'error_rate')
+          ?.points.map((p) => [new Date(p.timestamp).getTime(), p.value * 100]) || [],
+      latency: {
+        p95:
+          metricsArray
+            .find((m) => m.metric_name === 'latency_p95_ms')
+            ?.points.map((p) => [new Date(p.timestamp).getTime(), p.value]) || [],
+        p90:
+          metricsArray
+            .find((m) => m.metric_name === 'latency_p90_ms')
+            ?.points.map((p) => [new Date(p.timestamp).getTime(), p.value]) || [],
+        p50:
+          metricsArray
+            .find((m) => m.metric_name === 'latency_p50_ms')
+            ?.points.map((p) => [new Date(p.timestamp).getTime(), p.value]) || [],
+      },
+    };
+
+    return { xAxisMin, xAxisMax, chartData };
+  }, [metricsArray, timeRange]);
 
   /* -------------------- 차트 공통 스타일 ------------------ */
   const baseStyle = {
@@ -72,16 +95,18 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       padding: 6,
     },
     xAxis: {
-      type: 'category',
-      data: chartData.timestamps,
+      type: 'time',
+      min: xAxisMin,
+      max: xAxisMax,
       axisLabel: {
         color: '#6b7280',
         fontSize: 11,
-        interval: 'auto',
+        formatter: getTimeAxisFormatter(interval),
         hideOverlap: true,
       },
       axisLine: { show: true, lineStyle: { color: '#9ca3af', width: 1 } },
       axisTick: { show: false },
+      splitNumber: 20, // 약 20개의 라벨 표시
     },
     yAxis: {
       type: 'value',
@@ -99,11 +124,11 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
     },
   };
 
-  /* -------------------- Requests & Errors -------------------- */
+  /* -------------------- Requests -------------------- */
   const requestsOption = {
     ...baseStyle,
     title: {
-      text: 'Requests & Errors',
+      text: 'Requests',
       left: 'center',
       textStyle: { fontSize: 14, color: '#374151', fontWeight: 600 },
     },
@@ -112,20 +137,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         name: 'Requests',
         type: 'bar',
         data: chartData.requests,
-        barWidth: getBarWidth(interval),
+        barMaxWidth: getBarMaxWidthForTimeAxis(interval),
         itemStyle: {
           color: '#2563eb',
-          opacity: 0.65,
-          borderRadius: [0, 0, 0, 0],
-        },
-      },
-      {
-        name: 'Errors',
-        type: 'bar',
-        data: chartData.errors,
-        barWidth: getBarWidth(interval),
-        itemStyle: {
-          color: '#ef4444',
           opacity: 0.65,
           borderRadius: [0, 0, 0, 0],
         },
@@ -146,7 +160,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         name: 'Errors',
         type: 'bar',
         data: chartData.errors,
-        barWidth: getBarWidth(interval),
+        barMaxWidth: getBarMaxWidthForTimeAxis(interval),
         itemStyle: {
           color: '#ef4444',
           opacity: 0.7,
@@ -157,6 +171,13 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   };
 
   /* -------------------- Latency -------------------- */
+  // 레이턴시 차트 색상 정의 (라벨과 선 동기화)
+  const latencyColors = {
+    p95: '#dc2626', // 빨강 (더 진한 빨강)
+    p90: '#f59e0b', // 주황 (더 진한 주황)
+    p50: '#10b981', // 초록 (에메랄드 그린)
+  };
+
   const latencyOption = {
     ...baseStyle,
     title: {
@@ -182,18 +203,36 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       padding: 6,
       formatter: (params: unknown) => {
         interface TooltipParam {
-          axisValue: string;
+          axisValue: string | number;
           color: string;
           seriesName: string;
-          value: number;
+          value: number[];
         }
         const list = params as TooltipParam[];
         if (!list?.length) return '';
-        const header = `<div style="margin-bottom:4px;"><b>${list[0].axisValue}</b></div>`;
+
+        // axisValue가 timestamp인 경우 날짜/시간 형식으로 변환
+        const timestamp =
+          typeof list[0].axisValue === 'number'
+            ? list[0].axisValue
+            : new Date(list[0].axisValue).getTime();
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+
+        const header = `<div style="margin-bottom:4px;"><b>${formattedDate}</b></div>`;
         const lines = list
           .map(
             (p) =>
-              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${p.seriesName}: ${p.value} ms</div>`,
+              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${
+                p.seriesName
+              }: ${p.value[1].toFixed(2)} ms</div>`,
           )
           .join('');
         return header + lines;
@@ -206,7 +245,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p95,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#ef4444' },
+        lineStyle: { width: 2, color: latencyColors.p95 },
+        itemStyle: { color: latencyColors.p95 },
       },
       {
         name: 'p90',
@@ -214,7 +254,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p90,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#f97316' },
+        lineStyle: { width: 2, color: latencyColors.p90 },
+        itemStyle: { color: latencyColors.p90 },
       },
       {
         name: 'p50',
@@ -222,7 +263,8 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         data: chartData.latency.p50,
         smooth: true,
         symbol: 'none',
-        lineStyle: { width: 2, color: '#10b981' },
+        lineStyle: { width: 2, color: latencyColors.p50 },
+        itemStyle: { color: latencyColors.p50 },
       },
     ],
   };
@@ -241,7 +283,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 메트릭 데이터가 없습니다"
           >
-            <ReactECharts option={requestsOption} style={{ height: 250 }} />
+            <ReactECharts option={requestsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -254,7 +296,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 에러 데이터가 없습니다"
           >
-            <ReactECharts option={errorsOption} style={{ height: 250 }} />
+            <ReactECharts option={errorsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -267,7 +309,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="레이턴시 데이터를 불러오는 중..."
             emptyMessage="표시할 레이턴시 데이터가 없습니다"
           >
-            <ReactECharts option={latencyOption} style={{ height: 250 }} />
+            <ReactECharts option={latencyOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
       </div>
