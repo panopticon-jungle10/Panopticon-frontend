@@ -140,7 +140,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
         from: startTime,
         to: endTime,
         page: 1,
-        size: 199, // TODO : 현재 최대 199개까지만 조회 가능
+        size: 200, // 현재 200개가 최대
       }),
     refetchInterval: POLLING_INTERVAL,
   });
