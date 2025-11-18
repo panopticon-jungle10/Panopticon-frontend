@@ -1,3 +1,5 @@
+// 코드 블록 + 복사 버튼
+
 'use client';
 
 import { useState } from 'react';

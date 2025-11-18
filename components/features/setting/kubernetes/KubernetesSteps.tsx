@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { IoCheckmarkCircle } from 'react-icons/io5';
-import { CopyableCodeBlock } from '../CopyableCodeBlock';
+import { CopyableCodeBlock } from '../install/common/CopyableCodeBlock';
 
 type BaseStepProps = {
   icon: ReactNode;

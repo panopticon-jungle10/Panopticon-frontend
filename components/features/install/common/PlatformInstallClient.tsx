@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IoArrowBack } from 'react-icons/io5';
-import { StepIndicator } from './docker/StepIndicator';
+import { StepIndicator } from './StepIndicator';
 import { InstallStep, MonitoringOptions, PlatformType, StepConfig } from '@/types/agent-install';
-import { platformsData } from '@/components/features/install/platforms';
+import { platformsData } from '@/components/features/install/common/platforms';
 import {
   DockerStepOne,
   DockerStepThree,
@@ -17,7 +17,7 @@ import {
   KubernetesStepTwo,
   KubernetesStepThree,
   KubernetesStepFour,
-} from './kubernetes/KubernetesSteps';
+} from '../../setting/kubernetes/KubernetesSteps';
 import { CopyableCodeBlock } from './CopyableCodeBlock';
 
 const platformStepConfig: Record<PlatformType, StepConfig> = {
