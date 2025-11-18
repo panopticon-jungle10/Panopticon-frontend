@@ -79,11 +79,14 @@ export default function InstallPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-6 text-center">
         <div className="max-w-lg space-y-4 rounded-2xl border border-dashed border-gray-200 bg-white p-10 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">Install Guide</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
+            Install Guide
+          </p>
           <h1 className="text-2xl font-bold text-gray-900">설치 옵션을 찾을 수 없어요</h1>
           <p className="text-gray-600">
-            서비스 생성 모달에서 Frontend / Backend 및 수집 옵션을 선택한 뒤 &ldquo;설치 시작&rdquo;을 눌러주세요.
-            다시 설치를 진행하려면 아래 버튼을 눌러 서비스 화면으로 돌아가면 됩니다.
+            서비스 생성 모달에서 Frontend / Backend 및 수집 옵션을 선택한 뒤 &ldquo;설치
+            시작&rdquo;을 눌러주세요. 다시 설치를 진행하려면 아래 버튼을 눌러 서비스 화면으로
+            돌아가면 됩니다.
           </p>
           <div className="flex justify-center gap-3">
             <button

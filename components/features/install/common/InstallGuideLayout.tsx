@@ -40,16 +40,13 @@ export default function InstallGuideLayout({ steps, icon }) {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50">
-
       {/* scroll target */}
       <div id="top"></div>
 
       <div className="mx-auto max-w-4xl px-6 py-16">
-
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} className="mb-12" />
 
         <StepContainer>
-
           <StepHeader
             icon={icon}
             subtitle={activeStep.subtitle}
@@ -67,12 +64,9 @@ export default function InstallGuideLayout({ steps, icon }) {
             ))}
           </div>
 
-          {activeStep.checklist && (
-            <StepChecklist title="설정 확인" items={activeStep.checklist} />
-          )}
+          {activeStep.checklist && <StepChecklist title="설정 확인" items={activeStep.checklist} />}
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-between">
-
             {/* 이전 단계 */}
             <button
               onClick={handlePrev}
@@ -90,7 +84,6 @@ export default function InstallGuideLayout({ steps, icon }) {
               {currentStep === totalSteps ? '대시보드로 이동' : '다음 단계'}
             </button>
           </div>
-
         </StepContainer>
       </div>
     </div>

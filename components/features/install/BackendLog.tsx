@@ -398,10 +398,5 @@ NODE_ENV=production`,
 ];
 
 export default function BackendLogGuide() {
-  return (
-    <InstallGuideLayout
-      steps={steps}
-      icon={<PiFileTextLight className="h-10 w-10" />}   
-    />
-  );
+  return <InstallGuideLayout steps={steps} icon={<PiFileTextLight className="h-10 w-10" />} />;
 }
