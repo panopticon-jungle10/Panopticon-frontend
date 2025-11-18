@@ -150,7 +150,9 @@ export default function Table<T>({
                       }}
                       className={`w-4 h-4 cursor-pointer transition-colors ${
                         // ⭐ 추가: 즐겨찾기 상태별 색상 적용
-                        (row as any).isFavorite ? 'text-yellow-400' : 'text-gray-400'
+                        ((row as { isFavorite?: boolean }).isFavorite
+                          ? 'text-yellow-400'
+                          : 'text-gray-400')
                       }`}
                     />
                   </td>
