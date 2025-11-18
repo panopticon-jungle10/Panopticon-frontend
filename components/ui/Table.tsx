@@ -145,14 +145,14 @@ export default function Table<T>({
                   <td className="px-4 py-3 text-sm">
                     <Star
                       onClick={(e) => {
-                        e.stopPropagation(); // ⭐ 추가: Row 클릭 막기
-                        onFavoriteClick?.(row, rowIndex); // ⭐ 추가: 실제 토글 발생
+                        e.stopPropagation(); // ⭐ Row 클릭 막기
+                        onFavoriteClick?.(row, rowIndex); // ⭐ 토글 발생
                       }}
                       className={`w-4 h-4 cursor-pointer transition-colors ${
-                        // ⭐ 추가: 즐겨찾기 상태별 색상 적용
-                        ((row as { isFavorite?: boolean }).isFavorite
+                        // ⭐ 즐겨찾기 상태별 색상 적용
+                        (row as { isFavorite?: boolean }).isFavorite
                           ? 'text-yellow-400'
-                          : 'text-gray-400')
+                          : 'text-gray-400'
                       }`}
                     />
                   </td>
