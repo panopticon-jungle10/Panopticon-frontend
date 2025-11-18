@@ -1,6 +1,7 @@
 // 서비스 목록 테이블 (+페이지네이션)
 'use client';
 
+import { useState } from 'react';
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
@@ -26,9 +27,7 @@ const environmentBadgeStyles: Record<string, string> = {
 
 const getEnvironmentBadgeClass = (environment: string) => {
   const normalized = normalizeEnvironmentKey(environment);
-  return (
-    environmentBadgeStyles[normalized] ?? 'bg-gray-100 text-gray-700 border border-gray-200'
-  );
+  return environmentBadgeStyles[normalized] ?? 'bg-gray-100 text-gray-700 border border-gray-200';
 };
 
 const columns = [
@@ -92,12 +91,33 @@ export default function ServiceListTable({
   pagination,
   onRowClick,
 }: ServiceListTableProps) {
+  // ⭐ 즐겨찾기 상태 관리
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    services.forEach(
+      (s) => (init[s.service_name] = s.isFavorite ?? false), // ⭐
+    );
+    return init;
+  });
+
+  // ⭐ 즐겨찾기 토글 핸들러
+  const handleFavoriteClick = (row: ServiceSummary) => {
+    setFavoriteMap((prev) => ({
+      ...prev,
+      [row.service_name]: !prev[row.service_name], // ⭐
+    }));
+  };
+
   return (
     <>
       <Table<ServiceSummary>
         columns={columns}
-        data={services}
+        data={services.map((s) => ({
+          ...s,
+          isFavorite: favoriteMap[s.service_name], // ⭐
+        }))}
         showFavorite
+        onFavoriteClick={handleFavoriteClick}
         onRowClick={onRowClick}
       />
       {pagination && (
