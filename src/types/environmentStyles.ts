@@ -11,7 +11,10 @@ const environmentStyles: Record<string, EnvironmentStyle> = {
   dev: { chip: 'bg-blue-50 text-blue-700 border border-blue-100', dot: 'bg-blue-500' },
   qa: { chip: 'bg-purple-50 text-purple-700 border border-purple-100', dot: 'bg-purple-500' },
   docker: { chip: 'bg-sky-50 text-sky-700 border border-sky-100', dot: 'bg-sky-500' },
-  kubernetes: { chip: 'bg-emerald-50 text-emerald-700 border border-emerald-100', dot: 'bg-emerald-500' },
+  kubernetes: {
+    chip: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+    dot: 'bg-emerald-500',
+  },
   k8s: { chip: 'bg-emerald-50 text-emerald-700 border border-emerald-100', dot: 'bg-emerald-500' },
   vm: { chip: 'bg-yellow-50 text-yellow-700 border border-yellow-100', dot: 'bg-yellow-500' },
   baremetal: { chip: 'bg-slate-100 text-slate-700 border border-slate-200', dot: 'bg-slate-500' },
