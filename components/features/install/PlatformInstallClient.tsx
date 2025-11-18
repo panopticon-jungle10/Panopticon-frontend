@@ -56,7 +56,7 @@ export default function PlatformInstallClient({ platformKey }: Props) {
         <div className="text-center">
           <h1 className="mb-4 text-2xl font-bold text-gray-900">Platform not found</h1>
           <button
-            onClick={() => router.push('/install')}
+            onClick={() => router.push('/services/install')}
             className="text-blue-600 underline transition hover:text-blue-700"
           >
             Go back to platform selection
@@ -66,7 +66,7 @@ export default function PlatformInstallClient({ platformKey }: Props) {
     );
   }
 
-  const handleBack = () => router.push('/install');
+  const handleBack = () => router.push('/services/install');
 
   const handleNextStep = () => {
     if (currentStep < stepConfig.total) {
@@ -146,13 +146,13 @@ export default function PlatformInstallClient({ platformKey }: Props) {
           </p>
           <div className="flex gap-3">
             <button
-              onClick={() => router.push('/install')}
+              onClick={() => router.push('/services/install')}
               className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
             >
               설치 페이지로 돌아가기
             </button>
             <button
-              onClick={() => router.push('/main')}
+              onClick={() => router.push('/services')}
               className="rounded-lg border border-blue-600 bg-white px-6 py-2 text-blue-600 transition hover:bg-blue-50"
             >
               대시보드로 이동
@@ -231,7 +231,7 @@ export default function PlatformInstallClient({ platformKey }: Props) {
             onPrev={handlePrevStep}
             onComplete={handleInstallComplete}
             onInstallAnother={handleBack}
-            onGoDashboard={() => router.push('/main')}
+            onGoDashboard={() => router.push('/services')}
           />
         );
       default:
@@ -278,7 +278,7 @@ export default function PlatformInstallClient({ platformKey }: Props) {
             totalSteps={stepConfig.total}
             onPrev={handlePrevStep}
             onInstallAnother={handleBack}
-            onGoDashboard={() => router.push('/main')}
+            onGoDashboard={() => router.push('/services')}
           />
         );
       default:

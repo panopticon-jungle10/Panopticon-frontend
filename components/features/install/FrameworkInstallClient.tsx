@@ -12,7 +12,7 @@ type Props = {
 export default function FrameworkInstallClient({ framework }: Props) {
   const router = useRouter();
 
-  const handleBack = () => router.push('/install');
+  const handleBack = () => router.push('/services/install');
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50">
@@ -78,7 +78,7 @@ export default function FrameworkInstallClient({ framework }: Props) {
               </li>
             </ul>
             <button
-              onClick={() => router.push('/install')}
+              onClick={() => router.push('/services/install')}
               className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
             >
               Infrastructure 설치 가이드로 이동
@@ -110,7 +110,7 @@ export default function FrameworkInstallClient({ framework }: Props) {
           {/* 대시보드 링크 */}
           <div className="text-center">
             <button
-              onClick={() => router.push('/main')}
+              onClick={() => router.push('/services')}
               className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-gray-700 transition hover:bg-gray-50"
             >
               대시보드로 이동

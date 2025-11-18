@@ -11,6 +11,58 @@ import Dropdown from '@/components/ui/Dropdown';
 import TraceAnalysis from './TraceAnalysis';
 
 /**
+ * Trace Card Component
+ */
+interface TraceCardProps {
+  trace: EndpointTraceItem;
+  onClick: () => void;
+}
+
+function TraceCard({ trace, onClick }: TraceCardProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer h-full flex flex-col"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-2 py-1 text-xs font-medium rounded-md ${
+              trace.status === 'ERROR' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+            }`}
+          >
+            {trace.status}
+          </span>
+          <span className="text-xs text-gray-500">{trace.serviceName}</span>
+        </div>
+      </div>
+      <div className="flex-1 space-y-3">
+        <div>
+          <p className="text-xs text-gray-500 mb-1">Trace ID</p>
+          <p className="font-mono text-xs text-gray-900 break-all line-clamp-2">{trace.traceId}</p>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Duration</p>
+            <p className="font-mono text-sm font-semibold text-gray-900">
+              {trace.durationMs >= 1000
+                ? `${(trace.durationMs / 1000).toFixed(2)}s`
+                : `${trace.durationMs.toFixed(2)}ms`}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500 mb-1">Time</p>
+            <p className="text-xs text-gray-700">
+              {new Date(trace.timestamp).toLocaleTimeString('ko-KR')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Endpoint Trace Analysis Component
  * 엔드포인트의 에러/느린 트레이스 목록을 보여주는 SlideOverPanel
  */
@@ -96,7 +148,7 @@ export default function EndpointTraceAnalysis({
       />
 
       {/* Slide-over Panel */}
-      <div className="fixed top-0 right-0 h-full w-[70%] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0">
+      <div className="fixed top-0 right-0 h-full w-[80%] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex-1">
@@ -132,46 +184,14 @@ export default function EndpointTraceAnalysis({
             emptyMessage={`${status === 'ERROR' ? '에러' : '느린'} 트레이스가 없습니다`}
           >
             <div className="p-6">
-              {/* Trace List */}
-              <div className="space-y-3">
+              {/* Trace Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data?.map((trace) => (
-                  <div
+                  <TraceCard
                     key={trace.traceId}
+                    trace={trace}
                     onClick={() => handleTraceClick(trace)}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-md ${
-                            trace.status === 'ERROR'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {trace.status}
-                        </span>
-                        <span className="text-xs text-gray-500">{trace.serviceName}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {new Date(trace.timestamp).toLocaleString('ko-KR')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500 mb-1">Trace ID</p>
-                        <p className="font-mono text-sm text-gray-900 break-all">{trace.traceId}</p>
-                      </div>
-                      <div className="ml-4 text-right">
-                        <p className="text-xs text-gray-500 mb-1">Duration</p>
-                        <p className="font-mono text-sm font-semibold text-gray-900">
-                          {trace.durationMs >= 1000
-                            ? `${(trace.durationMs / 1000).toFixed(2)}s`
-                            : `${trace.durationMs.toFixed(2)}ms`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  />
                 ))}
               </div>
             </div>

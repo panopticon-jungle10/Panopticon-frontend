@@ -4,12 +4,11 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import ServiceListSidebar from '@/components/features/services/servicelist/Sidebar';
-import CategoryContent, {
-  serviceListCategoryMeta,
-} from '@/components/features/services/servicelist/CategoryContent';
+import CategoryContent from '@/components/features/services/servicelist/CategoryContent';
 import ServiceListFilters from '@/components/features/services/servicelist/Filters';
 import CreateServiceModal from '@/components/features/services/servicelist/CreateService';
 import { SelectDate } from '@/components/features/services/SelectDate';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import type { CreateServiceFormValues } from '@/types/CreateService';
 import { getServices } from '@/src/api/apm';
 import type { ServiceSummary } from '@/types/apm';
@@ -83,8 +82,6 @@ export default function ServicesPage() {
     router.push(`/services/${service.service_name}`);
   };
 
-  // categoryMeta
-  const categoryMeta = serviceListCategoryMeta[category];
   const isEmpty = !isLoading && filteredServices.length === 0;
 
   const openServiceModal = (
@@ -115,7 +112,7 @@ export default function ServicesPage() {
   // 설치 시작 클릭 -> Install Agent 페이지
   const handleServiceModalSubmit = () => {
     setIsServiceModalOpen(false);
-    router.push(`/services/install`);
+    router.push(`/services/settings/install`);
   };
 
   return (
@@ -131,12 +128,8 @@ export default function ServicesPage() {
 
         <main className="flex-1 min-w-0 space-y-6">
           <div>
-            <div className="flex items-baseline gap-3">
-              {/* 상단 제목 + 설명 */}
-              <h2 className="text-xl font-semibold text-gray-900">{categoryMeta.title}</h2>
-              <span className="text-xs text-gray-400">{filteredServices.length}개 서비스</span>
-            </div>
-            <p className="text-sm text-gray-500 mt-1">{categoryMeta.subtitle}</p>
+            <Breadcrumb />
+            <span className="text-xs text-gray-400">{filteredServices.length}개 서비스</span>
           </div>
 
           {/* 필터 (검색 / 시간 / 페이지당 개수) */}

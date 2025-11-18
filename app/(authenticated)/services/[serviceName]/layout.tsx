@@ -1,6 +1,6 @@
 'use client';
 
-import Sidebar from '@/components/features/services/[serviceId]/Sidebar';
+import Sidebar from '@/components/features/services/[serviceName]/Sidebar';
 import { SelectDate } from '@/components/features/services/SelectDate';
 import type { ReactNode } from 'react';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
