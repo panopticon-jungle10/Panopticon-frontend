@@ -18,16 +18,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // 환경변수를 빌드 시점에 명시적으로 번들에 포함
-  env: {
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-    GITHUB_REDIRECT_URI: process.env.GITHUB_REDIRECT_URI,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
-    JWT_SECRET: process.env.JWT_SECRET,
-  },
+  // NEXT_PUBLIC_* 변수는 자동으로 클라이언트에 노출되므로 여기에 명시할 필요 없음
+  // 서버 전용 변수(JWT_SECRET, CLIENT_SECRET 등)는 절대 env에 포함하지 말것!
+  // Amplify 환경 변수에서 자동으로 로드됨
 };
 
 export default nextConfig;
