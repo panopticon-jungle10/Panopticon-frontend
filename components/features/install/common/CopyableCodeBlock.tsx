@@ -9,6 +9,7 @@ interface CopyableCodeBlockProps {
   code: string;
   className?: string;
   copyLabel?: string;
+  language?: string;
 }
 
 export function CopyableCodeBlock({
