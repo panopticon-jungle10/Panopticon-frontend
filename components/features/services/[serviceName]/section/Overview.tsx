@@ -212,9 +212,10 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         if (!list?.length) return '';
 
         // axisValue가 timestamp인 경우 날짜/시간 형식으로 변환
-        const timestamp = typeof list[0].axisValue === 'number'
-          ? list[0].axisValue
-          : new Date(list[0].axisValue).getTime();
+        const timestamp =
+          typeof list[0].axisValue === 'number'
+            ? list[0].axisValue
+            : new Date(list[0].axisValue).getTime();
         const date = new Date(timestamp);
         const formattedDate = date.toLocaleString('ko-KR', {
           year: 'numeric',
@@ -229,7 +230,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         const lines = list
           .map(
             (p) =>
-              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${p.seriesName}: ${p.value[1].toFixed(2)} ms</div>`,
+              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${
+                p.seriesName
+              }: ${p.value[1].toFixed(2)} ms</div>`,
           )
           .join('');
         return header + lines;
@@ -280,11 +283,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 메트릭 데이터가 없습니다"
           >
-            <ReactECharts
-              option={requestsOption}
-              style={{ height: 250 }}
-              notMerge={true}
-            />
+            <ReactECharts option={requestsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -297,11 +296,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="메트릭을 불러오는 중..."
             emptyMessage="표시할 에러 데이터가 없습니다"
           >
-            <ReactECharts
-              option={errorsOption}
-              style={{ height: 250 }}
-              notMerge={true}
-            />
+            <ReactECharts option={errorsOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -314,11 +309,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
             loadingMessage="레이턴시 데이터를 불러오는 중..."
             emptyMessage="표시할 레이턴시 데이터가 없습니다"
           >
-            <ReactECharts
-              option={latencyOption}
-              style={{ height: 250 }}
-              notMerge={true}
-            />
+            <ReactECharts option={latencyOption} style={{ height: 250 }} notMerge={true} />
           </StateHandler>
         </div>
       </div>
