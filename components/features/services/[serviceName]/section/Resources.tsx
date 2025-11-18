@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceEndpoints } from '@/src/api/apm';
 import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
+import { convertTimeRangeToParams } from '@/src/utils/timeRange';
 import StateHandler from '@/components/ui/StateHandler';
 import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
@@ -104,7 +105,7 @@ interface ResourcesSectionProps {
 
 export default function ResourcesSection({ serviceName }: ResourcesSectionProps) {
   // Zustand store에서 시간 정보 가져오기
-  const { startTime, endTime } = useTimeRangeStore();
+  const { timeRange } = useTimeRangeStore();
 
   // 선택된 메트릭 타입 (기본값: 요청수)
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('requests');
@@ -130,16 +131,20 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     return 'latency_p95_ms';
   }, [selectedMetric]);
 
-  // API 데이터 가져오기 (200개 엔드포인트, 선택된 메트릭으로 정렬, 10초마다 폴링)
+  // API 데이터 가져오기 (200개 엔드포인트, 선택된 메트릭으로 정렬, 3초마다 폴링)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['serviceEndpoints', serviceName, startTime, endTime, sortBy],
-    queryFn: () =>
-      getServiceEndpoints(serviceName, {
-        from: startTime,
-        to: endTime,
+    queryKey: ['serviceEndpoints', serviceName, timeRange, sortBy],
+    queryFn: () => {
+      // 폴링할 때마다 현재 시간 기준으로 시간 범위 재계산
+      const { start_time, end_time } = convertTimeRangeToParams(timeRange);
+
+      return getServiceEndpoints(serviceName, {
+        from: start_time,
+        to: end_time,
         limit: TOTAL_ENDPOINTS_LIMIT,
         sort_by: sortBy,
-      }),
+      });
+    },
     refetchInterval: POLLING_INTERVAL,
     refetchIntervalInBackground: true, // 백그라운드에서도 갱신
     staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청

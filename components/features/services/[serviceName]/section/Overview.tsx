@@ -203,18 +203,33 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       padding: 6,
       formatter: (params: unknown) => {
         interface TooltipParam {
-          axisValue: string;
+          axisValue: string | number;
           color: string;
           seriesName: string;
-          value: number;
+          value: number[];
         }
         const list = params as TooltipParam[];
         if (!list?.length) return '';
-        const header = `<div style="margin-bottom:4px;"><b>${list[0].axisValue}</b></div>`;
+
+        // axisValue가 timestamp인 경우 날짜/시간 형식으로 변환
+        const timestamp = typeof list[0].axisValue === 'number'
+          ? list[0].axisValue
+          : new Date(list[0].axisValue).getTime();
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+
+        const header = `<div style="margin-bottom:4px;"><b>${formattedDate}</b></div>`;
         const lines = list
           .map(
             (p) =>
-              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${p.seriesName}: ${p.value} ms</div>`,
+              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${p.seriesName}: ${p.value[1].toFixed(2)} ms</div>`,
           )
           .join('');
         return header + lines;
