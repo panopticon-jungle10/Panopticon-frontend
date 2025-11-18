@@ -8,6 +8,7 @@ import { getServiceTraces } from '@/src/api/apm';
 import { TraceSummary } from '@/types/apm';
 import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import { formatChartTimeLabel, getXAxisInterval } from '@/src/utils/chartFormatter';
+import { convertTimeRangeToParams } from '@/src/utils/timeRange';
 import StateHandler from '@/components/ui/StateHandler';
 import TraceAnalysis from '@/components/analysis/TraceAnalysis';
 
@@ -130,19 +131,25 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // Zustand store에서 시간 정보 가져오기
-  const { startTime, endTime, interval } = useTimeRangeStore();
+  const { timeRange, interval } = useTimeRangeStore();
 
-  // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용, 10초마다 폴링)
+  // 모든 트레이스 데이터 가져오기 (그래프 및 테이블 공용, 3초마다 폴링)
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['serviceTraces', serviceName, startTime, endTime],
-    queryFn: () =>
-      getServiceTraces(serviceName, {
-        from: startTime,
-        to: endTime,
+    queryKey: ['serviceTraces', serviceName, timeRange],
+    queryFn: () => {
+      // 폴링할 때마다 현재 시간 기준으로 시간 범위 재계산
+      const { start_time, end_time } = convertTimeRangeToParams(timeRange);
+
+      return getServiceTraces(serviceName, {
+        from: start_time,
+        to: end_time,
         page: 1,
-        size: 199, // TODO : 현재 최대 199개까지만 조회 가능
-      }),
+        size: 200, // 현재 200개가 최대
+      });
+    },
     refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true, // 백그라운드에서도 갱신
+    staleTime: 0, // 즉시 stale 상태로 만들어 항상 최신 데이터 요청
   });
 
   // 전체 트레이스 데이터 변환 (최신순 정렬)
@@ -371,6 +378,7 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
           <ReactECharts
             option={option}
             style={{ height: 400 }}
+            notMerge={true}
             onEvents={{
               click: (params: { seriesName: string; dataIndex: number }) => {
                 const status = params.seriesName.toLowerCase();
