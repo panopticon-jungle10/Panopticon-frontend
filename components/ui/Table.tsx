@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import Star from '../icons/Star';
 
-interface TableColumn<T> {
+export interface TableColumn<T> {
   key: keyof T;
   header: string;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
@@ -175,3 +175,4 @@ export default function Table<T>({
     </div>
   );
 }
+

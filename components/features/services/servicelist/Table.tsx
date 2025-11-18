@@ -1,8 +1,8 @@
-// 서비스 목록 테이블 (+페이지네이션)
+// 서비스 목록 테이블 (+페이징)
 'use client';
 
-import { useState } from 'react';
-import Table from '@/components/ui/Table';
+import { useEffect, useMemo, useState } from 'react';
+import Table, { type TableColumn } from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 import type { PaginationControls } from '@/types/servicelist';
@@ -21,26 +21,27 @@ const environmentBadgeStyles: Record<string, string> = {
   kubernetes: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
   k8s: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
   vm: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
-  vmec2등: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
+  vmec2: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
   baremetal: 'bg-slate-100 text-slate-700 border border-slate-200',
 };
 
-const getEnvironmentBadgeClass = (environment: string) => {
-  const normalized = normalizeEnvironmentKey(environment);
-  return environmentBadgeStyles[normalized] ?? 'bg-gray-100 text-gray-700 border border-gray-200';
-};
+const getEnvironmentBadgeClass = (environment: string) =>
+  environmentBadgeStyles[normalizeEnvironmentKey(environment)] ??
+  'bg-gray-100 text-gray-700 border border-gray-200';
 
-const columns = [
+type ServiceTableRow = ServiceSummary & { isFavorite: boolean };
+
+const columns: TableColumn<ServiceTableRow>[] = [
   {
-    key: 'service_name' as keyof ServiceSummary,
+    key: 'service_name',
     header: 'Name',
     width: '30%',
   },
   {
-    key: 'environment' as keyof ServiceSummary,
+    key: 'environment',
     header: 'Environment',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => {
+    render: (value) => {
       const environment = value as string;
       return (
         <span
@@ -55,25 +56,25 @@ const columns = [
     },
   },
   {
-    key: 'request_count' as keyof ServiceSummary,
+    key: 'request_count',
     header: 'Requests',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (value as number).toLocaleString(),
+    render: (value) => (value as number).toLocaleString(),
   },
   {
-    key: 'error_rate' as keyof ServiceSummary,
+    key: 'error_rate',
     header: 'Error Rate',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => {
+    render: (value) => {
       const rate = ((value as number) * 100).toFixed(2);
       return <span>{rate}%</span>;
     },
   },
   {
-    key: 'latency_p95_ms' as keyof ServiceSummary,
+    key: 'latency_p95_ms',
     header: 'P95 Latency',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => {
+    render: (value) => {
       const latency = (value as number).toFixed(2);
       return <span>{latency}ms</span>;
     },
@@ -91,31 +92,41 @@ export default function ServiceListTable({
   pagination,
   onRowClick,
 }: ServiceListTableProps) {
-  // ⭐ 즐겨찾기 상태 관리
-  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    services.forEach(
-      (s) => (init[s.service_name] = s.isFavorite ?? false), // ⭐
-    );
-    return init;
-  });
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
 
-  // ⭐ 즐겨찾기 토글 핸들러
-  const handleFavoriteClick = (row: ServiceSummary) => {
+  useEffect(() => {
+    setFavoriteMap((prev) => {
+      const next = { ...prev };
+      services.forEach((service) => {
+        if (next[service.service_name] === undefined) {
+          next[service.service_name] = false;
+        }
+      });
+      return next;
+    });
+  }, [services]);
+
+  const handleFavoriteClick = (row: ServiceTableRow, _index?: number) => {
     setFavoriteMap((prev) => ({
       ...prev,
-      [row.service_name]: !prev[row.service_name], // ⭐
+      [row.service_name]: !prev[row.service_name],
     }));
   };
 
+  const tableData: ServiceTableRow[] = useMemo(
+    () =>
+      services.map((service) => ({
+        ...service,
+        isFavorite: favoriteMap[service.service_name] ?? false,
+      })),
+    [favoriteMap, services],
+  );
+
   return (
     <>
-      <Table<ServiceSummary>
+      <Table<ServiceTableRow>
         columns={columns}
-        data={services.map((s) => ({
-          ...s,
-          isFavorite: favoriteMap[s.service_name], // ⭐
-        }))}
+        data={tableData}
         showFavorite
         onFavoriteClick={handleFavoriteClick}
         onRowClick={onRowClick}
