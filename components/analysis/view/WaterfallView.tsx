@@ -31,7 +31,6 @@ interface WaterfallViewProps {
 import { getBucketColor, getBucketLabel, getBucketByIndex } from '@/src/utils/durationBuckets';
 
 export default function WaterfallView({ spans, onSpanSelect }: WaterfallViewProps) {
-
   const chartOption = useMemo<EChartsOption | null>(() => {
     if (!spans || spans.length === 0) return null;
 
@@ -66,9 +65,7 @@ export default function WaterfallView({ spans, onSpanSelect }: WaterfallViewProp
       };
     });
 
-    const yAxisData = spans.map((s) =>
-      s.name.length > 25 ? s.name.slice(0, 22) + '...' : s.name
-    );
+    const yAxisData = spans.map((s) => (s.name.length > 25 ? s.name.slice(0, 22) + '...' : s.name));
 
     return {
       backgroundColor: 'transparent',
@@ -132,6 +129,7 @@ export default function WaterfallView({ spans, onSpanSelect }: WaterfallViewProp
       yAxis: {
         type: 'category',
         data: yAxisData,
+        inverse: true,
         axisLabel: { fontSize: 12, color: '#374151', fontWeight: 500 },
         axisLine: { show: true, lineStyle: { color: '#d1d5db' } },
         axisTick: { show: false },
