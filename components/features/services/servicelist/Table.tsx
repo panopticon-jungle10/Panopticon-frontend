@@ -6,6 +6,7 @@ import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 import type { PaginationControls } from '@/types/servicelist';
+import { getEnvironmentStyle } from '../../../../src/types/environmentStyles';
 
 interface ServiceListTableProps {
   services: ServiceSummary[];
@@ -23,9 +24,18 @@ const columns = [
     key: 'environment' as keyof ServiceSummary,
     header: 'Environment',
     width: '15%',
-    render: (value: ServiceSummary[keyof ServiceSummary]) => (
-      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">{value as string}</span>
-    ),
+    render: (value: ServiceSummary[keyof ServiceSummary]) => {
+      const environment = value as string;
+      const styles = getEnvironmentStyle(environment);
+      return (
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${styles.chip}`}
+        >
+          <span className={`h-2 w-2 rounded-full ${styles.dot}`} />
+          {environment}
+        </span>
+      );
+    },
   },
   {
     key: 'request_count' as keyof ServiceSummary,
