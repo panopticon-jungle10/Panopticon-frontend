@@ -9,12 +9,12 @@ export const AuthenticatedHeader = () => {
   // Setting 드롭다운 아이템
   const settingItems = [
     {
-      href: '/services/settings/notifications',
+      href: '/services/notification',
       label: '알림 설정',
       ariaLabel: '알림 설정 페이지로 이동',
     },
     {
-      href: '/services/settings/install',
+      href: '/services/install',
       label: '에이전트 설치',
       ariaLabel: '에이전트 설치 페이지로 이동',
     },
