@@ -79,7 +79,7 @@ export default function ServiceListTable({
           ({
             ...service,
             isFavorite: favoriteMap[service.service_name] ?? false,
-          }) as ServiceSummary,
+          } as ServiceSummary),
       ),
     [favoriteMap, services],
   );
