@@ -4,10 +4,15 @@ import { useEffect, useState } from 'react';
 import { HiXMark } from 'react-icons/hi2';
 import {
   SERVICE_ENVIRONMENT_OPTIONS,
-  SERVICE_LANGUAGE_OPTIONS,
+  SERVICE_FRAMEWORK_OPTIONS,
+  SERVICE_TYPE_OPTIONS,
   getDefaultServiceFormValues,
 } from '@/types/CreateService';
-import type { CreateServiceFormValues, CreateServiceModalProps } from '@/types/CreateService';
+import type {
+  CreateServiceFormValues,
+  CreateServiceModalProps,
+  ServiceType,
+} from '@/types/CreateService';
 
 export default function CreateServiceModal({
   open,
@@ -41,6 +46,31 @@ export default function CreateServiceModal({
   const isSubmitDisabled =
     !formValues.serviceName || (!formValues.collectLogs && !formValues.collectTraces);
 
+  // 현재 선택된 서비스 타입(UI/API)에 따라 프레임워크 목록 결정
+  const availableFrameworks = SERVICE_FRAMEWORK_OPTIONS[formValues.serviceType];
+  const isApiService = formValues.serviceType === 'api';
+
+  // 서비스 종류(UI/API) 변경 핸들러
+  const handleServiceTypeChange = (type: ServiceType) => {
+    setFormValues((prev) => ({
+      ...prev,
+      serviceType: type,
+      framework: SERVICE_FRAMEWORK_OPTIONS[type][0]?.value ?? prev.framework,
+      collectLogs: type === 'api',
+      collectTraces: type === 'ui' ? true : prev.collectTraces,
+    }));
+  };
+
+  // 프레임워크 변경 핸들러
+  const handleFrameworkChange = (framework: string) => {
+    setFormValues((prev) => ({ ...prev, framework }));
+  };
+
+  // 실행환경 변경 핸들러
+  const handleEnvironmentChange = (environment: string) => {
+    setFormValues((prev) => ({ ...prev, environment }));
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
       {/* 모달 컨테이너 */}
@@ -50,9 +80,10 @@ export default function CreateServiceModal({
           <div>
             <p className="text-xs text-blue-500 font-semibold">Service List</p>
             <h2 className="text-xl text-gray-900">
-              {mode === 'edit' ? '서비스 설정 수정' : '서비스 생성'}
+              {mode === 'edit' ? '서비스 정보 수정' : '서비스 생성'}
             </h2>
           </div>
+
           {/* 닫기 버튼 */}
           <button
             onClick={onClose}
@@ -63,10 +94,34 @@ export default function CreateServiceModal({
           </button>
         </div>
 
-        {/* 폼 시작 */}
+        {/* form 영역 */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-6">
-            {/* 서비스 이름 */}
+            {/* 1) 서비스 종류 선택 (UI / API) */}
+            <div>
+              <label className="block text-sm text-gray-700 mb-2">
+                서비스 종류 <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {SERVICE_TYPE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleServiceTypeChange(option.value)}
+                    aria-pressed={formValues.serviceType === option.value}
+                    className={`w-full rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                      formValues.serviceType === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-600'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 2) 서비스 이름 입력 */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
                 서비스 이름 <span className="text-red-500">*</span>
@@ -81,69 +136,88 @@ export default function CreateServiceModal({
                 required
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="mt-1 text-xs text-gray-500">영문, 숫자, 하이픈(-)만 사용 가능합니다.</p>
+              <p className="mt-1 text-xs text-gray-500">
+                입력한 서비스 이름은 이후 모든 화면에서 서비스 식별용으로 사용됩니다.
+              </p>
             </div>
 
-            {/* 언어 선택 */}
+            {/* 3) 프레임워크 선택 (서비스 타입에 따라 옵션 변경) */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
-                언어 <span className="text-red-500">*</span>
+                프레임워크 <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formValues.language}
-                onChange={(event) =>
-                  setFormValues((prev) => ({ ...prev, language: event.target.value }))
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                {SERVICE_LANGUAGE_OPTIONS.map((language) => (
-                  <option key={language.value} value={language.value}>
-                    {language.label}
-                  </option>
+              <div className="grid grid-cols-2 gap-3">
+                {availableFrameworks.map((framework) => (
+                  <button
+                    key={framework.value}
+                    type="button"
+                    onClick={() => handleFrameworkChange(framework.value)}
+                    aria-pressed={formValues.framework === framework.value}
+                    className={`w-full rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                      formValues.framework === framework.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-600'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {framework.label}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* 배포환경 선택 */}
+            {/* 4) 런타임 안내 (자동 설정) */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="text-sm font-semibold text-gray-800">런타임(Runtime)</p>
+              <p className="mt-1 text-xs text-gray-600">
+                선택한 프레임워크에 따라 런타임 환경이 자동으로 설정됩니다. (예: Next.js → Node,
+                FastAPI → Python)
+              </p>
+            </div>
+
+            {/* 5) 실행환경 (Docker/K8s/Serverless/VM) */}
             <div>
               <label className="block text-sm text-gray-700 mb-2">
-                배포환경 <span className="text-red-500">*</span>
+                실행환경 <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formValues.environment}
-                onChange={(event) =>
-                  setFormValues((prev) => ({ ...prev, environment: event.target.value }))
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
+              <div className="grid grid-cols-2 gap-3">
                 {SERVICE_ENVIRONMENT_OPTIONS.map((environment) => (
-                  <option key={environment.value} value={environment.value}>
+                  <button
+                    key={environment.value}
+                    type="button"
+                    onClick={() => handleEnvironmentChange(environment.value)}
+                    aria-pressed={formValues.environment === environment.value}
+                    className={`w-full rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                      formValues.environment === environment.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-600'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
                     {environment.label}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* 수집 대상 선택 (Logs, Traces) */}
+            {/* 6) 수집 데이터 종류 (UI: Trace / API: Trace + Log) */}
             <div>
               <label className="block text-sm text-gray-700 mb-3">
-                수집객체 <span className="text-red-500">*</span>
+                수집 데이터 종류 <span className="text-red-500">*</span>
               </label>
               <div className="space-y-3">
-                {/* Logs */}
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formValues.collectLogs}
-                    onChange={(event) =>
-                      setFormValues((prev) => ({ ...prev, collectLogs: event.target.checked }))
-                    }
-                    className="w-5 h-5 border-gray-300 rounded accent-blue-600 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">로그 (Logs)</span>
-                </label>
+                {isApiService && (
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formValues.collectLogs}
+                      onChange={(event) =>
+                        setFormValues((prev) => ({ ...prev, collectLogs: event.target.checked }))
+                      }
+                      className="w-5 h-5 border-gray-300 rounded accent-blue-600 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Log</span>
+                  </label>
+                )}
 
-                {/* Traces */}
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -153,22 +227,22 @@ export default function CreateServiceModal({
                     }
                     className="w-5 h-5 border-gray-300 rounded accent-blue-600 focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700">트레이스 (Traces)</span>
+                  <span className="text-sm text-gray-700">Trace</span>
                 </label>
               </div>
             </div>
 
             {/* 안내 박스 */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm text-blue-900 mb-2">📦 Agent 설치 안내</h3>
+              <h3 className="text-sm text-blue-900 mb-2"> 📦 에이전트 설치 안내</h3>
               <p className="text-xs text-blue-700 leading-relaxed">
-                서비스 생성 후 Agent를 설치하셔야 데이터 수집이 시작됩니다. 설치 가이드는 생성 완료
-                페이지에서 확인하실 수 있습니다.
+                서비스 생성 후 안내되는 Agent 설치 가이드를 참고해 데이터 수집 환경 설정을 완료해
+                주세요.
               </p>
             </div>
           </div>
 
-          {/* 제출 버튼 영역 */}
+          {/* 버튼 영역 */}
           <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
             <button
               type="button"
@@ -182,7 +256,7 @@ export default function CreateServiceModal({
               disabled={isSubmitDisabled}
               className="px-6 py-2.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {mode === 'edit' ? '설정 저장' : '설치시작'}
+              {mode === 'edit' ? '변경 저장' : '생성하기'}
             </button>
           </div>
         </form>
