@@ -173,7 +173,7 @@ export default function RootLayout({
     title: '환경 변수 설정 & Trace 수집 확인',
     description:
       '브라우저가 Panopticon Ingest 서버로 Trace를 전송할 수 있도록\n서비스 이름과 OTLP 엔드포인트를 환경 변수로 설정합니다.\n설정 후, 브라우저에서 페이지를 새로고침하여 Trace가 수집되는지 확인합니다.',
-    meta: '작업 유형: 📝 기존 환경 설정(.env) 파일에 값 추가 ',
+    meta: '작업 유형: ✏️ 기존 파일 수정',
     sections: [
       {
         code: `# [기존 또는 새 파일] frontend/.env.local
@@ -197,10 +197,5 @@ NEXT_PUBLIC_OTEL_EXPORTER_OTLP_URL=https://api.jungle-panopticon.cloud/producer/
 ];
 
 export default function FrontendTraceGuide() {
-  return (
-    <InstallGuideLayout
-      steps={steps}
-      icon={<PiMonitorLight className="h-10 w-10" />}   
-    />
-  );
+  return <InstallGuideLayout steps={steps} icon={<PiMonitorLight className="h-10 w-10" />} />;
 }
