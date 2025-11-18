@@ -24,10 +24,7 @@ export const SERVICE_TYPE_OPTIONS = [
   { label: 'API', value: 'api' },
 ] as const;
 
-export const SERVICE_FRAMEWORK_OPTIONS: Record<
-  ServiceType,
-  { label: string; value: string }[]
-> = {
+export const SERVICE_FRAMEWORK_OPTIONS: Record<ServiceType, { label: string; value: string }[]> = {
   ui: [
     { label: 'Next.js', value: 'nextjs' },
     { label: 'React', value: 'react' },
