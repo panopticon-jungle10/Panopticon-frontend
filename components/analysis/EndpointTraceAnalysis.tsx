@@ -28,9 +28,7 @@ function TraceCard({ trace, onClick }: TraceCardProps) {
         <div className="flex items-center gap-2">
           <span
             className={`px-2 py-1 text-xs font-medium rounded-md ${
-              trace.status === 'ERROR'
-                ? 'bg-red-100 text-red-700'
-                : 'bg-yellow-100 text-yellow-700'
+              trace.status === 'ERROR' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
             }`}
           >
             {trace.status}
@@ -41,9 +39,7 @@ function TraceCard({ trace, onClick }: TraceCardProps) {
       <div className="flex-1 space-y-3">
         <div>
           <p className="text-xs text-gray-500 mb-1">Trace ID</p>
-          <p className="font-mono text-xs text-gray-900 break-all line-clamp-2">
-            {trace.traceId}
-          </p>
+          <p className="font-mono text-xs text-gray-900 break-all line-clamp-2">{trace.traceId}</p>
         </div>
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div>
