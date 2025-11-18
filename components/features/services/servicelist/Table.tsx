@@ -7,6 +7,12 @@ import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 import type { PaginationControls } from '@/types/servicelist';
 
+interface ServiceListTableProps {
+  services: ServiceSummary[];
+  pagination?: PaginationControls;
+  onRowClick: (service: ServiceSummary) => void;
+}
+
 const columns = [
   {
     key: 'service_name' as keyof ServiceSummary,
@@ -47,14 +53,6 @@ const columns = [
   },
 ];
 
-interface ServiceListTableProps {
-  services: ServiceSummary[];
-  pagination?: PaginationControls;
-  onRowClick: (service: ServiceSummary) => void;
-}
-
-type ServiceRow = ServiceSummary & { isFavorite: boolean };
-
 export default function ServiceListTable({
   services,
   pagination,
@@ -74,18 +72,21 @@ export default function ServiceListTable({
     }));
   };
 
-  const tableData: ServiceRow[] = useMemo(
+  const tableData: ServiceSummary[] = useMemo(
     () =>
-      services.map((service) => ({
-        ...service,
-        isFavorite: favoriteMap[service.service_name] ?? false,
-      })),
+      services.map(
+        (service) =>
+          ({
+            ...service,
+            isFavorite: favoriteMap[service.service_name] ?? false,
+          }) as ServiceSummary,
+      ),
     [favoriteMap, services],
   );
 
   return (
     <>
-      <Table<ServiceRow>
+      <Table<ServiceSummary>
         columns={columns}
         data={tableData}
         showFavorite
