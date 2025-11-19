@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { getServiceMetrics } from '@/src/api/apm';
 import StateHandler from '@/components/ui/StateHandler';
 import { POLLING_INTERVAL, useTimeRangeStore } from '@/src/store/timeRangeStore';
-import { convertTimeRangeToParams, TIME_RANGE_DURATION_MS } from '@/src/utils/timeRange';
+import { convertTimeRangeToParams, getChartXAxisRange } from '@/src/utils/timeRange';
 import { getTimeAxisFormatter, getBarMaxWidthForTimeAxis } from '@/src/utils/chartFormatter';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
@@ -44,15 +44,10 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
 
   // X축 고정 범위 계산 및 차트 데이터 변환
   const { xAxisMin, xAxisMax, chartData } = useMemo(() => {
-    // 데이터에서 가장 최근 timestamp를 기준으로 현재 시각 추정
-    const latestTimestamp =
-      metricsArray[0]?.points.length > 0
-        ? Math.max(...metricsArray[0].points.map((p) => new Date(p.timestamp).getTime()))
-        : new Date().getTime();
-
-    const timeRangeDuration = TIME_RANGE_DURATION_MS[timeRange];
-    const xAxisMax = latestTimestamp;
-    const xAxisMin = latestTimestamp - timeRangeDuration;
+    // 항상 현재 시각을 기준으로 X축 범위 설정
+    const { min, max } = getChartXAxisRange(timeRange);
+    const xAxisMin = min;
+    const xAxisMax = max;
 
     // 시간 기반 X축을 위한 timestamp-value 페어
     const chartData = {
