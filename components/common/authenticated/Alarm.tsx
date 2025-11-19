@@ -109,7 +109,7 @@ export const Alarm = () => {
                     className="p-4 hover:bg-gray-50 transition cursor-pointer"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="shrink-0 mt-1">
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold text-red-600 bg-red-50">
                           ERROR
                         </span>
