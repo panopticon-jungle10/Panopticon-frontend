@@ -35,9 +35,6 @@ export function AlarmProvider({ children }: { children: ReactNode }) {
     // 펄스 애니메이션 활성화
     setHasNewAlarm(true);
 
-    // 5초 후 펄스 애니메이션 자동 제거
-    setTimeout(() => setHasNewAlarm(false), 5000);
-
     // 슬랙 알림 로직: 에러 버퍼에 추가
     errorBufferRef.current.push(log);
 
