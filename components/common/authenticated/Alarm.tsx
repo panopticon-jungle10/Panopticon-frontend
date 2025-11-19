@@ -5,7 +5,7 @@ import { FiBell } from 'react-icons/fi';
 import { useAlarm } from '@/src/providers/AlarmProvider';
 
 export const Alarm = () => {
-  const { unreadCount, hasNewAlarm, recentErrors, clearAlarm, resetUnreadCount } = useAlarm();
+  const { unreadCount, recentErrors, clearAlarm, resetUnreadCount } = useAlarm();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
