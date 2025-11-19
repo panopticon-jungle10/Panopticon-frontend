@@ -48,10 +48,10 @@ const webhookStore = new Map<string, WebhookConfig>();
 // ==================== Discord 메시지 전송 ====================
 async function sendDiscordMessage(config: WebhookConfig, notification: NotificationMessage) {
   const color = {
-    info: 0x3b82f6,      // blue
-    warning: 0xf59e0b,   // amber
-    error: 0xef4444,     // red
-    critical: 0xdc2626,  // dark red
+    info: 0x3b82f6, // blue
+    warning: 0xf59e0b, // amber
+    error: 0xef4444, // red
+    critical: 0xdc2626, // dark red
   }[notification.severity || 'info'];
 
   const payload = {
@@ -294,10 +294,7 @@ export async function POST(request: NextRequest) {
     // ========== 웹훅 설정 저장 ==========
     if (action === 'save') {
       if (!type || !config) {
-        return NextResponse.json(
-          { error: 'Missing type or config' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Missing type or config' }, { status: 400 });
       }
 
       const webhookConfig: WebhookConfig = {
@@ -319,10 +316,7 @@ export async function POST(request: NextRequest) {
     // ========== 웹훅 설정 삭제 ==========
     if (action === 'delete') {
       if (!type) {
-        return NextResponse.json(
-          { error: 'Missing type' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Missing type' }, { status: 400 });
       }
 
       webhookStore.delete(type);
@@ -336,18 +330,12 @@ export async function POST(request: NextRequest) {
     // ========== 테스트 메시지 전송 ==========
     if (action === 'test') {
       if (!type) {
-        return NextResponse.json(
-          { error: 'Missing type' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Missing type' }, { status: 400 });
       }
 
       const webhookConfig = webhookStore.get(type);
       if (!webhookConfig) {
-        return NextResponse.json(
-          { error: `No webhook config found for ${type}` },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: `No webhook config found for ${type}` }, { status: 404 });
       }
 
       const testNotification: NotificationMessage = {
@@ -366,10 +354,7 @@ export async function POST(request: NextRequest) {
     // ========== 실제 알림 전송 ==========
     if (action === 'send') {
       if (!notification) {
-        return NextResponse.json(
-          { error: 'Missing notification' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Missing notification' }, { status: 400 });
       }
 
       // 활성화된 모든 웹훅으로 전송
@@ -383,13 +368,22 @@ export async function POST(request: NextRequest) {
       }
 
       const results = await Promise.allSettled(
-        activeConfigs.map((config) => sendNotification(config, notification))
+        activeConfigs.map((config) => sendNotification(config, notification)),
       );
 
-      const responses = results.map((result, index) => ({
-        platform: activeConfigs[index].type,
-        ...(result.status === 'fulfilled' ? result.value : { success: false, error: result.reason }),
-      }));
+      const responses = results.map((result, index) => {
+        const platform = activeConfigs[index].type;
+
+        if (result.status === 'fulfilled') {
+          // result.value may include a `platform` property; avoid duplicating the key
+          const valueObj = result.value as Record<string, unknown>;
+          const rest = { ...valueObj };
+          if ('platform' in rest) delete (rest as Record<string, unknown>)['platform'];
+          return { platform, ...rest };
+        }
+
+        return { platform, success: false, error: result.reason };
+      });
 
       return NextResponse.json({
         success: true,
@@ -399,7 +393,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { error: 'Invalid action. Must be: save, send, test, or delete' },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     console.error('[Notifications API] Error:', error);
@@ -408,7 +402,7 @@ export async function POST(request: NextRequest) {
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -422,10 +416,7 @@ export async function DELETE(request: NextRequest) {
   const type = searchParams.get('type') as NotificationType | null;
 
   if (!type) {
-    return NextResponse.json(
-      { error: 'Missing type parameter' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Missing type parameter' }, { status: 400 });
   }
 
   const existed = webhookStore.has(type);

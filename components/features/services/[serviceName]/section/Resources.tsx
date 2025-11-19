@@ -45,12 +45,7 @@ interface EndpointTableData {
 }
 
 // 시각적 바를 포함한 렌더링 헬퍼 함수
-const renderWithBar = (
-  value: number,
-  maxValue: number,
-  formattedValue: string,
-  color: string,
-) => {
+const renderWithBar = (value: number, maxValue: number, formattedValue: string, color: string) => {
   const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
   return (
     <div className="flex items-center gap-2">
@@ -213,7 +208,12 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
 
   // 테이블 컬럼 생성 (최댓값 기반)
   const tableColumns = useMemo(
-    () => getEndpointTableColumns(maxValues.maxRequestCount, maxValues.maxLatency, maxValues.maxErrorRate),
+    () =>
+      getEndpointTableColumns(
+        maxValues.maxRequestCount,
+        maxValues.maxLatency,
+        maxValues.maxErrorRate,
+      ),
     [maxValues],
   );
 
