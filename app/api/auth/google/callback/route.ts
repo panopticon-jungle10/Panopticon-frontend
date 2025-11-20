@@ -102,9 +102,12 @@ export async function GET(request: NextRequest) {
     try {
       const apiBase = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '';
       if (apiBase) {
-        await fetch(`${apiBase.replace(/\/$/, '')}/users/upsert`, {
+        await fetch(`${apiBase.replace(/\/$/, '')}/users`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`,
+          },
           body: JSON.stringify({
             google_id: googleUser.id,
             login: googleUser.name || googleUser.email.split('@')[0],
