@@ -1,11 +1,11 @@
 // 에러 로그 목록 => 로그 목록 전체 + 상태 관리
 
 import type { LogEntry } from '@/types/apm';
-import LogItem from './LogItem';
-import { ReactNode } from 'react';
+import LogItem, { HighlightedLogItem } from './LogItem';
 
+// LogEntry 확장 타입으로 교체
 interface LogListProps {
-  items: (LogEntry & { message: ReactNode; service: ReactNode; traceId: ReactNode })[]; //items 타입을 ReactNode 포함 가능하도록 변경
+  items: HighlightedLogItem[];
   onItemClick?: (log: LogEntry) => void;
 }
 

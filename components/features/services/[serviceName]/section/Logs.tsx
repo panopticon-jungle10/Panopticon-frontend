@@ -13,13 +13,7 @@ import StateHandler from '@/components/ui/StateHandler';
 import { FiLayers } from 'react-icons/fi';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 import { ReactNode } from 'react';
-
-/** highlight 적용된 UI용 타입 */
-type HighlightedLogEntry = Omit<LogEntry, 'service' | 'message' | 'traceId'> & {
-  service: ReactNode;
-  message: ReactNode;
-  traceId: ReactNode;
-};
+import type { HighlightedLogItem } from '../logs/LogItem';
 
 interface LogsSectionProps {
   serviceName: string;
@@ -131,7 +125,11 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   // 하이라이트 함수
   const highlight = (text: string, keywords: string[]): ReactNode => {
-    const safe = keywords.filter(Boolean);
+    const safe = keywords
+      .map((k) => k.trim())
+      .filter(Boolean)
+      .filter((k) => text.toLowerCase().includes(k.toLowerCase()));
+
     if (safe.length === 0) return text;
 
     const escaped = safe.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
@@ -187,13 +185,15 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     [keyword, tags],
   );
 
-  const highlightedPaginatedLogs = useMemo(() => {
+  // 문자열 필드를 그대로 두고, ReactNode는 별도 필드에 저장
+  const highlightedPaginatedLogs = useMemo<HighlightedLogItem[]>(() => {
     return paginatedLogs.map((l) => ({
       ...l,
-      // string → ReactNode 로 변환 (UI 렌더링에서만!)
-      message: highlight(l.message, highlightKeywords),
-      service: highlight(l.service, highlightKeywords),
-      traceId: highlight(l.traceId, highlightKeywords),
+      highlighted: {
+        message: highlight(l.message, highlightKeywords),
+        service: highlight(l.service, highlightKeywords),
+        traceId: highlight(l.traceId, highlightKeywords),
+      },
     }));
   }, [paginatedLogs, highlightKeywords]);
 
