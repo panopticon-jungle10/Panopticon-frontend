@@ -9,6 +9,7 @@ import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
 import Dropdown from '@/components/ui/Dropdown';
 import TraceAnalysis from './TraceAnalysis';
+import SlideOverLayout from '@/components/ui/SlideOverLayout';
 
 /**
  * Trace Card Component
@@ -145,21 +146,25 @@ export default function EndpointTraceAnalysis({
     setSelectedTraceId(null);
   };
 
+  const widthClass = 'w-[70%]';
+  const backdropClassName =
+    'fixed inset-0 bg-black/10 backdrop-blur-[2px] z-60 transition-opacity duration-300 opacity-100';
+  const panelClassName =
+    'fixed top-0 right-0 h-full bg-white shadow-2xl z-70 transform transition-transform duration-300 ease-in-out translate-x-0';
+
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 opacity-100"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Slide-over Panel */}
-      <div className="fixed top-0 right-0 h-full w-[80%] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0">
+      <SlideOverLayout
+        isOpen={isOpen}
+        onClose={onClose}
+        widthClass={widthClass}
+        backdropClassName={backdropClassName}
+        panelClassName={panelClassName}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">엔드포인트 트레이스</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-1">엔드포인트 추적</h2>
             <p className="text-sm text-gray-600 font-mono">{endpointName}</p>
           </div>
           <div className="flex items-center gap-3">
@@ -204,7 +209,7 @@ export default function EndpointTraceAnalysis({
             </div>
           </StateHandler>
         </div>
-      </div>
+      </SlideOverLayout>
 
       {/* TraceAnalysis (선택된 트레이스가 있을 때) */}
       {selectedTraceId && (
