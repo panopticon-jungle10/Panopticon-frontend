@@ -14,6 +14,13 @@ import { FiLayers } from 'react-icons/fi';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 import { ReactNode } from 'react';
 
+/** highlight 적용된 UI용 타입 */
+type HighlightedLogEntry = Omit<LogEntry, 'service' | 'message' | 'traceId'> & {
+  service: ReactNode;
+  message: ReactNode;
+  traceId: ReactNode;
+};
+
 interface LogsSectionProps {
   serviceName: string;
 }
@@ -88,6 +95,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       traceId: log.trace_id || '',
       message: log.message,
       timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
+      spanId: '',
     }));
   }, [realtimeLogs]);
 
@@ -182,7 +190,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const highlightedPaginatedLogs = useMemo(() => {
     return paginatedLogs.map((l) => ({
       ...l,
-      // 🔵 string → ReactNode 로 변환 (UI 렌더링에서만!)
+      // string → ReactNode 로 변환 (UI 렌더링에서만!)
       message: highlight(l.message, highlightKeywords),
       service: highlight(l.service, highlightKeywords),
       traceId: highlight(l.traceId, highlightKeywords),
