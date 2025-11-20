@@ -157,6 +157,7 @@ export default function TagSearchBar({
               setInputValue(e.target.value);
               setShowDropdown(true);
             }}
+            onFocus={() => setShowDropdown(true)}
             onKeyDown={handleKeyDown}
             placeholder="msg:error  service:order  trace:abcd  또는 일반 검색어 입력"
             className="flex-1 outline-none bg-transparent text-[15px]"
