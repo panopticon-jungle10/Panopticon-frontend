@@ -1,10 +1,11 @@
 // 에러 로그 목록 => 로그 목록 전체 + 상태 관리
 
 import type { LogEntry } from '@/types/apm';
-import LogItem from './LogItem';
+import LogItem, { HighlightedLogItem } from './LogItem';
 
+// LogEntry 확장 타입으로 교체
 interface LogListProps {
-  items: LogEntry[];
+  items: HighlightedLogItem[];
   onItemClick?: (log: LogEntry) => void;
 }
 
