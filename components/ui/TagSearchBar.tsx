@@ -40,6 +40,8 @@ export default function TagSearchBar({
   const [inputValue, setInputValue] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
+  void keyword; // 외부에서 내려온 전체 검색어 표시용 (현재는 setKeyword에만 사용)
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isKeyTyping = !inputValue.includes(':');

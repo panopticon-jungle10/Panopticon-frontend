@@ -76,7 +76,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       traceId: log.trace_id || '',
       message: log.message,
       timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
-      spanId: (log as any).span_id || '',
+      spanId: log.span_id || '',
     }));
   }, [logsData]);
 
