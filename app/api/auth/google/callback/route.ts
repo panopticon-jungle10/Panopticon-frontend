@@ -98,6 +98,28 @@ export async function GET(request: NextRequest) {
       provider: 'google',
     });
 
+    // (선택) 백엔드 API에 유저 정보 업서트 요청
+    try {
+      const apiBase = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      if (apiBase) {
+        await fetch(`${apiBase.replace(/\/$/, '')}/users/upsert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            google_id: googleUser.id,
+            login: googleUser.name || googleUser.email.split('@')[0],
+            email: googleUser.email,
+            avatar_url: googleUser.picture,
+            provider: 'google',
+          }),
+        });
+      } else {
+        console.warn('[Auth] API_BASE_URL not configured; skipping user upsert');
+      }
+    } catch (e) {
+      console.error('[Auth] Failed to upsert user to backend:', e);
+    }
+
     // 쿠키에 JWT 저장하고 메인 페이지로 리다이렉트
     // 프로덕션에서는 실제 호스트를 사용, 개발에서는 request.url 사용
     const host = request.headers.get('host');
