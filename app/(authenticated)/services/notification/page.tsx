@@ -16,12 +16,7 @@ import DiscordConfigModal from '@/components/features/notification/modals/Discor
 import type { DiscordConfig } from '@/components/features/notification/modals/DiscordConfigModal';
 import TeamsConfigModal from '@/components/features/notification/modals/TeamsConfigModal';
 import type { TeamsConfig } from '@/components/features/notification/modals/TeamsConfigModal';
-import GitHubConfigModal from '@/components/features/notification/modals/GitHubConfigModal';
-import type { GitHubConfig } from '@/components/features/notification/modals/GitHubConfigModal';
-import JiraConfigModal from '@/components/features/notification/modals/JiraConfigModal';
-import type { JiraConfig } from '@/components/features/notification/modals/JiraConfigModal';
-import TrelloConfigModal from '@/components/features/notification/modals/TrelloConfigModal';
-import type { TrelloConfig } from '@/components/features/notification/modals/TrelloConfigModal';
+import SLOList from '../../../../components/features/notification/SLOList';
 
 interface ConnectionState {
   [key: string]: boolean;
@@ -31,15 +26,7 @@ interface ConnectionState {
 function loadConnectionsFromStorage(): ConnectionState {
   if (typeof window === 'undefined') return {};
 
-  const types: IntegrationType[] = [
-    'discord',
-    'slack',
-    'teams',
-    'email',
-    'jira',
-    'github',
-    'trello',
-  ];
+  const types: IntegrationType[] = ['discord', 'slack', 'teams', 'email'];
   const initial: ConnectionState = {};
   types.forEach((t) => {
     const v = localStorage.getItem(`notification_${t}`);
@@ -141,29 +128,7 @@ export default function NotificationPage() {
     toast.success('Teams 연동이 완료되었습니다!');
   };
 
-  // GitHub 설정 저장
-  const handleGitHubSave = (config: GitHubConfig) => {
-    localStorage.setItem('notification_github', JSON.stringify(config));
-    setConnections((prev) => ({ ...prev, github: true }));
-    setActiveModal(null);
-    toast.success('GitHub 연동이 완료되었습니다!');
-  };
-
-  // Jira 설정 저장
-  const handleJiraSave = (config: JiraConfig) => {
-    localStorage.setItem('notification_jira', JSON.stringify(config));
-    setConnections((prev) => ({ ...prev, jira: true }));
-    setActiveModal(null);
-    toast.success('Jira 연동이 완료되었습니다!');
-  };
-
-  // Trello 설정 저장
-  const handleTrelloSave = (config: TrelloConfig) => {
-    localStorage.setItem('notification_trello', JSON.stringify(config));
-    setConnections((prev) => ({ ...prev, trello: true }));
-    setActiveModal(null);
-    toast.success('Trello 연동이 완료되었습니다!');
-  };
+  // (GitHub/Jira/Trello 관련 코드 제거 — 사용하지 않음)
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
@@ -216,74 +181,58 @@ export default function NotificationPage() {
           </div>
         </div>
 
-        {/* 2단 레이아웃: 왼쪽 연동 서비스, 오른쪽 SLO */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* 왼쪽: 연동 서비스 */}
+        {/* 상단 바로 아래: 핵심 연동 서비스 카드(한 줄) */}
+        <div className="mb-8">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">외부 서비스 연동</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  다양한 협업 도구와 연동하여 알림을 받아보세요
-                </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">연동 서비스</h3>
+            <div className="flex gap-4 justify-start items-stretch">
+              <div className="w-1/4">
+                <NotificationIntegrationCard
+                  type="slack"
+                  isConnected={connections.slack}
+                  onConnect={() => handleConnect('slack')}
+                  onDisconnect={() => handleDisconnect('slack')}
+                  onConfigure={() => handleConfigure('slack')}
+                />
+              </div>
+              <div className="w-1/4">
+                <NotificationIntegrationCard
+                  type="discord"
+                  isConnected={connections.discord}
+                  onConnect={() => handleConnect('discord')}
+                  onDisconnect={() => handleDisconnect('discord')}
+                  onConfigure={() => handleConfigure('discord')}
+                />
+              </div>
+              <div className="w-1/4">
+                <NotificationIntegrationCard
+                  type="email"
+                  isConnected={connections.email}
+                  onConnect={() => handleConnect('email')}
+                  onDisconnect={() => handleDisconnect('email')}
+                  onConfigure={() => handleConfigure('email')}
+                />
+              </div>
+              <div className="w-1/4">
+                <NotificationIntegrationCard
+                  type="teams"
+                  isConnected={connections.teams}
+                  onConnect={() => handleConnect('teams')}
+                  onDisconnect={() => handleDisconnect('teams')}
+                  onConfigure={() => handleConfigure('teams')}
+                />
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <NotificationIntegrationCard
-                type="discord"
-                isConnected={connections.discord}
-                onConnect={() => handleConnect('discord')}
-                onDisconnect={() => handleDisconnect('discord')}
-                onConfigure={() => handleConfigure('discord')}
-              />
-              <NotificationIntegrationCard
-                type="slack"
-                isConnected={connections.slack}
-                onConnect={() => handleConnect('slack')}
-                onDisconnect={() => handleDisconnect('slack')}
-                onConfigure={() => handleConfigure('slack')}
-              />
-              <NotificationIntegrationCard
-                type="teams"
-                isConnected={connections.teams}
-                onConnect={() => handleConnect('teams')}
-                onDisconnect={() => handleDisconnect('teams')}
-                onConfigure={() => handleConfigure('teams')}
-              />
-              <NotificationIntegrationCard
-                type="email"
-                isConnected={connections.email}
-                onConnect={() => handleConnect('email')}
-                onDisconnect={() => handleDisconnect('email')}
-                onConfigure={() => handleConfigure('email')}
-              />
-              <NotificationIntegrationCard
-                type="jira"
-                isConnected={connections.jira}
-                onConnect={() => handleConnect('jira')}
-                onDisconnect={() => handleDisconnect('jira')}
-                onConfigure={() => handleConfigure('jira')}
-              />
-              <NotificationIntegrationCard
-                type="github"
-                isConnected={connections.github}
-                onConnect={() => handleConnect('github')}
-                onDisconnect={() => handleDisconnect('github')}
-                onConfigure={() => handleConfigure('github')}
-              />
-              <NotificationIntegrationCard
-                type="trello"
-                isConnected={connections.trello}
-                onConnect={() => handleConnect('trello')}
-                onDisconnect={() => handleDisconnect('trello')}
-                onConfigure={() => handleConfigure('trello')}
-              />
-            </div>
           </div>
+        </div>
 
-          {/* 오른쪽: SLO 설정 */}
+        {/* 아래: 2단 레이아웃 - 좌: SLO 설정, 우: 설정한 SLO 리스트 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div>
             <SLOConfiguration onSave={handleSLOSave} />
+          </div>
+          <div>
+            <SLOList />
           </div>
         </div>
       </div>
@@ -308,21 +257,6 @@ export default function NotificationPage() {
         isOpen={activeModal === 'teams'}
         onClose={() => setActiveModal(null)}
         onSave={handleTeamsSave}
-      />
-      <GitHubConfigModal
-        isOpen={activeModal === 'github'}
-        onClose={() => setActiveModal(null)}
-        onSave={handleGitHubSave}
-      />
-      <JiraConfigModal
-        isOpen={activeModal === 'jira'}
-        onClose={() => setActiveModal(null)}
-        onSave={handleJiraSave}
-      />
-      <TrelloConfigModal
-        isOpen={activeModal === 'trello'}
-        onClose={() => setActiveModal(null)}
-        onSave={handleTrelloSave}
       />
       <ToastContainer position="top-right" autoClose={1000} />
     </div>
