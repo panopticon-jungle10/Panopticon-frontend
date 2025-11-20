@@ -12,6 +12,7 @@ import LogAnalysis from '@/components/analysis/LogAnalysis';
 import StateHandler from '@/components/ui/StateHandler';
 import { FiLayers } from 'react-icons/fi';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
+import { ReactNode } from 'react';
 
 interface LogsSectionProps {
   serviceName: string;
@@ -121,7 +122,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const spanIds = useMemo(() => [...new Set(logs.map((l) => l.spanId).filter(Boolean))], [logs]);
 
   // 하이라이트 함수
-  const highlight = (text: string, keywords: string[]) => {
+  const highlight = (text: string, keywords: string[]): ReactNode => {
     const safe = keywords.filter(Boolean);
     if (safe.length === 0) return text;
 
@@ -173,16 +174,20 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   }, [filteredLogs, page]);
 
   // 하이라이트 적용된 logs로 변환
-  const highlightedPaginatedLogs = useMemo(() => {
-    const keywords = [keyword, ...tags.map((t) => t.value)].filter(Boolean);
+  const highlightKeywords = useMemo(
+    () => [keyword, ...tags.map((t) => t.value)].filter(Boolean),
+    [keyword, tags],
+  );
 
+  const highlightedPaginatedLogs = useMemo(() => {
     return paginatedLogs.map((l) => ({
       ...l,
-      message: highlight(l.message, keywords), // message 하이라이트
-      service: highlight(l.service, keywords), // service 하이라이트
-      traceId: highlight(l.traceId, keywords), // traceId 하이라이트
+      // 🔵 string → ReactNode 로 변환 (UI 렌더링에서만!)
+      message: highlight(l.message, highlightKeywords),
+      service: highlight(l.service, highlightKeywords),
+      traceId: highlight(l.traceId, highlightKeywords),
     }));
-  }, [paginatedLogs, keyword, tags]);
+  }, [paginatedLogs, highlightKeywords]);
 
   const handleLogClick = (log: LogEntry) => {
     setSelectedLog(log);

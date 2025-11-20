@@ -2,9 +2,10 @@
 
 import type { LogEntry } from '@/types/apm';
 import LogItem from './LogItem';
+import { ReactNode } from 'react';
 
 interface LogListProps {
-  items: LogEntry[];
+  items: (LogEntry & { message: ReactNode; service: ReactNode; traceId: ReactNode })[]; //items 타입을 ReactNode 포함 가능하도록 변경
   onItemClick?: (log: LogEntry) => void;
 }
 

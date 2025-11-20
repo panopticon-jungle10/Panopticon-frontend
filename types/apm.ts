@@ -275,12 +275,12 @@ export interface GetLogsResponse extends PaginationMeta {
  * UI용 로그 엔트리 (LogItem을 기반으로 변환된 형태)
  */
 export interface LogEntry {
-  id: string | ReactNode
-  level: LogLevel | ReactNode;
-  service: string | ReactNode;
-  traceId: string | ReactNode;
-  message: string | ReactNode;
-  timestamp: string | ReactNode;
+  id: string;
+  level: LogLevel;
+  service: string;
+  traceId: string;
+  message: string;
+  timestamp: string;
 }
 
 // ---------- GET /spans ----------
