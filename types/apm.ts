@@ -1,6 +1,7 @@
 /**
  * APM 페이지 API 타입 정의
  */
+import { ReactNode } from 'react';
 
 // ==================== 공통 타입 ====================
 
@@ -274,12 +275,12 @@ export interface GetLogsResponse extends PaginationMeta {
  * UI용 로그 엔트리 (LogItem을 기반으로 변환된 형태)
  */
 export interface LogEntry {
-  id: string;
-  level: LogLevel;
-  service: string;
-  traceId: string;
-  message: string;
-  timestamp: string;
+  id: string | ReactNode
+  level: LogLevel | ReactNode;
+  service: string | ReactNode;
+  traceId: string | ReactNode;
+  message: string | ReactNode;
+  timestamp: string | ReactNode;
 }
 
 // ---------- GET /spans ----------

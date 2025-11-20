@@ -10,6 +10,8 @@ import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
 import LogAnalysis from '@/components/analysis/LogAnalysis';
 import StateHandler from '@/components/ui/StateHandler';
+import { FiLayers } from 'react-icons/fi';
+import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 
 interface LogsSectionProps {
   serviceName: string;
@@ -20,6 +22,10 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  const [tags, setTags] = useState<Tag[]>([]); // 태그 상태
+  const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
+
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -52,7 +58,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
         level: level || undefined,
         from: startTime,
         to: endTime,
-        size: 60,
+        size: 200, // message 기반 키워드 추출 위해 size 증가
       }),
     retry: false, // API 오류 시 재시도 하지 않음
     throwOnError: false, // 오류를 throw하지 않고 isError 상태로만 처리
@@ -68,6 +74,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       traceId: log.trace_id || '',
       message: log.message,
       timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
+      spanId: (log as any).span_id || '',
     }));
   }, [logsData]);
 
@@ -89,25 +96,93 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     return [...realtimeLogEntries, ...apiLogs];
   }, [realtimeLogEntries, apiLogs]);
 
-  // 페이지네이션 계산
-  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
+  // 자동 Suggestion 데이터
+  const messageKeywords = useMemo(() => {
+    const freq: Record<string, number> = {};
+    logs.forEach((log) => {
+      const words = log.message
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/gi, ' ')
+        .split(/\s+/);
+      words.forEach((w) => {
+        if (w.length < 3) return;
+        if (/^\d+$/.test(w)) return;
+        freq[w] = (freq[w] || 0) + 1;
+      });
+    });
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 30)
+      .map(([w]) => w);
+  }, [logs]);
+
+  const serviceNames = useMemo(() => [...new Set(logs.map((l) => l.service))], [logs]);
+  const traceIds = useMemo(() => [...new Set(logs.map((l) => l.traceId).filter(Boolean))], [logs]);
+  const spanIds = useMemo(() => [...new Set(logs.map((l) => l.spanId).filter(Boolean))], [logs]);
+
+  // 하이라이트 함수
+  const highlight = (text: string, keywords: string[]) => {
+    const safe = keywords.filter(Boolean);
+    if (safe.length === 0) return text;
+
+    const escaped = safe.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const regex = new RegExp(`(${escaped.join('|')})`, 'gi');
+
+    return text.split(regex).map((part, i) =>
+      escaped.some((k) => part.toLowerCase() === k.toLowerCase()) ? (
+        <mark key={i} className="bg-blue-200 text-blue-900 px-1 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
+    );
+  };
+
+  // 필터링
+  const filteredLogs = useMemo(() => {
+    let result = [...logs];
+
+    tags.forEach(({ key, value }) => {
+      const v = value.toLowerCase();
+      if (key === 'msg') result = result.filter((l) => l.message.toLowerCase().includes(v));
+      if (key === 'service') result = result.filter((l) => l.service.toLowerCase().includes(v));
+      if (key === 'trace') result = result.filter((l) => l.traceId.toLowerCase().includes(v));
+      if (key === 'span') result = result.filter((l) => l.spanId.toLowerCase().includes(v));
+      if (key === 'level') result = result.filter((l) => l.level.toLowerCase() === v);
+    });
+
+    if (keyword.trim()) {
+      const k = keyword.toLowerCase();
+      result = result.filter(
+        (l) =>
+          l.message.toLowerCase().includes(k) ||
+          l.service.toLowerCase().includes(k) ||
+          l.traceId.toLowerCase().includes(k),
+      );
+    }
+
+    return result;
+  }, [tags, keyword, logs]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
+
   const paginatedLogs = useMemo(() => {
     const startIdx = (page - 1) * pageSize;
-    const endIdx = startIdx + pageSize;
-    return logs.slice(startIdx, endIdx);
-  }, [logs, page, pageSize]);
+    return filteredLogs.slice(startIdx, startIdx + pageSize);
+  }, [filteredLogs, page]);
 
-  const handlePrev = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  };
+  // 하이라이트 적용된 logs로 변환
+  const highlightedPaginatedLogs = useMemo(() => {
+    const keywords = [keyword, ...tags.map((t) => t.value)].filter(Boolean);
 
-  const handleNext = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    }
-  };
+    return paginatedLogs.map((l) => ({
+      ...l,
+      message: highlight(l.message, keywords), // message 하이라이트
+      service: highlight(l.service, keywords), // service 하이라이트
+      traceId: highlight(l.traceId, keywords), // traceId 하이라이트
+    }));
+  }, [paginatedLogs, keyword, tags]);
 
   const handleLogClick = (log: LogEntry) => {
     setSelectedLog(log);
@@ -116,26 +191,58 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
-    // 애니메이션이 끝난 후 selectedLog를 null로 설정
     setTimeout(() => setSelectedLog(null), 300);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-800">에러 로그</h2>
+
+      <div className="w-full max-w-screen-xl mx-auto flex items-center justify-between gap-4">
+        <div className="flex-1">
+          <TagSearchBar
+            tags={tags}
+            onTagsChange={setTags}
+            keyword={keyword}
+            onKeywordChange={(v) => {
+              setKeyword(v);
+              setPage(1);
+            }}
+            messageKeywords={messageKeywords}
+            serviceNames={serviceNames}
+            traceIds={traceIds}
+            spanIds={spanIds}
+          />
+        </div>
+
+        <div className="h-[52px] px-5 flex items-center rounded-xl border bg-white shadow-sm shrink-0 gap-2">
+          <FiLayers className="w-5 h-5 text-blue-600" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[12px] text-gray-500">총 로그 개수</span>
+            <span className="text-[18px] font-semibold text-gray-700">
+              {filteredLogs.length.toLocaleString()} 개
+            </span>
+          </div>
+        </div>
+      </div>
+
       <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
         <StateHandler
           isLoading={isLoading}
           isError={isError}
-          isEmpty={logs.length === 0}
+          isEmpty={filteredLogs.length === 0}
           type="table"
           height={200}
-          loadingMessage="에러 로그를 불러오는 중..."
-          errorMessage="에러 로그를 불러올 수 없습니다"
-          emptyMessage="에러 로그가 없습니다"
         >
-          <LogList items={paginatedLogs} onItemClick={handleLogClick} />
-          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
+          {/* LogList에 하이라이트된 logs 전달 */}
+          <LogList items={highlightedPaginatedLogs} onItemClick={handleLogClick} />
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPrev={() => setPage(page - 1)}
+            onNext={() => setPage(page + 1)}
+          />
         </StateHandler>
       </section>
 
