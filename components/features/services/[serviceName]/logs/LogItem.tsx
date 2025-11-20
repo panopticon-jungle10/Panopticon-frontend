@@ -2,9 +2,17 @@
 
 import type { LogEntry } from '@/types/apm';
 import LevelBadge from './LevelBadge';
+import { ReactNode } from 'react';
+
+// LogEntry의 service/message/traceId를 ReactNode 허용하도록 확장
+interface HighlightedLogItem extends Omit<LogEntry, 'service' | 'message' | 'traceId'> {
+  service: ReactNode;
+  message: ReactNode;
+  traceId: ReactNode;
+}
 
 interface LogItemProps {
-  item: LogEntry;
+  item: HighlightedLogItem;
   onClick?: (log: LogEntry) => void;
 }
 
