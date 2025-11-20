@@ -37,12 +37,29 @@ export default function TagSearchBar({
   traceIds,
   spanIds,
 }: TagSearchBarProps) {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(keyword);
   const [showDropdown, setShowDropdown] = useState(false);
-
-  void keyword; // 외부에서 내려온 전체 검색어 표시용 (현재는 setKeyword에만 사용)
-
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const skipAutoClearRef = useRef(false);
+
+  // 외부 keyword가 변경되면 입력창과 동기화
+  useEffect(() => {
+    setInputValue(keyword);
+  }, [keyword]);
+
+  // 입력창이 비어있는데도 keyword가 남아있다면 자동으로 초기화
+  useEffect(() => {
+    if (inputValue.trim() === '') {
+      if (skipAutoClearRef.current) {
+        skipAutoClearRef.current = false;
+        return;
+      }
+
+      if (keyword !== '') {
+        onKeywordChange('');
+      }
+    }
+  }, [inputValue, keyword, onKeywordChange]);
 
   const isKeyTyping = !inputValue.includes(':');
   const currentKey = isKeyTyping ? null : inputValue.split(':')[0];
@@ -93,6 +110,7 @@ export default function TagSearchBar({
 
   const addTag = (key: string, value: string) => {
     onTagsChange([...tags, { key, value }]);
+    skipAutoClearRef.current = true;
     setInputValue('');
     setShowDropdown(false);
   };
@@ -105,7 +123,6 @@ export default function TagSearchBar({
       if (key && value) addTag(key, value);
     } else {
       onKeywordChange(inputValue);
-      setInputValue('');
     }
   };
 
