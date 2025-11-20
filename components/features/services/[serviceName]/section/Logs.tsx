@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import LogList from '../logs/LogList';
 import Pagination from '../../Pagination';
 import { useQuery } from '@tanstack/react-query';
 import { getLogs } from '@/src/api/apm';
@@ -10,26 +9,49 @@ import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
 import LogAnalysis from '@/components/analysis/LogAnalysis';
 import StateHandler from '@/components/ui/StateHandler';
+import LogGroups from '@/components/common/LogGroups';
 import { FiLayers } from 'react-icons/fi';
+import SlideOverLayout from '@/components/ui/SlideOverLayout';
+import { IoClose } from 'react-icons/io5';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
-import { ReactNode } from 'react';
-import type { HighlightedLogItem } from '../logs/LogItem';
+// ReactNode import removed; 관련 하이라이트 기능이 비활성화되어 있습니다.
+// LogList는 UI에서 잠시 주석 상태로 유지합니다.
 
 interface LogsSectionProps {
   serviceName: string;
 }
 
 export default function LogsSection({ serviceName }: LogsSectionProps) {
-  // const [level, setLevel] = useState<LogLevel | ''>('ERROR');
-  const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
+  // level은 태그에서 선택되면 그 값을 사용하고, 없으면 기본 ERROR 사용
+
+  // 간단한 메시지 정규화(그룹화 기준과 동일하게 유지)
+  const normalizeMessage = (msg: string) =>
+    msg
+      .toLowerCase()
+      .replace(/0x[a-f0-9]+/gi, ' ')
+      .replace(/\d+/g, ' ')
+      .replace(/[^a-z0-9\s]/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120);
+
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const [tags, setTags] = useState<Tag[]>([]); // 태그 상태
   const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
 
+  // 태그에서 level 값을 찾음 (tags가 선언된 이후에 읽음)
+  const selectedLevel = tags.find((t) => t.key === 'level')?.value;
+
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isGroupPanelOpen, setIsGroupPanelOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<{
+    key: string;
+    title: string;
+    items: LogEntry[];
+  } | null>(null);
 
   // 웹소켓으로 받은 실시간 에러 로그를 누적하는 상태
   const [realtimeLogs, setRealtimeLogs] = useState<LogItem[]>([]);
@@ -53,15 +75,16 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['logs', serviceName, level, startTime, endTime],
+    queryKey: ['logs', serviceName, selectedLevel, startTime, endTime],
     queryFn: () =>
       getLogs({
         service_name: serviceName,
-        level: level || undefined,
+        level: (selectedLevel as unknown as LogLevel) || undefined,
         from: startTime,
         to: endTime,
-        size: 200, // message 기반 키워드 추출 위해 size 증가
+        size: 10000, // message 기반 키워드 추출 위해 size 증가(1만개)
       }),
+    refetchInterval: 30000, // 30초마다 갱신
     retry: false, // API 오류 시 재시도 하지 않음
     throwOnError: false, // 오류를 throw하지 않고 isError 상태로만 처리
   });
@@ -120,43 +143,21 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   }, [logs]);
 
   const serviceNames = useMemo(() => [...new Set(logs.map((l) => l.service))], [logs]);
-  const traceIds = useMemo(() => [...new Set(logs.map((l) => l.traceId).filter(Boolean))], [logs]);
-  const spanIds = useMemo(() => [...new Set(logs.map((l) => l.spanId).filter(Boolean))], [logs]);
-
-  // 하이라이트 함수
-  const highlight = (text: string, keywords: string[]): ReactNode => {
-    const safe = keywords
-      .map((k) => k.trim())
-      .filter(Boolean)
-      .filter((k) => text.toLowerCase().includes(k.toLowerCase()));
-
-    if (safe.length === 0) return text;
-
-    const escaped = safe.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const regex = new RegExp(`(${escaped.join('|')})`, 'gi');
-
-    return text.split(regex).map((part, i) =>
-      escaped.some((k) => part.toLowerCase() === k.toLowerCase()) ? (
-        <mark key={i} className="bg-blue-200 text-blue-900 px-1 rounded">
-          {part}
-        </mark>
-      ) : (
-        part
-      ),
-    );
-  };
 
   // 필터링
   const filteredLogs = useMemo(() => {
     let result = [...logs];
 
     tags.forEach(({ key, value }) => {
-      const v = value.toLowerCase();
-      if (key === 'msg') result = result.filter((l) => l.message.toLowerCase().includes(v));
-      if (key === 'service') result = result.filter((l) => l.service.toLowerCase().includes(v));
-      if (key === 'trace') result = result.filter((l) => l.traceId.toLowerCase().includes(v));
-      if (key === 'span') result = result.filter((l) => l.spanId.toLowerCase().includes(v));
-      if (key === 'level') result = result.filter((l) => l.level.toLowerCase() === v);
+      const v = value;
+      if (key === 'msg') {
+        // msg 태그는 그룹화된 키(정규화된 메시지)와 일치하는 항목으로 필터링
+        const nv = normalizeMessage(v);
+        result = result.filter((l) => normalizeMessage(l.message) === nv);
+      }
+      if (key === 'service')
+        result = result.filter((l) => l.service.toLowerCase().includes(v.toLowerCase()));
+      if (key === 'level') result = result.filter((l) => l.level.toLowerCase() === v.toLowerCase());
     });
 
     if (keyword.trim()) {
@@ -174,33 +175,9 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
 
-  const paginatedLogs = useMemo(() => {
-    const startIdx = (page - 1) * pageSize;
-    return filteredLogs.slice(startIdx, startIdx + pageSize);
-  }, [filteredLogs, page]);
+  // 페이지네이션용 데이터는 현재 LogList가 주석 상태라 별도 슬라이스하지 않습니다.
 
-  // 하이라이트 적용된 logs로 변환
-  const highlightKeywords = useMemo(
-    () => [keyword, ...tags.map((t) => t.value)].filter(Boolean),
-    [keyword, tags],
-  );
-
-  // 문자열 필드를 그대로 두고, ReactNode는 별도 필드에 저장
-  const highlightedPaginatedLogs = useMemo<HighlightedLogItem[]>(() => {
-    return paginatedLogs.map((l) => ({
-      ...l,
-      highlighted: {
-        message: highlight(l.message, highlightKeywords),
-        service: highlight(l.service, highlightKeywords),
-        traceId: highlight(l.traceId, highlightKeywords),
-      },
-    }));
-  }, [paginatedLogs, highlightKeywords]);
-
-  const handleLogClick = (log: LogEntry) => {
-    setSelectedLog(log);
-    setIsPanelOpen(true);
-  };
+  // 하이라이트 및 리스트 클릭 핸들러는 LogList가 주석 상태이므로 제거됨
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
@@ -209,9 +186,9 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">에러 로그</h2>
+      <h2 className="text-xl font-semibold text-gray-800">로그</h2>
 
-      <div className="w-full max-w-screen-xl mx-auto flex items-center justify-between gap-4">
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex-1">
           <TagSearchBar
             tags={tags}
@@ -223,8 +200,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
             }}
             messageKeywords={messageKeywords}
             serviceNames={serviceNames}
-            traceIds={traceIds}
-            spanIds={spanIds}
           />
         </div>
 
@@ -247,8 +222,18 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
           type="table"
           height={200}
         >
+          {/* 그룹화 뷰 */}
+          <div className="mb-4">
+            <LogGroups
+              items={filteredLogs}
+              onGroupClick={(key, title, items) => {
+                setSelectedGroup({ key, title, items });
+                setIsGroupPanelOpen(true);
+              }}
+            />
+          </div>
           {/* LogList에 하이라이트된 logs 전달 */}
-          <LogList items={highlightedPaginatedLogs} onItemClick={handleLogClick} />
+          {/* <LogList items={highlightedPaginatedLogs} onItemClick={handleLogClick} /> */}
 
           <Pagination
             page={page}
@@ -258,6 +243,59 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
           />
         </StateHandler>
       </section>
+
+      {/* 그룹 패널: 그룹을 클릭하면 열리는 패널 (첫 번째 패널) */}
+      {isGroupPanelOpen && selectedGroup && (
+        <SlideOverLayout
+          isOpen={isGroupPanelOpen}
+          onClose={() => setIsGroupPanelOpen(false)}
+          widthClass="w-[70%]"
+        >
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-gray-900">{selectedGroup.title}</h2>
+              <div className="text-sm text-gray-600 mt-1">
+                {selectedGroup.items.length}개 메시지
+              </div>
+            </div>
+            <button
+              onClick={() => setIsGroupPanelOpen(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
+              aria-label="Close panel"
+            >
+              <IoClose className="w-6 h-6 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {selectedGroup.items.map((it, idx) => (
+                <div
+                  key={`${it.service}-${it.timestamp}-${idx}`}
+                  onClick={() => {
+                    setSelectedLog({
+                      id: `${it.service}-${it.timestamp}-${idx}`,
+                      level: it.level as LogLevel,
+                      service: it.service || '',
+                      traceId: it.traceId || '',
+                      message: it.message,
+                      timestamp: it.timestamp,
+                    });
+                    setIsPanelOpen(true);
+                  }}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer bg-white"
+                >
+                  <div className="text-xs text-gray-500 font-mono">{it.service}</div>
+                  <div className="mt-2 text-sm text-gray-800 line-clamp-3">{it.message}</div>
+                  <div className="mt-3 text-xs text-gray-400">
+                    {new Date(it.timestamp).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SlideOverLayout>
+      )}
 
       <LogAnalysis log={selectedLog} isOpen={isPanelOpen} onClose={handleClosePanel} />
     </div>

@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { IoEyeSharp, IoCubeSharp } from 'react-icons/io5';
 import { SiRelay } from 'react-icons/si';
-import { BiBug } from 'react-icons/bi';
+import { LuTextSearch } from 'react-icons/lu';
 
 const apmItems = [
   { key: 'overview', label: '개요', icon: IoEyeSharp },
   { key: 'resources', label: '리소스', icon: IoCubeSharp },
   { key: 'traces', label: '요청 추적', icon: SiRelay },
-  { key: 'errors-logs', label: '에러 로그', icon: BiBug },
+  { key: 'logs', label: '로그', icon: LuTextSearch },
 ] as const;
 
 type SectionKey = (typeof apmItems)[number]['key'];

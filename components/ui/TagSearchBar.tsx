@@ -15,15 +15,11 @@ interface TagSearchBarProps {
   onKeywordChange: (keyword: string) => void;
   messageKeywords: string[];
   serviceNames: string[];
-  traceIds: string[];
-  spanIds: string[];
 }
 
 const TAG_KEYS = [
   { key: 'msg', label: '메시지' },
   { key: 'service', label: '서비스명' },
-  { key: 'trace', label: '트레이스 ID' },
-  { key: 'span', label: '스팬 ID' },
   { key: 'level', label: '로그 레벨' },
 ];
 
@@ -34,8 +30,6 @@ export default function TagSearchBar({
   onKeywordChange,
   messageKeywords,
   serviceNames,
-  traceIds,
-  spanIds,
 }: TagSearchBarProps) {
   const [inputValue, setInputValue] = useState(keyword);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -81,11 +75,6 @@ export default function TagSearchBar({
       case 'service':
         source = serviceNames;
         break;
-      case 'trace':
-        source = traceIds;
-        break;
-      case 'span':
-        source = spanIds;
       case 'level':
         return ['ERROR', 'WARN', 'INFO', 'DEBUG'];
       default:
