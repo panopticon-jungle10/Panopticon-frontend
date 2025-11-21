@@ -1,11 +1,11 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
 import { LogItem } from '@/types/apm';
-import { sendSlackErrorNotification } from '@/src/utils/slackNotifications';
+import { sendErrorNotification } from '@/src/utils/notifications';
 
-interface AlarmContextType {
+interface AlarmContextValue {
   unreadCount: number;
   hasNewAlarm: boolean;
   recentErrors: LogItem[];
@@ -13,44 +13,59 @@ interface AlarmContextType {
   resetUnreadCount: () => void;
 }
 
-const AlarmContext = createContext<AlarmContextType | undefined>(undefined);
+const AlarmContext = createContext<AlarmContextValue | undefined>(undefined);
 
-export function AlarmProvider({ children }: { children: ReactNode }) {
+const SLACK_NOTIFICATION_THRESHOLD = 20;
+const MAX_RECENT_ERRORS = 10;
+
+export default function AlarmProvider({ children }: { children: React.ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasNewAlarm, setHasNewAlarm] = useState(false);
   const [recentErrors, setRecentErrors] = useState<LogItem[]>([]);
 
-  // 슬랙 알림을 위한 에러 버퍼 (10개마다 전송)
+  // 서버로 전송할 버퍼 (ref로 유지)
   const errorBufferRef = useRef<LogItem[]>([]);
-  const SLACK_NOTIFICATION_THRESHOLD = 10; // 10개마다 슬랙 알림 전송
 
-  // 새 에러 로그가 도착했을 때
-  const handleLogReceived = useCallback((log: LogItem) => {
-    // 읽지 않은 알림 카운트 증가
-    setUnreadCount((prev) => prev + 1);
-
-    // 최근 에러 로그 목록 업데이트 (최대 5개 유지)
-    setRecentErrors((prev) => [log, ...prev].slice(0, 5));
-
-    // 펄스 애니메이션 활성화
-    setHasNewAlarm(true);
-
-    // 슬랙 알림 로직: 에러 버퍼에 추가
-    errorBufferRef.current.push(log);
-
-    // 10개가 쌓이면 슬랙으로 전송
-    if (errorBufferRef.current.length >= SLACK_NOTIFICATION_THRESHOLD) {
-      const errorsToSend = [...errorBufferRef.current];
-      errorBufferRef.current = []; // 버퍼 초기화
-
-      // 비동기로 슬랙 알림 전송 (UI 블로킹 방지)
-      sendSlackErrorNotification(errorsToSend).catch((error) => {
-        console.error('[AlarmProvider] Failed to send Slack notification:', error);
-      });
+  const sendBufferIfNeeded = useCallback(async () => {
+    const buffer = errorBufferRef.current;
+    if (buffer.length >= SLACK_NOTIFICATION_THRESHOLD) {
+      const errorsToSend = buffer.slice();
+      // 비동기로 전송하고 버퍼 초기화
+      try {
+        // 여러 채널로 동시 전송 시도 (각 채널은 내부에서 설정 확인)
+        await Promise.allSettled([
+          sendErrorNotification('slack', errorsToSend),
+          sendErrorNotification('discord', errorsToSend),
+          sendErrorNotification('teams', errorsToSend),
+        ]);
+      } catch (e) {
+        console.error('Notification send failed', e);
+      }
+      errorBufferRef.current = [];
     }
   }, []);
 
-  // WebSocket 연결 - serviceName 없이 전체 에러 로그 수신
+  const handleLogReceived = useCallback(
+    (log: LogItem) => {
+      // recentErrors 업데이트
+      setRecentErrors((prev) => {
+        const next = [log, ...prev].slice(0, MAX_RECENT_ERRORS);
+        return next;
+      });
+
+      // unread 및 표시 상태
+      setUnreadCount((c) => c + 1);
+      setHasNewAlarm(true);
+
+      // 버퍼에 추가
+      errorBufferRef.current.push(log);
+      // 전송 조건 검사
+      void sendBufferIfNeeded();
+    },
+    [sendBufferIfNeeded],
+  );
+
+  // 전체 서비스 에러 수신 (serviceName 없이 전체 에러 로그 수신)
   useErrorLogsWebSocket({
     onLogReceived: handleLogReceived,
     enabled: true,

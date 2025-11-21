@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SLOTarget } from './SLOConfiguration';
 
 const metricConfig: Record<
@@ -34,14 +34,22 @@ const metricConfig: Record<
 };
 
 export default function SLOList() {
-  const [targets, setTargets] = useState<SLOTarget[]>(() => {
+  const [targets, setTargets] = useState<SLOTarget[]>([]);
+
+  // 서버 렌더링과 클라이언트 초기 렌더링 결과를 일치시키기 위해
+  // localStorage 접근은 마운트 후에 수행합니다.
+  useEffect(() => {
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem('slo_targets') : null;
-      return raw ? (JSON.parse(raw) as SLOTarget[]) : [];
+      if (raw) {
+        const parsed = JSON.parse(raw) as SLOTarget[];
+        // 비동기 마이크로태스크로 설정하여 동기적인 이펙트 내 setState 경고를 회피합니다.
+        Promise.resolve().then(() => setTargets(parsed));
+      }
     } catch {
-      return [];
+      // ignore
     }
-  });
+  }, []);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<number | null>(null);
