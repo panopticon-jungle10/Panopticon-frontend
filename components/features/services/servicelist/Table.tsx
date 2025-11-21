@@ -6,7 +6,6 @@ import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import type { ServiceSummary } from '@/types/apm';
 import type { PaginationControls } from '@/types/servicelist';
-import { getEnvironmentStyle } from '../../../../src/types/environmentStyles';
 
 interface ServiceListTableProps {
   services: ServiceSummary[];
@@ -26,12 +25,9 @@ const columns = [
     width: '15%',
     render: (value: ServiceSummary[keyof ServiceSummary]) => {
       const environment = value as string;
-      const styles = getEnvironmentStyle(environment);
       return (
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${styles.chip}`}
-        >
-          <span className={`h-2 w-2 rounded-full ${styles.dot}`} />
+        <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+          <span className="h-2 w-2 rounded-full bg-gray-400" />
           {environment}
         </span>
       );

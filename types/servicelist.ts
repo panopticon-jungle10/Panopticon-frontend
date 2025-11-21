@@ -1,8 +1,6 @@
 import type { ServiceSummary } from '@/types/apm';
 
-export type ServiceListCategory = 'list' | 'request_count' | 'error_rate' | 'latency';
-export type MetricKey = 'request_count' | 'error_rate' | 'latency_p95_ms';
-export type MetricTone = 'neutral' | 'success' | 'warning' | 'caution' | 'danger';
+export type ServiceListCategory = 'list' | 'card';
 
 export interface ServiceListSidebarItem {
   key: ServiceListCategory;
@@ -25,6 +23,7 @@ export interface CategoryContentProps {
   isEmpty: boolean;
   onRowClick: (service: ServiceSummary) => void;
   onCardClick?: (service: ServiceSummary) => void;
+  onCreateClick?: () => void;
   pagination?: PaginationControls;
 }
 
@@ -35,16 +34,6 @@ export interface ServiceListFiltersProps {
   onPageSizeChange: (value: number) => void;
   onEditClick?: () => void;
   onCreateClick?: () => void;
-}
-
-export interface MetricCardProps {
-  serviceName: string;
-  environment: string;
-  primaryValue: string;
-  secondaryValue: string;
-  statusLabel?: string;
-  tone?: MetricTone;
-  onClick?: () => void;
 }
 
 export interface ServiceListSidebarProps {

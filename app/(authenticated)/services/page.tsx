@@ -17,7 +17,7 @@ import type { ServiceListCategory } from '@/types/servicelist';
 export default function ServicesPage() {
   const router = useRouter();
 
-  const [category, setCategory] = useState<ServiceListCategory>('list');
+  const [category, setCategory] = useState<ServiceListCategory>('card');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -186,6 +186,7 @@ export default function ServicesPage() {
             isError={isError}
             isEmpty={isEmpty}
             onRowClick={handleServiceRowClick}
+            onCreateClick={handleCreateClick}
             pagination={{
               page: currentPage,
               totalPages,

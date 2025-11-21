@@ -1,14 +1,12 @@
 'use client';
 
 import type { ServiceListSidebarItem, ServiceListSidebarProps } from '@/types/servicelist';
-import { FiAlertTriangle, FiClock, FiList, FiTrendingUp } from 'react-icons/fi';
+import { FiGrid, FiList } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
 const sidebarItems: (ServiceListSidebarItem & { icon: IconType })[] = [
-  { key: 'list', label: '리스트', description: '기본 테이블 뷰', icon: FiList },
-  { key: 'request_count', label: '요청수', description: 'Request Count', icon: FiTrendingUp },
-  { key: 'error_rate', label: '에러율', description: 'Error Rate', icon: FiAlertTriangle },
-  { key: 'latency', label: 'Latency', description: 'Latency P95', icon: FiClock },
+  { key: 'card', label: 'Card', description: '요약 카드', icon: FiGrid },
+  { key: 'list', label: 'List', description: '테이블 뷰', icon: FiList },
 ];
 
 export default function ServiceListSidebar({ value, onChange }: ServiceListSidebarProps) {
