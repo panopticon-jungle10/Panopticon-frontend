@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -9,7 +8,7 @@ interface EndpointItem {
   endpoint_name: string;
   request_count?: number;
   latency_p95_ms?: number;
-  error_rate?: number; // 0~1 값
+  error_rate?: number;
   color?: string; // Pie와 동일 색
 }
 
@@ -28,26 +27,29 @@ export default function EndpointBarChart({
   onBarClick,
   colors,
 }: Props) {
+
   const option = useMemo(() => {
     if (!items?.length) return null;
 
     const palette = colors?.length ? colors : undefined;
-
     const isErrorRate = selectedMetric === 'error_rate';
 
+    // 메트릭별 기본 값 만들기 (요청, p95, 에러율 %)
     const baseValues = items.map((ep) => {
       if (selectedMetric === 'requests') return ep.request_count ?? 0;
       if (selectedMetric === 'latency') return Number((ep.latency_p95_ms ?? 0).toFixed(2));
-      return Number(((ep.error_rate ?? 0) * 100).toFixed(2)); // error_rate → percentage
+      return Number(((ep.error_rate ?? 0) * 100).toFixed(2));
     });
 
-    const errorRateTotal = isErrorRate ? baseValues.reduce((sum, v) => sum + v, 0) : 0;
+    // 합계 (모든 메트릭 공통, Pie와 동일한 비중 계산)
+    const totalBase = baseValues.reduce((sum, v) => sum + v, 0);
 
+    // 에러율일 경우 Pie와 동일하게 전체 대비 퍼센트로 환산
     const values = items.map((ep, idx) => {
       const raw = baseValues[idx] ?? 0;
       const value =
-        isErrorRate && errorRateTotal > 0
-          ? Number(((raw / errorRateTotal) * 100).toFixed(2)) // match pie slice percentage
+        isErrorRate && totalBase > 0
+          ? Number(((raw / totalBase) * 100).toFixed(2))
           : raw;
 
       return {
@@ -59,10 +61,11 @@ export default function EndpointBarChart({
       };
     });
 
-    // error_rate일 때 y축 자동 확장
+    // y축 범위 자동 확장(에러율)
     const maxValue = Math.max(...values.map((v) => v.value));
     const dynamicMax = isErrorRate ? Math.ceil(maxValue * 1.2) : undefined;
 
+    // ECharts 옵션 구성(축, 라벨, 색상)
     return {
       backgroundColor: 'transparent',
 
@@ -72,13 +75,20 @@ export default function EndpointBarChart({
         borderColor: 'transparent',
         textStyle: { color: '#f9fafb', fontSize: 12 },
         padding: 10,
+
+        // 호버: 선택된 엔드포인트 정보 표시
         formatter: (params: any) => {
           const name = params.name ?? '';
-          const ep = items.find((i) => i.endpoint_name === name) as EndpointItem | undefined;
+          const idx = params.dataIndex ?? items.findIndex((i) => i.endpoint_name === name);
+          const ep = idx >= 0 ? (items[idx] as EndpointItem | undefined) : undefined;
           const requests = ep?.request_count ?? 0;
           const p95 = ep?.latency_p95_ms ?? 0;
           const errorRate =
             ep?.error_rate !== undefined && ep?.error_rate !== null ? ep.error_rate * 100 : null;
+          const sharePercent =
+            totalBase > 0 && idx >= 0
+              ? Number(((baseValues[idx] / totalBase) * 100).toFixed(2))
+              : 0;
 
           const mainMetricLabel =
             selectedMetric === 'requests'
@@ -86,20 +96,21 @@ export default function EndpointBarChart({
               : selectedMetric === 'error_rate'
               ? '에러율'
               : '지연시간';
+
           const mainMetricValue =
             selectedMetric === 'requests'
-              ? requests.toLocaleString()
+              ? `${sharePercent.toFixed(2)}%`
               : selectedMetric === 'error_rate'
-              ? `${((ep?.error_rate ?? 0) * 100).toFixed(2)}%`
-              : `${p95.toFixed(2)} ms`;
+              ? `${sharePercent.toFixed(2)}%`
+              : `${sharePercent.toFixed(2)}%`;
 
           const errorRateText = errorRate !== null ? `${errorRate.toFixed(2)}%` : '-';
 
           return `
             <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
-            <div style="margin:4px 0;font-size:12px;">${mainMetricLabel}: ${mainMetricValue}</div>
-            <div style="margin:4px 0;font-size:12px;">지연시간(P95): ${p95.toFixed(2)} ms</div>
-            <div style="margin:4px 0;font-size:12px;">에러율: ${errorRateText}</div>
+            <div>${mainMetricLabel}: ${mainMetricValue}</div>
+            <div>지연시간(P95): ${p95.toFixed(2)} ms</div>
+            <div>에러율: ${errorRateText}</div>
           `;
         },
       },
@@ -124,6 +135,7 @@ export default function EndpointBarChart({
         },
       },
 
+      // 막대 그래프 렌더링
       series: [
         {
           type: 'bar',
@@ -145,6 +157,7 @@ export default function EndpointBarChart({
     };
   }, [items, selectedMetric, colors]);
 
+  // 클릭 이벤트 전달
   const events = {
     click: (params: any) => {
       if (params?.name && onBarClick) onBarClick(params.name);
