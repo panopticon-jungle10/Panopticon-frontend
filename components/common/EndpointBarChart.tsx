@@ -67,12 +67,40 @@ export default function EndpointBarChart({
       backgroundColor: 'transparent',
 
       tooltip: {
-        trigger: 'axis',
+        trigger: 'item',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: 'transparent',
+        textStyle: { color: '#f9fafb', fontSize: 12 },
+        padding: 10,
         formatter: (params: any) => {
-          const p = params[0];
-          if (selectedMetric === 'error_rate') return `${p.name}<br/>${p.value.toFixed(2)}%`;
-          if (selectedMetric === 'latency') return `${p.name}<br/>${p.value} ms`;
-          return `${p.name}<br/>${p.value}`;
+          const name = params.name ?? '';
+          const ep = items.find((i) => i.endpoint_name === name) || {};
+          const requests = ep.request_count ?? 0;
+          const p95 = ep.latency_p95_ms ?? 0;
+          const errorRate =
+            ep.error_rate !== undefined && ep.error_rate !== null ? ep.error_rate * 100 : null;
+
+          const mainMetricLabel =
+            selectedMetric === 'requests'
+              ? '요청수'
+              : selectedMetric === 'error_rate'
+              ? '에러율'
+              : '지연시간';
+          const mainMetricValue =
+            selectedMetric === 'requests'
+              ? requests.toLocaleString()
+              : selectedMetric === 'error_rate'
+              ? `${((ep.error_rate ?? 0) * 100).toFixed(2)}%`
+              : `${p95.toFixed(2)} ms`;
+
+          const errorRateText = errorRate !== null ? `${errorRate.toFixed(2)}%` : '-';
+
+          return `
+            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
+            <div style="margin:4px 0;font-size:12px;">${mainMetricLabel}: ${mainMetricValue}</div>
+            <div style="margin:4px 0;font-size:12px;">지연시간(P95): ${p95.toFixed(2)} ms</div>
+            <div style="margin:4px 0;font-size:12px;">에러율: ${errorRateText}</div>
+          `;
         },
       },
 
