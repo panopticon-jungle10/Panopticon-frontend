@@ -12,6 +12,7 @@ import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import EndpointTraceAnalysis from '@/components/analysis/EndpointTraceAnalysis';
+import EndpointBarChart from '@/components/common/EndpointBarChart';
 
 // 페이지당 아이템 수 (리스트용)
 const ITEMS_PER_PAGE = 10;
@@ -23,6 +24,9 @@ const TOTAL_ENDPOINTS_LIMIT = 200;
 // (차트 팔레트는 개별 렌더러에서 관리)
 
 type MetricType = 'requests' | 'latency' | 'error_rate';
+
+// pie/bar 공통 팔레트
+const CHART_COLORS = ['#537FE7', '#5BC0BE', '#FFB562'];
 
 // 엔드포인트 테이블용 데이터 타입
 interface EndpointTableData {
@@ -168,9 +172,12 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     }));
   }, [data]);
 
-  // 상위 3개 엔드포인트 (차트용)
+  /** Pie와 Bar 색상 1:1 일치시키기 위해 ep.color를 미리 주입 */
   const topEndpoints = useMemo(() => {
-    return allEndpoints.slice(0, 3);
+    return allEndpoints.slice(0, 3).map((ep, idx) => ({
+      ...ep,
+      color: CHART_COLORS[idx], // Pie ↔ Bar 색상 완전 고정
+    }));
   }, [allEndpoints]);
 
   const isEmpty = allEndpoints.length === 0;
@@ -261,18 +268,31 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
           errorMessage="리소스 데이터를 불러올 수 없습니다"
           emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
         >
-          {/* 차트 영역 */}
+          {/* 차트 영역: 한 줄로 좌(원), 우(막대) 배치 */}
           <div className="border border-gray-200 rounded-lg p-4 mb-6">
             <h4 className="text-md font-semibold text-gray-800 mb-3">상위 3개 엔드포인트</h4>
-            <EndpointPieChart
-              items={topEndpoints}
-              selectedMetric={selectedMetric}
-              height={350}
-              showLegend={true}
-              onSliceClick={(name: string) => handleEndpointClick(name)}
-            />
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 rounded-lg border border-gray-100 p-2">
+                <EndpointPieChart
+                  items={topEndpoints}
+                  selectedMetric={selectedMetric}
+                  height={350}
+                  showLegend={true}
+                  colors={CHART_COLORS} // 동일 팔레트 적용
+                  onSliceClick={(name: string) => handleEndpointClick(name)}
+                />
+              </div>
+              <div className="flex-1 rounded-lg border border-gray-100 p-2">
+                <EndpointBarChart
+                  items={topEndpoints}
+                  selectedMetric={selectedMetric}
+                  height={350}
+                  colors={CHART_COLORS} // 동일 팔레트 적용
+                  onBarClick={(name: string) => handleEndpointClick(name)}
+                />
+              </div>
+            </div>
           </div>
-
           {/* 테이블 영역 */}
           <div className="mt-6">
             <Table<EndpointTableData>

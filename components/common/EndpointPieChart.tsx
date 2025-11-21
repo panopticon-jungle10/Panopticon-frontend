@@ -10,6 +10,7 @@ interface EndpointItem {
   request_count?: number;
   latency_p95_ms?: number;
   error_rate?: number;
+  color?: string; // Resources에서 넣어주는 색
 }
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
   height?: number;
   onSliceClick?: (endpointName: string) => void;
   showLegend?: boolean;
+  colors?: string[]; // 팔레트 주입 (없으면 ECharts 기본 팔레트)
 }
 
 export default function EndpointPieChart({
@@ -26,8 +28,11 @@ export default function EndpointPieChart({
   height = 350,
   onSliceClick,
   showLegend = false,
+  colors,
 }: Props) {
   const pieOption = useMemo(() => {
+    const palette = colors && colors.length > 0 ? colors : undefined; // 팔레트 있으면 적용
+
     const pieData = (items || []).map((ep) => {
       let value: number = ep.request_count ?? 0;
       if (selectedMetric === 'error_rate') value = (ep.error_rate ?? 0) * 100;
@@ -36,11 +41,15 @@ export default function EndpointPieChart({
         name: ep.endpoint_name,
         value,
         endpointData: ep,
+        itemStyle: {
+          color: ep.color, // 여기서 강제로 색 고정
+        },
       };
     });
 
     return {
       backgroundColor: 'transparent',
+      color: palette,
       tooltip: {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
@@ -74,7 +83,7 @@ export default function EndpointPieChart({
             <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
             <div style="margin:4px 0;font-size:12px;">${mainMetricLabel}: ${mainMetricValue}</div>
             <div style="margin:4px 0;font-size:12px;">지연시간(p95): ${p95.toFixed(2)} ms</div>
-            <div style="margin:4px 0;font-size:12px;">에러율: ${errorRateText}</div>
+            <div style="margin:4px 0;font-size:12px;">에러율 ${errorRateText}</div>
           `;
         },
       },
@@ -94,6 +103,7 @@ export default function EndpointPieChart({
           center: ['50%', '50%'],
           data: pieData,
           label: { show: true, formatter: '{d}%' },
+
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -104,7 +114,7 @@ export default function EndpointPieChart({
         },
       ],
     } as any;
-  }, [items, selectedMetric, showLegend]);
+  }, [items, selectedMetric, showLegend, colors]);
 
   const events = {
     click: (params: any) => {

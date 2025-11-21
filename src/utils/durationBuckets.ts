@@ -4,9 +4,9 @@ export const BUCKET_COLORS = ['#60a5fa', '#34d399', '#fbbf24', '#fb923c', '#f43f
 
 // ratio expected in [0,1+] where 1 means maxDuration
 export function ratioToBucket(ratio: number): number {
-  if (ratio > 0.8) return 4;
-  if (ratio > 0.6) return 3;
-  if (ratio > 0.4) return 2;
+  if (ratio > 0.95) return 4;
+  if (ratio > 0.8) return 3;
+  if (ratio > 0.5) return 2;
   if (ratio > 0.2) return 1;
   return 0;
 }
