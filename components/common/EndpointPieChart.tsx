@@ -114,7 +114,7 @@ export default function EndpointPieChart({
         },
       ],
     } as any;
-  }, [items, selectedMetric, showLegend]);
+  }, [items, selectedMetric, showLegend, colors]);
 
   const events = {
     click: (params: any) => {
