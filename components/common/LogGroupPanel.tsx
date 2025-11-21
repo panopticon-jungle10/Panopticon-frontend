@@ -58,7 +58,7 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
         </div>
 
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {group.items.map((it, idx) => (
               <div
                 key={`${it.service}-${it.timestamp}-${idx}`}
@@ -73,12 +73,36 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
                   });
                   setIsAnalysisOpen(true);
                 }}
-                className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer bg-white"
+                className="flex flex-col justify-between min-w-0 border-b border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                <div className="text-xs text-gray-500 font-mono">{it.service}</div>
-                <div className="mt-2 text-sm text-gray-800 line-clamp-3">{it.message}</div>
-                <div className="mt-3 text-xs text-gray-400">
-                  {new Date(it.timestamp).toLocaleString()}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs text-gray-600 font-mono flex-1 min-w-0 truncate">
+                    {it.service || '—'}
+                  </div>
+                  <span
+                    className={`text-[11px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide ${
+                      (it.level || '').toUpperCase() === 'ERROR'
+                        ? 'bg-red-100 text-red-700'
+                        : (it.level || '').toUpperCase() === 'WARN' ||
+                          (it.level || '').toUpperCase() === 'WARNING'
+                        ? 'bg-amber-100 text-amber-700'
+                        : (it.level || '').toUpperCase() === 'DEBUG'
+                        ? 'bg-gray-100 text-gray-800'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {it.level || 'INFO'}
+                  </span>
+                </div>
+
+                <div className="mt-2 text-sm text-gray-800 truncate min-w-0">{it.message}</div>
+
+                <div className="mt-1 text-xs text-gray-400 truncate max-w-40">
+                  {(() => {
+                    const day = new Date(it.timestamp as unknown as string);
+                    if (isNaN(day.getTime())) return String(it.timestamp);
+                    return day.toLocaleString();
+                  })()}
                 </div>
               </div>
             ))}
