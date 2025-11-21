@@ -1,16 +1,14 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import Pagination from '../../Pagination';
 import { useQuery } from '@tanstack/react-query';
 import { getLogs } from '@/src/api/apm';
-import { LogLevel, LogEntry, LogItem } from '@/types/apm';
+import { LogLevel, LogEntry } from '@/types/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
-import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
 import StateHandler from '@/components/ui/StateHandler';
-import LogGroups from '@/components/common/LogGroups';
+import LogGroups, { computeGroups } from '@/components/common/LogGroups';
 import LogGroupPanel from '@/components/common/LogGroupPanel';
-import { FiLayers } from 'react-icons/fi';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 
 interface LogsSectionProps {
@@ -32,9 +30,12 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       .slice(0, 120);
 
   const [page, setPage] = useState(1);
-  const pageSize = 10;
 
-  const [tags, setTags] = useState<Tag[]>([{ key: 'level', value: 'ERROR' }]); // 태그 상태 (초기값: level:ERROR)
+  // 그룹 기반 페이징: 한 페이지에 표시할 그룹 수
+  const groupsPerPage = 18;
+
+  // 기본 태그 없음
+  const [tags, setTags] = useState<Tag[]>([]);
   const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
 
   // selected log / inner analysis state handled inside GroupPanel
@@ -45,21 +46,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     items: LogEntry[];
   } | null>(null);
 
-  // 웹소켓으로 받은 실시간 에러 로그를 누적하는 상태
-  const [realtimeLogs, setRealtimeLogs] = useState<LogItem[]>([]);
-
   const { startTime, endTime } = useTimeRangeStore();
-
-  // 웹소켓으로 에러 로그 수신
-  const handleLogReceived = useCallback((log: LogItem) => {
-    setRealtimeLogs((prev) => [log, ...prev]); // 최신 로그를 맨 앞에 추가
-  }, []);
-
-  useErrorLogsWebSocket({
-    serviceName,
-    onLogReceived: handleLogReceived,
-    enabled: true,
-  });
 
   // 로그 목록 가져오기 (새 API)
   const {
@@ -67,14 +54,20 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['logs', serviceName, startTime, endTime],
-    queryFn: () =>
-      getLogs({
-        service_name: serviceName,
+    // tags를 키에 포함하면 태그 변경 시 쿼리가 자동으로 다시 수행됩니다.
+    queryKey: ['logs', serviceName, startTime, endTime, tags],
+    queryFn: () => {
+      const levelTag = tags.find((t) => t.key === 'level')?.value;
+      const serviceTag = tags.find((t) => t.key === 'service')?.value;
+
+      return getLogs({
+        service_name: serviceTag || serviceName,
         from: startTime,
         to: endTime,
         size: 10000, // message 기반 키워드 추출 위해 size 증가(1만개)
-      }),
+        level: levelTag as LogLevel | undefined,
+      });
+    },
     refetchInterval: 30000, // 30초마다 갱신
     retry: false, // API 오류 시 재시도 하지 않음
     throwOnError: false, // 오류를 throw하지 않고 isError 상태로만 처리
@@ -94,24 +87,8 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     }));
   }, [logsData]);
 
-  // 실시간 로그 데이터 변환
-  const realtimeLogEntries = useMemo(() => {
-    return realtimeLogs.map((log) => ({
-      id: `ws-${log.service_name}-${log.timestamp}`,
-      level: log.level as LogLevel,
-      service: log.service_name,
-      traceId: log.trace_id || '',
-      message: log.message,
-      timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
-      spanId: '',
-    }));
-  }, [realtimeLogs]);
-
-  // API 로그 + 실시간 로그 병합 (실시간 로그가 먼저 표시됨)
-  // API 호출 시 이미 level로 필터링되므로 클라이언트 필터링 불필요
-  const logs = useMemo(() => {
-    return [...realtimeLogEntries, ...apiLogs];
-  }, [realtimeLogEntries, apiLogs]);
+  // 로그 목록은 API에서 가져온 항목만 사용
+  const logs = useMemo(() => apiLogs, [apiLogs]);
 
   // 자동 Suggestion 데이터
   const messageKeywords = useMemo(() => {
@@ -164,11 +141,9 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     return result;
   }, [tags, keyword, logs]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
-
-  // 페이지네이션용 데이터는 현재 사용하지 않음
-
-  // GroupPanel handles its own inner panel state
+  // 그룹을 계산해서 페이지 수를 결정
+  const groupsArr = useMemo(() => computeGroups(filteredLogs), [filteredLogs]);
+  const totalPages = Math.max(1, Math.ceil(groupsArr.length / groupsPerPage));
 
   return (
     <div className="space-y-6">
@@ -178,7 +153,10 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
         <div className="flex-1">
           <TagSearchBar
             tags={tags}
-            onTagsChange={setTags}
+            onTagsChange={(t) => {
+              setTags(t);
+              setPage(1);
+            }}
             keyword={keyword}
             onKeywordChange={(v) => {
               setKeyword(v);
@@ -187,16 +165,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
             messageKeywords={messageKeywords}
             serviceNames={serviceNames}
           />
-        </div>
-
-        <div className="h-[52px] px-5 flex items-center rounded-xl border bg-white shadow-sm shrink-0 gap-2">
-          <FiLayers className="w-5 h-5 text-blue-600" />
-          <div className="flex flex-col leading-tight">
-            <span className="text-[12px] text-gray-500">총 로그 개수</span>
-            <span className="text-[18px] font-semibold text-gray-700">
-              {filteredLogs.length.toLocaleString()} 개
-            </span>
-          </div>
         </div>
       </div>
 
@@ -212,6 +180,8 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
           <div className="mb-4">
             <LogGroups
               items={filteredLogs}
+              page={page}
+              pageSize={groupsPerPage}
               onGroupClick={(key, title, items) => {
                 setSelectedLogGroup({ key, title, items });
                 setIsLogGroupPanelOpen(true);
