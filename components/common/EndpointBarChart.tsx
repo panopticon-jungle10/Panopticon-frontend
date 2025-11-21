@@ -74,11 +74,10 @@ export default function EndpointBarChart({
         padding: 10,
 
         // 호버: 선택된 엔드포인트 정보 표시
-        formatter: (params: any) => {
+        formatter: (params: { name?: string; dataIndex?: number }) => {
           const name = params.name ?? '';
           const idx = params.dataIndex ?? items.findIndex((i) => i.endpoint_name === name);
           const ep = idx >= 0 ? (items[idx] as EndpointItem | undefined) : undefined;
-          const requests = ep?.request_count ?? 0;
           const p95 = ep?.latency_p95_ms ?? 0;
           const errorRate =
             ep?.error_rate !== undefined && ep?.error_rate !== null ? ep.error_rate * 100 : null;
@@ -141,7 +140,7 @@ export default function EndpointBarChart({
           label: {
             show: true,
             position: 'top',
-            formatter: (p: any) =>
+            formatter: (p: { value: number }) =>
               selectedMetric === 'error_rate'
                 ? `${p.value.toFixed(2)}%`
                 : selectedMetric === 'latency'
@@ -156,7 +155,7 @@ export default function EndpointBarChart({
 
   // 클릭 이벤트 전달
   const events = {
-    click: (params: any) => {
+    click: (params: { name?: string }) => {
       if (params?.name && onBarClick) onBarClick(params.name);
     },
   };
