@@ -1,5 +1,4 @@
 'use client';
-
 import { LogEntry } from '@/types/apm';
 import { FiX, FiClock, FiTag, FiLink } from 'react-icons/fi';
 import LevelBadge from '@/components/features/services/[serviceName]/logs/LevelBadge';

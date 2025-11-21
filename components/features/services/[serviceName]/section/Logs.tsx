@@ -14,8 +14,6 @@ import { FiLayers } from 'react-icons/fi';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
 import { IoClose } from 'react-icons/io5';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
-// ReactNode import removed; 관련 하이라이트 기능이 비활성화되어 있습니다.
-// LogList는 UI에서 잠시 주석 상태로 유지합니다.
 
 interface LogsSectionProps {
   serviceName: string;
@@ -38,11 +36,8 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const [tags, setTags] = useState<Tag[]>([]); // 태그 상태
+  const [tags, setTags] = useState<Tag[]>([{ key: 'level', value: 'ERROR' }]); // 태그 상태 (초기값: level:ERROR)
   const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
-
-  // 태그에서 level 값을 찾음 (tags가 선언된 이후에 읽음)
-  const selectedLevel = tags.find((t) => t.key === 'level')?.value;
 
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -75,11 +70,10 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['logs', serviceName, selectedLevel, startTime, endTime],
+    queryKey: ['logs', serviceName, startTime, endTime],
     queryFn: () =>
       getLogs({
         service_name: serviceName,
-        level: (selectedLevel as unknown as LogLevel) || undefined,
         from: startTime,
         to: endTime,
         size: 10000, // message 기반 키워드 추출 위해 size 증가(1만개)
@@ -175,9 +169,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
 
-  // 페이지네이션용 데이터는 현재 LogList가 주석 상태라 별도 슬라이스하지 않습니다.
-
-  // 하이라이트 및 리스트 클릭 핸들러는 LogList가 주석 상태이므로 제거됨
+  // 페이지네이션용 데이터는 현재 사용하지 않음
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
@@ -232,8 +224,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
               }}
             />
           </div>
-          {/* LogList에 하이라이트된 logs 전달 */}
-          {/* <LogList items={highlightedPaginatedLogs} onItemClick={handleLogClick} /> */}
 
           <Pagination
             page={page}
@@ -249,7 +239,19 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
         <SlideOverLayout
           isOpen={isGroupPanelOpen}
           onClose={() => setIsGroupPanelOpen(false)}
-          widthClass="w-[70%]"
+          widthClass="w-[60%]"
+          enableEsc={!isPanelOpen}
+          // 그룹 패널은 LogAnalysis가 열리면 뒤로 밀리고 흐릿해져야 함
+          backdropClassName={
+            isPanelOpen
+              ? 'fixed inset-0 bg-black/5 backdrop-blur-sm z-20 transition-opacity duration-300 opacity-100'
+              : 'fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 opacity-100'
+          }
+          panelClassName={
+            isPanelOpen
+              ? 'fixed top-0 right-0 h-full bg-white shadow-2xl z-30 transform transition-transform duration-300 ease-in-out translate-x-0 filter blur-sm'
+              : 'fixed top-0 right-0 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0'
+          }
         >
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex-1">

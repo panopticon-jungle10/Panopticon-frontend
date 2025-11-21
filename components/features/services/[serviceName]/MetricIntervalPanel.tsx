@@ -204,7 +204,7 @@ export default function MetricIntervalPanel({
               <div className="flex-1">
                 <h3 className="text-lg font-semibold">구간 상세 분석</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  {serviceName} · {new Date(start).toLocaleString()} ~{' '}
+                  {serviceName} <br /> {new Date(start).toLocaleString()} ~{' '}
                   {new Date(end).toLocaleString()}
                 </p>
               </div>
