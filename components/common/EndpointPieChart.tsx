@@ -49,7 +49,7 @@ export default function EndpointPieChart({
 
     return {
       backgroundColor: 'transparent',
-       color: palette,
+      color: palette,
       tooltip: {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
@@ -103,7 +103,6 @@ export default function EndpointPieChart({
           center: ['50%', '50%'],
           data: pieData,
           label: { show: true, formatter: '{d}%' },
-
 
           emphasis: {
             itemStyle: {
