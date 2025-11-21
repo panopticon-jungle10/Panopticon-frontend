@@ -54,10 +54,8 @@ export default function LogGroups({ items, maxGroups = 8, onGroupClick }: Props)
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">로그 그룹 (유사 메시지)</h3>
-        <div className="text-xs text-gray-500">그룹 {groups.length}개 표시</div>
-      </div>
+      <h3 className="text-sm font-semibold mb-1">로그 그룹 (유사 메시지)</h3>
+      <div className="text-xs text-gray-500">그룹 {groups.length}개 표시</div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {groups.map((g) => (

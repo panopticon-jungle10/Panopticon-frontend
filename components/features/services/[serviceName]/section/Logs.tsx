@@ -7,12 +7,10 @@ import { getLogs } from '@/src/api/apm';
 import { LogLevel, LogEntry, LogItem } from '@/types/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
-import LogAnalysis from '@/components/analysis/LogAnalysis';
 import StateHandler from '@/components/ui/StateHandler';
 import LogGroups from '@/components/common/LogGroups';
+import LogGroupPanel from '@/components/common/LogGroupPanel';
 import { FiLayers } from 'react-icons/fi';
-import SlideOverLayout from '@/components/ui/SlideOverLayout';
-import { IoClose } from 'react-icons/io5';
 import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 
 interface LogsSectionProps {
@@ -39,10 +37,9 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
   const [tags, setTags] = useState<Tag[]>([{ key: 'level', value: 'ERROR' }]); // 태그 상태 (초기값: level:ERROR)
   const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
 
-  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isGroupPanelOpen, setIsGroupPanelOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<{
+  // selected log / inner analysis state handled inside GroupPanel
+  const [isLogGroupPanelOpen, setIsLogGroupPanelOpen] = useState(false);
+  const [selectedLogGroup, setSelectedLogGroup] = useState<{
     key: string;
     title: string;
     items: LogEntry[];
@@ -171,16 +168,13 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
 
   // 페이지네이션용 데이터는 현재 사용하지 않음
 
-  const handleClosePanel = () => {
-    setIsPanelOpen(false);
-    setTimeout(() => setSelectedLog(null), 300);
-  };
+  // GroupPanel handles its own inner panel state
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-800">로그</h2>
 
-      <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="w-full flex items-center justify-start gap-4">
         <div className="flex-1">
           <TagSearchBar
             tags={tags}
@@ -219,8 +213,8 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
             <LogGroups
               items={filteredLogs}
               onGroupClick={(key, title, items) => {
-                setSelectedGroup({ key, title, items });
-                setIsGroupPanelOpen(true);
+                setSelectedLogGroup({ key, title, items });
+                setIsLogGroupPanelOpen(true);
               }}
             />
           </div>
@@ -234,72 +228,15 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
         </StateHandler>
       </section>
 
-      {/* 그룹 패널: 그룹을 클릭하면 열리는 패널 (첫 번째 패널) */}
-      {isGroupPanelOpen && selectedGroup && (
-        <SlideOverLayout
-          isOpen={isGroupPanelOpen}
-          onClose={() => setIsGroupPanelOpen(false)}
+      {/* 그룹 패널 */}
+      {isLogGroupPanelOpen && selectedLogGroup && (
+        <LogGroupPanel
+          isOpen={isLogGroupPanelOpen}
+          group={selectedLogGroup}
+          onClose={() => setIsLogGroupPanelOpen(false)}
           widthClass="w-[60%]"
-          enableEsc={!isPanelOpen}
-          // 그룹 패널은 LogAnalysis가 열리면 뒤로 밀리고 흐릿해져야 함
-          backdropClassName={
-            isPanelOpen
-              ? 'fixed inset-0 bg-black/5 backdrop-blur-sm z-20 transition-opacity duration-300 opacity-100'
-              : 'fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 opacity-100'
-          }
-          panelClassName={
-            isPanelOpen
-              ? 'fixed top-0 right-0 h-full bg-white shadow-2xl z-30 transform transition-transform duration-300 ease-in-out translate-x-0 filter blur-sm'
-              : 'fixed top-0 right-0 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0'
-          }
-        >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-900">{selectedGroup.title}</h2>
-              <div className="text-sm text-gray-600 mt-1">
-                {selectedGroup.items.length}개 메시지
-              </div>
-            </div>
-            <button
-              onClick={() => setIsGroupPanelOpen(false)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors hover:cursor-pointer"
-              aria-label="Close panel"
-            >
-              <IoClose className="w-6 h-6 text-gray-500" />
-            </button>
-          </div>
-
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {selectedGroup.items.map((it, idx) => (
-                <div
-                  key={`${it.service}-${it.timestamp}-${idx}`}
-                  onClick={() => {
-                    setSelectedLog({
-                      id: `${it.service}-${it.timestamp}-${idx}`,
-                      level: it.level as LogLevel,
-                      service: it.service || '',
-                      traceId: it.traceId || '',
-                      message: it.message,
-                      timestamp: it.timestamp,
-                    });
-                    setIsPanelOpen(true);
-                  }}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer bg-white"
-                >
-                  <div className="text-xs text-gray-500 font-mono">{it.service}</div>
-                  <div className="mt-2 text-sm text-gray-800 line-clamp-3">{it.message}</div>
-                  <div className="mt-3 text-xs text-gray-400">
-                    {new Date(it.timestamp).toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </SlideOverLayout>
+        />
       )}
-
-      <LogAnalysis log={selectedLog} isOpen={isPanelOpen} onClose={handleClosePanel} />
     </div>
   );
 }
