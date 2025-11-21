@@ -27,7 +27,6 @@ export default function EndpointBarChart({
   onBarClick,
   colors,
 }: Props) {
-
   const option = useMemo(() => {
     if (!items?.length) return null;
 
@@ -48,9 +47,7 @@ export default function EndpointBarChart({
     const values = items.map((ep, idx) => {
       const raw = baseValues[idx] ?? 0;
       const value =
-        isErrorRate && totalBase > 0
-          ? Number(((raw / totalBase) * 100).toFixed(2))
-          : raw;
+        isErrorRate && totalBase > 0 ? Number(((raw / totalBase) * 100).toFixed(2)) : raw;
 
       return {
         name: ep.endpoint_name,
