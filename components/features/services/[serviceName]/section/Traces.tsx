@@ -297,16 +297,11 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
       },
       {
         name: 'Error',
-        type: 'effectScatter',
+        type: 'scatter',
         data: errorTraces,
         symbolSize: 10,
         itemStyle: {
           color: getColorByStatus('error'),
-        },
-        rippleEffect: {
-          brushType: 'stroke',
-          scale: 3,
-          period: 4,
         },
         emphasis: {
           itemStyle: {
