@@ -1,11 +1,11 @@
 'use client';
 
+import { useAlarm } from '@/src/providers/AlarmProvider';
 import { useState, useRef, useEffect } from 'react';
 import { FiBell } from 'react-icons/fi';
-import { useAlarm } from '@/src/providers/AlarmProvider';
 
 export const Alarm = () => {
-  const { unreadCount, recentErrors, clearAlarm, resetUnreadCount } = useAlarm();
+  const { unreadCount, recentErrors, resetUnreadCount } = useAlarm();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -17,34 +17,16 @@ export const Alarm = () => {
       }
     };
 
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isDropdownOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
 
   const handleClick = () => {
-    clearAlarm();
     setIsDropdownOpen((prev) => !prev);
-
-    // 드롭다운을 열 때 unreadCount 리셋
-    if (!isDropdownOpen) {
-      resetUnreadCount();
-    }
+    if (!isDropdownOpen) resetUnreadCount();
   };
 
-  const handleViewMore = () => {
-    setIsDropdownOpen(false);
-
-    // 에러 로그 섹션으로 스크롤
-    const logsSection = document.getElementById('logs');
-    if (logsSection) {
-      logsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  const handleViewMore = () => setIsDropdownOpen(false);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -72,7 +54,6 @@ export const Alarm = () => {
       >
         <FiBell className="w-6 h-6 text-zinc-700" />
 
-        {/* 읽지 않은 알림 배지 */}
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-xs font-bold rounded-full">
             {unreadCount > 999 ? '999+' : unreadCount}
@@ -80,7 +61,6 @@ export const Alarm = () => {
         )}
       </button>
 
-      {/* 드롭다운 */}
       {isDropdownOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
           <div className="p-4 border-b border-gray-200">

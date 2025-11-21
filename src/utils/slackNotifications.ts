@@ -7,14 +7,12 @@
 
 import { LogItem } from '@/types/apm';
 import { getSlackWebhookUrl, isSlackEnabled } from './localStorage';
+import { sendSlackMessage } from '@/src/api/webhook/slackWebhook';
 
-interface SlackNotificationPayload {
-  title: string;
-  message: string;
-  severity?: 'info' | 'warning' | 'error' | 'critical';
-  serviceName?: string;
-  timestamp?: string;
-  metadata?: Record<string, unknown>;
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 /**
@@ -30,65 +28,21 @@ export async function sendSlackErrorNotification(errors: LogItem[]) {
       console.log('[Slack Notification] Slack webhook not configured or disabled');
       return { success: false, reason: 'not_configured' };
     }
-
-    // 에러 로그들을 분석하여 알림 메시지 생성
+    // 에러 로그들을 분석하여 단순 텍스트 메시지 생성
     const serviceName = errors[0]?.service_name || 'Unknown Service';
     const errorCount = errors.length;
-
-    // 에러 메시지들 요약 (최대 10개)
     const errorMessages = errors
       .slice(0, 10)
-      .map((error, index) => `${index + 1}. ${error.message}`)
+      .map((e, i) => `${i + 1}. ${e.message}`)
       .join('\n');
-
     const remainingCount = errorCount > 10 ? errorCount - 10 : 0;
-    const notification: SlackNotificationPayload = {
-      title: `🚨 ${errorCount}개의 에러 발생`,
-      message: `**Service**: ${serviceName}\n\n**최근 에러 메시지:**\n${errorMessages}${
-        remainingCount > 0 ? `\n\n... 외 ${remainingCount}개 에러` : ''
-      }`,
-      severity: 'error',
-      serviceName,
-      timestamp: new Date().toISOString(),
-      metadata: {
-        errorCount,
-        firstError: errors[0],
-      },
-    };
 
-    // 로컬스토리지에서 가져온 웹훅 URL을 API에 전달하여 저장
-    const saveResponse = await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'save',
-        type: 'slack',
-        config: {
-          url: webhookUrl,
-          enabled: true,
-        },
-      }),
-    });
+    const text = `🚨 ${errorCount}개의 에러 발생\n*Service*: ${serviceName}\n\n최근 에러:\n${errorMessages}${
+      remainingCount > 0 ? `\n\n... 외 ${remainingCount}개 에러` : ''
+    }`;
 
-    if (!saveResponse.ok) {
-      throw new Error(`Failed to save webhook: ${saveResponse.statusText}`);
-    }
-
-    // 알림 전송
-    const sendResponse = await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'send',
-        notification,
-      }),
-    });
-
-    if (!sendResponse.ok) {
-      throw new Error(`Failed to send notification: ${sendResponse.statusText}`);
-    }
-
-    const result = await sendResponse.json();
+    // sendSlackMessage는 내부적으로 /api/webhook/slack 프록시를 호출합니다.
+    const result = await sendSlackMessage(text);
     console.log('[Slack Notification] Sent successfully:', result);
     return result;
   } catch (error) {
@@ -102,39 +56,23 @@ export async function sendSlackErrorNotification(errors: LogItem[]) {
  */
 export async function testSlackWebhook(webhookUrl: string) {
   try {
-    // 먼저 웹훅 URL 저장
-    const saveResponse = await fetch('/api/notifications', {
+    // 프록시 엔드포인트에 직접 테스트 페이로드 전송
+    const token = getCookieValue('auth-token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/webhook/slack', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({
-        action: 'save',
-        type: 'slack',
-        config: {
-          url: webhookUrl,
-          enabled: true,
-        },
+        webhookUrl,
+        payload: { text: 'Panopticon - Slack webhook test message' },
       }),
     });
 
-    if (!saveResponse.ok) {
-      throw new Error(`Failed to save webhook: ${saveResponse.statusText}`);
-    }
-
-    // 테스트 메시지 전송
-    const testResponse = await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'test',
-        type: 'slack',
-      }),
-    });
-
-    if (!testResponse.ok) {
-      throw new Error(`Failed to test webhook: ${testResponse.statusText}`);
-    }
-
-    const result = await testResponse.json();
+    if (!res.ok) throw new Error(`Failed to test webhook: ${res.status} ${res.statusText}`);
+    const result = await res.json().catch(() => ({}));
     console.log('[Slack Webhook] Test successful:', result);
     return result;
   } catch (error) {

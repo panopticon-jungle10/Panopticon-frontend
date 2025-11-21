@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import QueryProvider from '@/src/providers/QueryProvider';
 import { OverlayStackProvider } from '@/components/ui/OverlayStackContext';
+import AlarmProvider from '@/src/providers/AlarmProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,10 +34,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <QueryProvider>
-          <OverlayStackProvider>
-            <ToastContainer position="top-right" autoClose={1200} hideProgressBar={true} />
-            {children}
-          </OverlayStackProvider>
+          <AlarmProvider>
+            <OverlayStackProvider>
+              <ToastContainer position="top-right" autoClose={1200} hideProgressBar={true} />
+              {children}
+            </OverlayStackProvider>
+          </AlarmProvider>
         </QueryProvider>
       </body>
     </html>
