@@ -10,7 +10,7 @@ interface EndpointItem {
   request_count?: number;
   latency_p95_ms?: number;
   error_rate?: number;
-  color?: string; // ← Resources에서 넣어주는 색
+  color?: string; // Resources에서 넣어주는 색
 }
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
   height?: number;
   onSliceClick?: (endpointName: string) => void;
   showLegend?: boolean;
+  colors?: string[]; // 팔레트 주입 (없으면 ECharts 기본 팔레트)
 }
 
 export default function EndpointPieChart({
@@ -27,8 +28,11 @@ export default function EndpointPieChart({
   height = 350,
   onSliceClick,
   showLegend = false,
+  colors,
 }: Props) {
   const pieOption = useMemo(() => {
+    const palette = colors && colors.length > 0 ? colors : undefined; // 팔레트 있으면 적용
+
     const pieData = (items || []).map((ep) => {
       let value: number = ep.request_count ?? 0;
       if (selectedMetric === 'error_rate') value = (ep.error_rate ?? 0) * 100;
@@ -45,6 +49,7 @@ export default function EndpointPieChart({
 
     return {
       backgroundColor: 'transparent',
+       color: palette,
       tooltip: {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',

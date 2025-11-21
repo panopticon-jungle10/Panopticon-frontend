@@ -28,6 +28,7 @@ export default function EndpointBarChart({
   const option = useMemo(() => {
     const values = items.map((ep) => {
       let v = 0;
+
       if (selectedMetric === 'requests') v = ep.request_count ?? 0;
       if (selectedMetric === 'latency') v = Number((ep.latency_p95_ms ?? 0).toFixed(2));
       if (selectedMetric === 'error_rate') v = Math.round((ep.error_rate ?? 0) * 100);
@@ -41,22 +42,22 @@ export default function EndpointBarChart({
 
     return {
       backgroundColor: 'transparent',
+
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(0,0,0,0.85)',
+        borderColor: 'transparent',
         textStyle: { color: '#fff' },
         formatter: (params: any) => {
           const p = params[0];
-          // latency는 소수점 2자리로 표시
-          if (selectedMetric === 'latency') {
-            return `${p.name}<br/>${p.value.toFixed(2)} ms`;
-          }
+          if (selectedMetric === 'latency') return `${p.name}<br/>${p.value.toFixed(2)} ms`; // latency는 소수점 2자리로 표시
           return `${p.name}<br/>${p.value}`;
         },
       },
 
       grid: { left: 40, right: 20, top: 30, bottom: 40 },
 
+      // 세로막대: x축은 category, y축은 value
       xAxis: {
         type: 'category',
         data: items.map((i) => i.endpoint_name),
@@ -65,7 +66,14 @@ export default function EndpointBarChart({
 
       yAxis: {
         type: 'value',
-        axisLabel: { color: '#6b7280', fontSize: 11 },
+        axisLabel: {
+          color: '#6b7280',
+          fontSize: 11,
+          formatter: (val: number) => {
+            if (selectedMetric === 'latency') return `${val.toFixed(0)}ms`;
+            return val.toLocaleString();
+          },
+        },
       },
 
       series: [
@@ -74,7 +82,7 @@ export default function EndpointBarChart({
           barWidth: '45%',
           data: values,
 
-          // 숫자 표시
+          // 세로 막대일 때 숫자 위치는 top
           label: {
             show: true,
             position: 'top',
