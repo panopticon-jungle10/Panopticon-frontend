@@ -172,7 +172,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     }));
   }, [data]);
 
-  /** 🔥 핵심: Pie와 Bar 색상 1:1 일치시키기 위해 ep.color를 미리 주입 */
+  /** Pie와 Bar 색상 1:1 일치시키기 위해 ep.color를 미리 주입 */
   const topEndpoints = useMemo(() => {
     return allEndpoints.slice(0, 3).map((ep, idx) => ({
       ...ep,
