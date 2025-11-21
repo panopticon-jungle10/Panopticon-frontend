@@ -10,6 +10,7 @@ interface EndpointItem {
   request_count?: number;
   latency_p95_ms?: number;
   error_rate?: number;
+  color?: string; // ← Resources에서 넣어주는 색
 }
 
 interface Props {
@@ -36,6 +37,9 @@ export default function EndpointPieChart({
         name: ep.endpoint_name,
         value,
         endpointData: ep,
+        itemStyle: {
+          color: ep.color, // 여기서 강제로 색 고정
+        },
       };
     });
 
@@ -74,7 +78,7 @@ export default function EndpointPieChart({
             <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
             <div style="margin:4px 0;font-size:12px;">${mainMetricLabel}: ${mainMetricValue}</div>
             <div style="margin:4px 0;font-size:12px;">지연시간(p95): ${p95.toFixed(2)} ms</div>
-            <div style="margin:4px 0;font-size:12px;">에러율: ${errorRateText}</div>
+            <div style="margin:4px 0;font-size:12px;">에러율 ${errorRateText}</div>
           `;
         },
       },
@@ -94,6 +98,8 @@ export default function EndpointPieChart({
           center: ['50%', '50%'],
           data: pieData,
           label: { show: true, formatter: '{d}%' },
+
+
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
