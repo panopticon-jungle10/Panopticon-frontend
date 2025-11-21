@@ -9,8 +9,8 @@ interface EndpointItem {
   endpoint_name: string;
   request_count?: number;
   latency_p95_ms?: number;
-  error_rate?: number;
-  color?: string; // Pie에서 전달한 색상 (옵션)
+  error_rate?: number; // 0~1 값
+  color?: string; // Pie와 동일 색
 }
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
   selectedMetric: 'requests' | 'error_rate' | 'latency';
   height?: number;
   onBarClick?: (endpointName: string) => void;
-  colors?: string[]; // 팔레트 (옵션) - 없으면 기본 팔레트 사용
+  colors?: string[];
 }
 
 export default function EndpointBarChart({
@@ -31,56 +31,68 @@ export default function EndpointBarChart({
   const option = useMemo(() => {
     if (!items?.length) return null;
 
-    const palette = colors && colors.length > 0 ? colors : undefined;
+    const palette = colors?.length ? colors : undefined;
+
+    const isErrorRate = selectedMetric === 'error_rate';
+
+    const baseValues = items.map((ep) => {
+      if (selectedMetric === 'requests') return ep.request_count ?? 0;
+      if (selectedMetric === 'latency') return Number((ep.latency_p95_ms ?? 0).toFixed(2));
+      return Number(((ep.error_rate ?? 0) * 100).toFixed(2)); // error_rate → percentage
+    });
+
+    const errorRateTotal = isErrorRate ? baseValues.reduce((sum, v) => sum + v, 0) : 0;
 
     const values = items.map((ep, idx) => {
-      let v = 0;
-      if (selectedMetric === 'requests') v = ep.request_count ?? 0;
-      if (selectedMetric === 'latency') v = Number((ep.latency_p95_ms ?? 0).toFixed(2));
-      if (selectedMetric === 'error_rate') v = Math.round((ep.error_rate ?? 0) * 100);
-
-      const color = ep.color ?? (palette ? palette[idx % palette.length] : undefined);
+      const raw = baseValues[idx] ?? 0;
+      const value =
+        isErrorRate && errorRateTotal > 0
+          ? Number(((raw / errorRateTotal) * 100).toFixed(2)) // match pie slice percentage
+          : raw;
 
       return {
-        value: v,
         name: ep.endpoint_name,
-        itemStyle: color ? { color } : undefined, // Pie와 동일색 또는 팔레트/기본색
+        value,
+        itemStyle: {
+          color: ep.color ?? palette?.[idx % palette.length],
+        },
       };
     });
+
+    // error_rate일 때 y축 자동 확장
+    const maxValue = Math.max(...values.map((v) => v.value));
+    const dynamicMax = isErrorRate ? Math.ceil(maxValue * 1.2) : undefined;
 
     return {
       backgroundColor: 'transparent',
 
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(0,0,0,0.85)',
-        borderColor: 'transparent',
-        textStyle: { color: '#fff' },
         formatter: (params: any) => {
           const p = params[0];
-          if (selectedMetric === 'latency') return `${p.name}<br/>${p.value.toFixed(2)} ms`;
+          if (selectedMetric === 'error_rate') return `${p.name}<br/>${p.value.toFixed(2)}%`;
+          if (selectedMetric === 'latency') return `${p.name}<br/>${p.value} ms`;
           return `${p.name}<br/>${p.value}`;
         },
       },
 
       grid: { left: 40, right: 20, top: 30, bottom: 40 },
 
-      // 가로막대: x축 = category, y축 = value
       xAxis: {
         type: 'category',
         data: items.map((i) => i.endpoint_name),
-        axisLabel: { color: '#6b7280', fontSize: 11 },
       },
 
       yAxis: {
         type: 'value',
+        max: dynamicMax,
         axisLabel: {
-          color: '#6b7280',
-          fontSize: 11,
-          formatter: (val: number) => {
-            if (selectedMetric === 'latency') return `${val.toFixed(0)}ms`;
-            return val.toLocaleString();
-          },
+          formatter: (val: number) =>
+            selectedMetric === 'error_rate'
+              ? `${val}%`
+              : selectedMetric === 'latency'
+              ? `${val}ms`
+              : val.toLocaleString(),
         },
       },
 
@@ -89,24 +101,17 @@ export default function EndpointBarChart({
           type: 'bar',
           barWidth: '45%',
           data: values,
-
-          // 가로 막대라 값 위치는 top
           label: {
             show: true,
             position: 'top',
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#374151',
-            formatter: (params: any) => {
-              const v = params.value;
-              if (selectedMetric === 'latency') return `${v.toFixed(2)} ms`;
-              return v;
-            },
+            formatter: (p: any) =>
+              selectedMetric === 'error_rate'
+                ? `${p.value.toFixed(2)}%`
+                : selectedMetric === 'latency'
+                ? `${p.value} ms`
+                : p.value,
           },
-
-          itemStyle: {
-            borderRadius: [4, 4, 0, 0],
-          },
+          itemStyle: { borderRadius: [4, 4, 0, 0] },
         },
       ],
     };
@@ -117,14 +122,6 @@ export default function EndpointBarChart({
       if (params?.name && onBarClick) onBarClick(params.name);
     },
   };
-
-  if (!option) {
-    return (
-      <div className="h-[350px] flex items-center justify-center text-sm text-gray-500">
-        차트 데이터를 불러오는 중입니다
-      </div>
-    );
-  }
 
   return <ReactECharts option={option} style={{ height }} onEvents={events} />;
 }
