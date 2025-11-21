@@ -9,9 +9,17 @@ interface LogGroup {
   items: LogEntry[];
 }
 
+interface ExtendedGroup extends LogGroup {
+  primaryLevel: string;
+  primaryPriority: number;
+}
+
 interface Props {
   items: LogEntry[];
   maxGroups?: number;
+  // 페이지 관련: page와 pageSize가 주어지면 해당 페이지만 표시
+  page?: number;
+  pageSize?: number;
   // 그룹 클릭 시 호출 (그룹 key, 대표 메시지, 그룹에 포함된 항목)
   onGroupClick?: (key: string, title: string, items: LogEntry[]) => void;
 }
@@ -28,35 +36,71 @@ function normalizeMessage(msg: string) {
     .slice(0, 120);
 }
 
-export default function LogGroups({ items, maxGroups = 8, onGroupClick }: Props) {
-  const groups: LogGroup[] = useMemo(() => {
-    const map = new Map<string, LogEntry[]>();
+// 그룹 계산 유틸: 전체 그룹(정렬 포함)을 반환
+export function computeGroups(items: LogEntry[]): ExtendedGroup[] {
+  const map = new Map<string, LogEntry[]>();
 
-    for (const it of items) {
-      const key = normalizeMessage(it.message || '') || 'other';
-      const arr = map.get(key) || [];
-      arr.push(it);
-      map.set(key, arr);
-    }
+  for (const it of items) {
+    const key = normalizeMessage(it.message || '') || 'other';
+    const arr = map.get(key) || [];
+    arr.push(it);
+    map.set(key, arr);
+  }
 
-    // convert to array and sort by size desc
-    const arr = Array.from(map.entries()).map(([k, v]) => ({
+  const levelPriority = (lvl?: string) => {
+    if (!lvl) return 99;
+    const L = lvl.toUpperCase();
+    if (L === 'ERROR') return 0;
+    if (L === 'WARN' || L === 'WARNING') return 1;
+    if (L === 'DEBUG') return 2;
+    if (L === 'INFO') return 3;
+    return 99;
+  };
+
+  const arr: ExtendedGroup[] = Array.from(map.entries()).map(([k, v]) => {
+    const primary = v.reduce((best: string | null, it) => {
+      if (!best) return it.level || null;
+      return levelPriority(it.level) < levelPriority(best) ? it.level : best;
+    }, null as string | null);
+
+    return {
       key: k,
       title: v[0]?.message || k,
       items: v,
-    }));
-    arr.sort((a, b) => b.items.length - a.items.length);
-    return arr.slice(0, maxGroups);
-  }, [items, maxGroups]);
+      primaryLevel: primary || 'INFO',
+      primaryPriority: levelPriority(primary || 'INFO'),
+    };
+  });
+
+  arr.sort((a: ExtendedGroup, b: ExtendedGroup) => {
+    if (a.primaryPriority !== b.primaryPriority) return a.primaryPriority - b.primaryPriority;
+    return b.items.length - a.items.length;
+  });
+
+  return arr;
+}
+
+export default function LogGroups({ items, maxGroups = 20, page, pageSize, onGroupClick }: Props) {
+  const fullGroups = useMemo(() => computeGroups(items), [items]);
+  const totalGroups = fullGroups.length;
+
+  // 페이징이 주어지면 해당 페이지만 표시, 아니면 maxGroups 기준으로 자름
+  const groups = useMemo<ExtendedGroup[]>(() => {
+    if (typeof page === 'number' && typeof pageSize === 'number') {
+      const start = Math.max(0, (page - 1) * pageSize);
+      return fullGroups.slice(start, start + pageSize);
+    }
+    return fullGroups.slice(0, maxGroups);
+  }, [fullGroups, page, pageSize, maxGroups]);
 
   if (!items || items.length === 0)
     return <div className="text-sm text-gray-500">로그가 없습니다</div>;
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">로그 그룹 (유사 메시지)</h3>
-        <div className="text-xs text-gray-500">그룹 {groups.length}개 표시</div>
+      <h3 className="text-sm font-semibold mb-1">로그 그룹 (유사 메시지)</h3>
+      <div className="text-xs text-gray-500">
+        그룹 <strong>{totalGroups}</strong>개 중 <strong>{groups.length}</strong>개 표시
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -65,16 +109,22 @@ export default function LogGroups({ items, maxGroups = 8, onGroupClick }: Props)
             key={g.key}
             role="button"
             onClick={() => onGroupClick && onGroupClick(g.key, g.title, g.items)}
-            className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer bg-white"
+            // 왼쪽 테두리 색상을 레벨에 따라 변경
+            className={`border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer bg-white border-l-4 ${
+              g.primaryLevel === 'ERROR'
+                ? 'border-l-red-500'
+                : g.primaryLevel === 'WARN' || g.primaryLevel === 'WARNING'
+                ? 'border-l-amber-500'
+                : g.primaryLevel === 'DEBUG'
+                ? 'border-l-gray-300'
+                : g.primaryLevel === 'INFO'
+                ? 'border-l-blue-200'
+                : 'border-l-gray-200'
+            }`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-800 wrap-break-word">{g.title}</div>
-                <div className="text-xs text-gray-500 mt-1">{g.items.length}개 메시지</div>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-600">
-              대표 메시지를 클릭하면 그룹 패널이 열립니다.
+            <div className="flex flex-col items-start justify-center">
+              <div className="text-sm font-medium text-gray-800 wrap-break-word">{g.title}</div>
+              <div className="text-xs text-gray-500 mt-1">{g.items.length}개 메시지</div>
             </div>
           </div>
         ))}

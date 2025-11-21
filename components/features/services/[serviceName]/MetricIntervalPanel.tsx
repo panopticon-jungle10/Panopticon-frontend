@@ -10,7 +10,8 @@ import { IoClose } from 'react-icons/io5';
 import TraceAnalysis from '@/components/analysis/TraceAnalysis';
 import EndpointTraceAnalysis from '@/components/analysis/EndpointTraceAnalysis';
 import Dropdown from '@/components/ui/Dropdown';
-import LogList from './logs/LogList';
+import LogGroups from '@/components/common/LogGroups';
+import LogGroupPanel from '@/components/common/LogGroupPanel';
 import StateHandler from '@/components/ui/StateHandler';
 import type { GetServiceTracesResponse, GetSpansResponse, GetLogsResponse } from '@/types/apm';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
@@ -70,6 +71,21 @@ export default function MetricIntervalPanel({
   })();
 
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const [isLogGroupPanelOpen, setIsLogGroupPanelOpen] = useState(false);
+  const [selectedLogGroup, setSelectedLogGroup] = useState<{
+    key: string;
+    title: string;
+    items:
+      | {
+          id: string;
+          level: string;
+          service: string;
+          traceId: string;
+          message: string;
+          timestamp: string;
+        }[]
+      | null;
+  } | null>(null);
 
   const fromISO = new Date(start).toISOString();
   const toISO = new Date(end).toISOString();
@@ -198,7 +214,7 @@ export default function MetricIntervalPanel({
     try {
       return (
         <>
-          <SlideOverLayout isOpen={isOpen} onClose={handleClose} widthClass="w-[80%]">
+          <SlideOverLayout isOpen={isOpen} onClose={handleClose} widthClass="w-[70vw]">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div className="flex-1">
@@ -325,8 +341,7 @@ export default function MetricIntervalPanel({
                 </div>
 
                 {/* Logs */}
-                <div>
-                  <h4 className="text-sm font-semibold mb-3">Logs</h4>
+                <div className="py-4">
                   <StateHandler
                     isLoading={logsQuery.isLoading}
                     isError={logsQuery.isError}
@@ -335,12 +350,20 @@ export default function MetricIntervalPanel({
                     loadingMessage="로그를 불러오는 중..."
                     errorMessage="로그를 불러올 수 없습니다"
                   >
-                    <LogList
+                    <LogGroups
                       items={logEntries}
-                      onItemClick={(log) => {
-                        if (log.traceId) setSelectedTraceId(log.traceId);
+                      onGroupClick={(key, title, items) => {
+                        setSelectedLogGroup({ key, title, items });
+                        setIsLogGroupPanelOpen(true);
                       }}
                     />
+                    {isLogGroupPanelOpen && selectedLogGroup && (
+                      <LogGroupPanel
+                        isOpen={isLogGroupPanelOpen}
+                        group={selectedLogGroup as any}
+                        onClose={() => setIsLogGroupPanelOpen(false)}
+                      />
+                    )}
                   </StateHandler>
                 </div>
               </div>
