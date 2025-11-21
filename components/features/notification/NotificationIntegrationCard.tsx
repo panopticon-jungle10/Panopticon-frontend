@@ -1,19 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaDiscord, FaSlack, FaGithub, FaTrello } from 'react-icons/fa';
-import { SiJira } from 'react-icons/si';
+import { FaDiscord, FaSlack } from 'react-icons/fa';
 import { BsMicrosoftTeams } from 'react-icons/bs';
 import { MdEmail } from 'react-icons/md';
 
-export type IntegrationType =
-  | 'discord'
-  | 'slack'
-  | 'jira'
-  | 'github'
-  | 'teams'
-  | 'trello'
-  | 'email';
+export type IntegrationType = 'discord' | 'slack' | 'teams' | 'email';
 
 export interface NotificationIntegrationCardProps {
   type: IntegrationType;
@@ -46,28 +38,6 @@ const integrationConfig = {
     buttonColor: 'bg-pink-600 hover:bg-pink-700',
     iconColor: 'text-pink-600',
   },
-  jira: {
-    name: 'Jira',
-    description: '이슈 발생 시 자동으로 지라 티켓을 생성하세요',
-    icon: <SiJira className="w-6 h-6" />,
-    color: 'from-blue-500 to-cyan-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    hoverBorderColor: 'hover:border-blue-400',
-    buttonColor: 'bg-blue-600 hover:bg-blue-700',
-    iconColor: 'text-blue-600',
-  },
-  github: {
-    name: 'GitHub',
-    description: 'GitHub 이슈 및 PR로 알림을 관리하세요',
-    icon: <FaGithub className="w-6 h-6" />,
-    color: 'from-gray-700 to-gray-900',
-    bgColor: 'bg-gray-50',
-    borderColor: 'border-gray-200',
-    hoverBorderColor: 'hover:border-gray-400',
-    buttonColor: 'bg-gray-800 hover:bg-gray-900',
-    iconColor: 'text-gray-800',
-  },
   teams: {
     name: 'Microsoft Teams',
     description: 'Teams 채널로 팀 전체에 알림을 공유하세요',
@@ -79,17 +49,7 @@ const integrationConfig = {
     buttonColor: 'bg-purple-600 hover:bg-purple-700',
     iconColor: 'text-purple-600',
   },
-  trello: {
-    name: 'Trello',
-    description: 'Trello 카드로 알림을 작업으로 전환하세요',
-    icon: <FaTrello className="w-6 h-6" />,
-    color: 'from-blue-500 to-blue-700',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    hoverBorderColor: 'hover:border-blue-400',
-    buttonColor: 'bg-blue-500 hover:bg-blue-600',
-    iconColor: 'text-blue-500',
-  },
+  // (jira/trello removed)
   email: {
     name: 'Email',
     description: '이메일로 알림을 받아보세요 (SMTP)',

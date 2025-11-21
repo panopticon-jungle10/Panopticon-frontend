@@ -27,7 +27,7 @@ export default function ServiceOverview() {
         <TracesSection serviceName={serviceName} />
       </section>
 
-      <section id="errors-logs" className="pt-4 scroll-mt-8">
+      <section id="logs" className="pt-4 scroll-mt-8">
         <LogsSection serviceName={serviceName} />
       </section>
     </div>

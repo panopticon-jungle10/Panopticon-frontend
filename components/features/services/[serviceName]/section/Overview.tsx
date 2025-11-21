@@ -1,20 +1,19 @@
 'use client';
-import dynamic from 'next/dynamic';
+// Chart rendering and selection moved to `OverviewCharts` component
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import OverviewCharts from '@/components/features/services/[serviceName]/OverviewCharts';
 import { getServiceMetrics } from '@/src/api/apm';
-import StateHandler from '@/components/ui/StateHandler';
 import { POLLING_INTERVAL, useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { convertTimeRangeToParams, getChartXAxisRange } from '@/src/utils/timeRange';
 import { getTimeAxisFormatter, getBarMaxWidthForTimeAxis } from '@/src/utils/chartFormatter';
-
-const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface OverviewSectionProps {
   serviceName: string;
 }
 
 export default function OverviewSection({ serviceName }: OverviewSectionProps) {
+  // Chart selection and layout moved to `OverviewCharts` component
   // Zustand store에서 시간 정보 가져오기 (timeRange만 사용)
   const { timeRange, interval } = useTimeRangeStore();
 
@@ -139,6 +138,15 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
           borderRadius: [0, 0, 0, 0],
         },
       },
+      {
+        name: '요청수 (선)',
+        type: 'line',
+        data: chartData.requests,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { width: 2, color: '#1e40af' },
+        itemStyle: { color: '#1e40af' },
+      },
     ],
   };
 
@@ -213,6 +221,15 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
           opacity: 0.7,
           borderRadius: [0, 0, 0, 0],
         },
+      },
+      {
+        name: '에러율 (선)',
+        type: 'line',
+        data: chartData.errorRate,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { width: 2, color: '#991b1b' },
+        itemStyle: { color: '#991b1b' },
       },
     ],
   };
@@ -319,47 +336,18 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-gray-800">개요</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <StateHandler
-            isLoading={isLoading}
-            isError={isError}
-            isEmpty={isEmpty}
-            type="chart"
-            height={250}
-            loadingMessage="메트릭을 불러오는 중..."
-            emptyMessage="표시할 메트릭 데이터가 없습니다"
-          >
-            <ReactECharts option={requestsOption} style={{ height: 250 }} notMerge={true} />
-          </StateHandler>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <StateHandler
-            isLoading={isLoading}
-            isError={isError}
-            isEmpty={isEmpty}
-            type="chart"
-            height={250}
-            loadingMessage="메트릭을 불러오는 중..."
-            emptyMessage="표시할 에러율 데이터가 없습니다"
-          >
-            <ReactECharts option={errorRateOption} style={{ height: 250 }} notMerge={true} />
-          </StateHandler>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <StateHandler
-            isLoading={isLoading}
-            isError={isError}
-            isEmpty={isEmpty}
-            type="chart"
-            height={250}
-            loadingMessage="레이턴시 데이터를 불러오는 중..."
-            emptyMessage="표시할 레이턴시 데이터가 없습니다"
-          >
-            <ReactECharts option={latencyOption} style={{ height: 250 }} notMerge={true} />
-          </StateHandler>
-        </div>
-      </div>
+
+      {/* Chart selection and layout handled inside `OverviewCharts` */}
+      <OverviewCharts
+        requestsOption={requestsOption}
+        errorRateOption={errorRateOption}
+        latencyOption={latencyOption}
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={isEmpty}
+        chartData={chartData}
+        serviceName={serviceName}
+      />
     </div>
   );
 }
