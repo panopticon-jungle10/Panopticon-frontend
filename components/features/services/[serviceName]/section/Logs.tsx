@@ -1,43 +1,52 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
-import LogList from '../logs/LogList';
+import { useMemo, useState } from 'react';
 import Pagination from '../../Pagination';
 import { useQuery } from '@tanstack/react-query';
 import { getLogs } from '@/src/api/apm';
-import { LogLevel, LogEntry, LogItem } from '@/types/apm';
+import { LogLevel, LogEntry } from '@/types/apm';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
-import { useErrorLogsWebSocket } from '@/src/hooks/useErrorLogsWebSocket';
-import LogAnalysis from '@/components/analysis/LogAnalysis';
 import StateHandler from '@/components/ui/StateHandler';
+import LogGroups, { computeGroups } from '@/components/common/LogGroups';
+import LogGroupPanel from '@/components/common/LogGroupPanel';
+import TagSearchBar, { Tag } from '@/components/ui/TagSearchBar';
 
 interface LogsSectionProps {
   serviceName: string;
 }
 
 export default function LogsSection({ serviceName }: LogsSectionProps) {
-  // const [level, setLevel] = useState<LogLevel | ''>('ERROR');
-  const level: LogLevel = 'ERROR'; // ERROR 레벨만 필터링
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  // level은 태그에서 선택되면 그 값을 사용하고, 없으면 기본 ERROR 사용
 
-  // 웹소켓으로 받은 실시간 에러 로그를 누적하는 상태
-  const [realtimeLogs, setRealtimeLogs] = useState<LogItem[]>([]);
+  // 간단한 메시지 정규화(그룹화 기준과 동일하게 유지)
+  const normalizeMessage = (msg: string) =>
+    msg
+      .toLowerCase()
+      .replace(/0x[a-f0-9]+/gi, ' ')
+      .replace(/\d+/g, ' ')
+      .replace(/[^a-z0-9\s]/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120);
+
+  const [page, setPage] = useState(1);
+
+  // 그룹 기반 페이징: 한 페이지에 표시할 그룹 수
+  const groupsPerPage = 18;
+
+  // 기본 태그 없음
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [keyword, setKeyword] = useState(''); // keyword 검색을 위한 상태 추가
+
+  // selected log / inner analysis state handled inside GroupPanel
+  const [isLogGroupPanelOpen, setIsLogGroupPanelOpen] = useState(false);
+  const [selectedLogGroup, setSelectedLogGroup] = useState<{
+    key: string;
+    title: string;
+    items: LogEntry[];
+  } | null>(null);
 
   const { startTime, endTime } = useTimeRangeStore();
-
-  // 웹소켓으로 에러 로그 수신
-  const handleLogReceived = useCallback((log: LogItem) => {
-    setRealtimeLogs((prev) => [log, ...prev]); // 최신 로그를 맨 앞에 추가
-  }, []);
-
-  useErrorLogsWebSocket({
-    serviceName,
-    onLogReceived: handleLogReceived,
-    enabled: true,
-  });
 
   // 로그 목록 가져오기 (새 API)
   const {
@@ -45,15 +54,21 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['logs', serviceName, level, startTime, endTime],
-    queryFn: () =>
-      getLogs({
-        service_name: serviceName,
-        level: level || undefined,
+    // tags를 키에 포함하면 태그 변경 시 쿼리가 자동으로 다시 수행됩니다.
+    queryKey: ['logs', serviceName, startTime, endTime, tags],
+    queryFn: () => {
+      const levelTag = tags.find((t) => t.key === 'level')?.value;
+      const serviceTag = tags.find((t) => t.key === 'service')?.value;
+
+      return getLogs({
+        service_name: serviceTag || serviceName,
         from: startTime,
         to: endTime,
-        size: 60,
-      }),
+        size: 10000, // message 기반 키워드 추출 위해 size 증가(1만개)
+        level: levelTag as LogLevel | undefined,
+      });
+    },
+    refetchInterval: 30000, // 30초마다 갱신
     retry: false, // API 오류 시 재시도 하지 않음
     throwOnError: false, // 오류를 throw하지 않고 isError 상태로만 처리
   });
@@ -68,78 +83,130 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
       traceId: log.trace_id || '',
       message: log.message,
       timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
+      spanId: log.span_id || '',
     }));
   }, [logsData]);
 
-  // 실시간 로그 데이터 변환
-  const realtimeLogEntries = useMemo(() => {
-    return realtimeLogs.map((log) => ({
-      id: `ws-${log.service_name}-${log.timestamp}`,
-      level: log.level as LogLevel,
-      service: log.service_name,
-      traceId: log.trace_id || '',
-      message: log.message,
-      timestamp: new Date(log.timestamp).toLocaleString('ko-KR'),
-    }));
-  }, [realtimeLogs]);
+  // 로그 목록은 API에서 가져온 항목만 사용
+  const logs = useMemo(() => apiLogs, [apiLogs]);
 
-  // API 로그 + 실시간 로그 병합 (실시간 로그가 먼저 표시됨)
-  // API 호출 시 이미 level로 필터링되므로 클라이언트 필터링 불필요
-  const logs = useMemo(() => {
-    return [...realtimeLogEntries, ...apiLogs];
-  }, [realtimeLogEntries, apiLogs]);
+  // 자동 Suggestion 데이터
+  const messageKeywords = useMemo(() => {
+    const freq: Record<string, number> = {};
+    logs.forEach((log) => {
+      const words = log.message
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/gi, ' ')
+        .split(/\s+/);
+      words.forEach((w) => {
+        if (w.length < 3) return;
+        if (/^\d+$/.test(w)) return;
+        freq[w] = (freq[w] || 0) + 1;
+      });
+    });
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 30)
+      .map(([w]) => w);
+  }, [logs]);
 
-  // 페이지네이션 계산
-  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
-  const paginatedLogs = useMemo(() => {
-    const startIdx = (page - 1) * pageSize;
-    const endIdx = startIdx + pageSize;
-    return logs.slice(startIdx, endIdx);
-  }, [logs, page, pageSize]);
+  const serviceNames = useMemo(() => [...new Set(logs.map((l) => l.service))], [logs]);
 
-  const handlePrev = () => {
-    if (page > 1) {
-      setPage(page - 1);
+  // 필터링
+  const filteredLogs = useMemo(() => {
+    let result = [...logs];
+
+    tags.forEach(({ key, value }) => {
+      const v = value;
+      if (key === 'msg') {
+        // msg 태그는 그룹화된 키(정규화된 메시지)와 일치하는 항목으로 필터링
+        const nv = normalizeMessage(v);
+        result = result.filter((l) => normalizeMessage(l.message) === nv);
+      }
+      if (key === 'service')
+        result = result.filter((l) => l.service.toLowerCase().includes(v.toLowerCase()));
+      if (key === 'level') result = result.filter((l) => l.level.toLowerCase() === v.toLowerCase());
+    });
+
+    if (keyword.trim()) {
+      const k = keyword.toLowerCase();
+      result = result.filter(
+        (l) =>
+          l.message.toLowerCase().includes(k) ||
+          l.service.toLowerCase().includes(k) ||
+          l.traceId.toLowerCase().includes(k),
+      );
     }
-  };
 
-  const handleNext = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    }
-  };
+    return result;
+  }, [tags, keyword, logs]);
 
-  const handleLogClick = (log: LogEntry) => {
-    setSelectedLog(log);
-    setIsPanelOpen(true);
-  };
-
-  const handleClosePanel = () => {
-    setIsPanelOpen(false);
-    // 애니메이션이 끝난 후 selectedLog를 null로 설정
-    setTimeout(() => setSelectedLog(null), 300);
-  };
+  // 그룹을 계산해서 페이지 수를 결정
+  const groupsArr = useMemo(() => computeGroups(filteredLogs), [filteredLogs]);
+  const totalPages = Math.max(1, Math.ceil(groupsArr.length / groupsPerPage));
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-800">에러 로그</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-gray-800">로그</h2>
+
+      <div className="w-full flex items-center justify-start gap-4">
+        <div className="flex-1">
+          <TagSearchBar
+            tags={tags}
+            onTagsChange={(t) => {
+              setTags(t);
+              setPage(1);
+            }}
+            keyword={keyword}
+            onKeywordChange={(v) => {
+              setKeyword(v);
+              setPage(1);
+            }}
+            messageKeywords={messageKeywords}
+            serviceNames={serviceNames}
+          />
+        </div>
+      </div>
+
       <section id="logs" className="flex flex-col gap-4 md:gap-6 scroll-mt-24">
         <StateHandler
           isLoading={isLoading}
           isError={isError}
-          isEmpty={logs.length === 0}
+          isEmpty={filteredLogs.length === 0}
           type="table"
           height={200}
-          loadingMessage="에러 로그를 불러오는 중..."
-          errorMessage="에러 로그를 불러올 수 없습니다"
-          emptyMessage="에러 로그가 없습니다"
         >
-          <LogList items={paginatedLogs} onItemClick={handleLogClick} />
-          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext} />
+          {/* 그룹화 뷰 */}
+          <div className="mb-4">
+            <LogGroups
+              items={filteredLogs}
+              page={page}
+              pageSize={groupsPerPage}
+              onGroupClick={(key, title, items) => {
+                setSelectedLogGroup({ key, title, items });
+                setIsLogGroupPanelOpen(true);
+              }}
+            />
+          </div>
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPrev={() => setPage(page - 1)}
+            onNext={() => setPage(page + 1)}
+          />
         </StateHandler>
       </section>
 
-      <LogAnalysis log={selectedLog} isOpen={isPanelOpen} onClose={handleClosePanel} />
+      {/* 그룹 패널 */}
+      {isLogGroupPanelOpen && selectedLogGroup && (
+        <LogGroupPanel
+          isOpen={isLogGroupPanelOpen}
+          group={selectedLogGroup}
+          onClose={() => setIsLogGroupPanelOpen(false)}
+          widthClass="w-[60%]"
+        />
+      )}
     </div>
   );
 }

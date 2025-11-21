@@ -1,38 +1,23 @@
-// 선택된 카테고리에 맞춰 테이블/카드 콘텐츠를 분기
-
 'use client';
 
 import StateHandler from '@/components/ui/StateHandler';
 import ServiceListTable from './Table';
-import ServiceMetricGrid from './MetricGrid';
+import ServiceCardGrid from './cards/ServiceCardGrid';
 
-import type { CategoryContentProps, MetricKey, ServiceListCategory } from '@/types/servicelist';
+import type { CategoryContentProps, ServiceListCategory } from '@/types/servicelist';
 
 export const serviceListCategoryMeta: Record<
   ServiceListCategory,
-  { title: string; subtitle: string; metricKey?: MetricKey; stateType: 'table' | 'general' }
+  { title: string; subtitle: string; stateType: 'table' | 'general' }
 > = {
   list: {
-    title: '리스트',
-    subtitle: '서비스 테이블 뷰',
+    title: 'List',
+    subtitle: '테이블 뷰',
     stateType: 'table',
   },
-  request_count: {
-    title: '요청수 (Request Count)',
-    subtitle: '서비스별 트래픽 규모',
-    metricKey: 'request_count',
-    stateType: 'general',
-  },
-  error_rate: {
-    title: '에러율 (Error Rate)',
-    subtitle: '서비스별 장애 상태',
-    metricKey: 'error_rate',
-    stateType: 'general',
-  },
-  latency: {
-    title: 'Latency(P95)',
-    subtitle: '서비스별 지연 현황',
-    metricKey: 'latency_p95_ms',
+  card: {
+    title: 'Card',
+    subtitle: '요약 카드',
     stateType: 'general',
   },
 };
@@ -45,46 +30,44 @@ export default function CategoryContent({
   isEmpty,
   onRowClick,
   onCardClick,
+  onCreateClick,
   pagination,
 }: CategoryContentProps) {
-  const meta = serviceListCategoryMeta[category];
   const cardClickHandler = onCardClick ?? onRowClick;
 
+  if (category === 'list') {
+    return (
+      <StateHandler
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={isEmpty}
+        type="table"
+        height={500}
+        loadingMessage="서비스 목록을 불러오는 중..."
+        errorMessage="서비스 목록을 불러올 수 없습니다"
+        emptyMessage="표시할 서비스가 없습니다"
+      >
+        <ServiceListTable services={services} pagination={pagination} onRowClick={onRowClick} />
+      </StateHandler>
+    );
+  }
+
   return (
-    <>
-      {category === 'list' ? (
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="table"
-          height={500}
-          loadingMessage="서비스 목록을 불러오는 중..."
-          errorMessage="서비스 목록을 불러올 수 없습니다"
-          emptyMessage="표시할 서비스가 없습니다"
-        >
-          <ServiceListTable services={services} pagination={pagination} onRowClick={onRowClick} />
-        </StateHandler>
-      ) : (
-        <StateHandler
-          isLoading={isLoading}
-          isError={isError}
-          isEmpty={isEmpty}
-          type="general"
-          height={420}
-          loadingMessage="서비스 지표를 불러오는 중..."
-          errorMessage="서비스 지표를 불러올 수 없습니다"
-          emptyMessage="표시할 서비스가 없습니다"
-        >
-          {meta.metricKey && (
-            <ServiceMetricGrid
-              services={services}
-              metric={meta.metricKey}
-              onCardClick={cardClickHandler}
-            />
-          )}
-        </StateHandler>
-      )}
-    </>
+    <StateHandler
+      isLoading={isLoading}
+      isError={isError}
+      isEmpty={isEmpty}
+      type="general"
+      height={420}
+      loadingMessage="서비스 목록을 불러오는 중..."
+      errorMessage="서비스 목록을 불러올 수 없습니다"
+      emptyMessage="표시할 서비스가 없습니다"
+    >
+      <ServiceCardGrid
+        services={services}
+        onCardClick={cardClickHandler}
+        onCreateClick={onCreateClick}
+      />
+    </StateHandler>
   );
 }

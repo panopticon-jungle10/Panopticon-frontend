@@ -1,8 +1,8 @@
 'use client';
-
 import { LogEntry } from '@/types/apm';
 import { FiX, FiClock, FiTag, FiLink } from 'react-icons/fi';
 import LevelBadge from '@/components/features/services/[serviceName]/logs/LevelBadge';
+import SlideOverLayout from '@/components/ui/SlideOverLayout';
 
 interface LogAnalysisProps {
   log: LogEntry | null;
@@ -15,14 +15,7 @@ export default function LogAnalysis({ log, isOpen, onClose }: LogAnalysisProps) 
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 opacity-100"
-        onClick={onClose}
-      />
-
-      {/* Slide-over Panel */}
-      <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 translate-x-0">
+      <SlideOverLayout isOpen={isOpen} onClose={onClose} widthClass="w-full md:w-[600px]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 p-4 md:p-6">
           <h2 className="text-xl font-semibold text-gray-900">로그 상세</h2>
@@ -92,7 +85,7 @@ export default function LogAnalysis({ log, isOpen, onClose }: LogAnalysisProps) 
             </div>
           </div>
         </div>
-      </div>
+      </SlideOverLayout>
     </>
   );
 }

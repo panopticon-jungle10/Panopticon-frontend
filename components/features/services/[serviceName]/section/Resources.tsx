@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Dropdown from '@/components/ui/Dropdown';
-import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import { getServiceEndpoints } from '@/src/api/apm';
+import EndpointPieChart from '@/components/common/EndpointPieChart';
 import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import { convertTimeRangeToParams } from '@/src/utils/timeRange';
 import StateHandler from '@/components/ui/StateHandler';
@@ -12,29 +12,21 @@ import { EndpointSortBy } from '@/types/apm';
 import Table from '@/components/ui/Table';
 import Pagination from '@/components/features/services/Pagination';
 import EndpointTraceAnalysis from '@/components/analysis/EndpointTraceAnalysis';
-
-const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
+import EndpointBarChart from '@/components/common/EndpointBarChart';
 
 // 페이지당 아이템 수 (리스트용)
 const ITEMS_PER_PAGE = 10;
 // API에서 가져올 총 엔드포인트 수
 const TOTAL_ENDPOINTS_LIMIT = 200;
 
-// ECharts Bar tooltip params 타입
-interface BarTooltipParams {
-  dataIndex: number;
-  name: string;
-  value: number;
-}
+// (ECharts tooltip 타입은 더 이상 로컬에서 사용하지 않습니다)
 
-// 차트 색상 팔레트 (차이가 확연히 보이도록 수정)
-const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#f59e0b', // amber
-  '#10b981', // emerald
-];
+// (차트 팔레트는 개별 렌더러에서 관리)
 
 type MetricType = 'requests' | 'latency' | 'error_rate';
+
+// pie/bar 공통 팔레트
+const CHART_COLORS = ['#537FE7', '#5BC0BE', '#FFB562'];
 
 // 엔드포인트 테이블용 데이터 타입
 interface EndpointTableData {
@@ -138,7 +130,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
   const metricOptions = [
     { label: '요청수', value: 'requests' as const },
     { label: '에러율', value: 'error_rate' as const },
-    { label: 'p95 레이턴시', value: 'latency' as const },
+    { label: '지연시간', value: 'latency' as const },
   ];
 
   // selectedMetric을 EndpointSortBy로 변환
@@ -180,9 +172,12 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     }));
   }, [data]);
 
-  // 상위 3개 엔드포인트 (차트용)
+  /** Pie와 Bar 색상 1:1 일치시키기 위해 ep.color를 미리 주입 */
   const topEndpoints = useMemo(() => {
-    return allEndpoints.slice(0, 3);
+    return allEndpoints.slice(0, 3).map((ep, idx) => ({
+      ...ep,
+      color: CHART_COLORS[idx], // Pie ↔ Bar 색상 완전 고정
+    }));
   }, [allEndpoints]);
 
   const isEmpty = allEndpoints.length === 0;
@@ -217,155 +212,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
     [maxValues],
   );
 
-  // 차트 옵션
-  const chartOption = useMemo(() => {
-    // 파이차트 (요청수, 에러율)
-    if (selectedMetric === 'requests' || selectedMetric === 'error_rate') {
-      const pieData = topEndpoints.map((endpoint, idx) => ({
-        name: endpoint.endpoint_name,
-        value: selectedMetric === 'requests' ? endpoint.request_count : endpoint.error_rate * 100,
-        itemStyle: {
-          color: CHART_COLORS[idx],
-        },
-        // 전체 엔드포인트 정보를 추가로 저장
-        endpointData: endpoint,
-      }));
-
-      return {
-        backgroundColor: 'transparent',
-        tooltip: {
-          trigger: 'item',
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          borderColor: 'transparent',
-          textStyle: { color: '#f9fafb', fontSize: 12 },
-          padding: 10,
-          formatter: (params: {
-            name: string;
-            value: number;
-            percent: number;
-            data: { endpointData: EndpointTableData };
-          }) => {
-            const endpoint = params.data.endpointData;
-            return `
-              <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${params.name}</div>
-              <div style="margin:4px 0;font-size:12px;">
-                ${
-                  selectedMetric === 'requests'
-                    ? `Requests: ${params.value.toLocaleString()}`
-                    : `Error Rate: ${params.value.toFixed(2)}%`
-                } (${params.percent}%)
-              </div>
-              <div style="margin:4px 0;font-size:12px;">p95 Latency: ${endpoint.latency_p95_ms.toFixed(
-                2,
-              )}ms</div>
-              <div style="margin:4px 0;font-size:12px;">Requests: ${endpoint.request_count.toLocaleString()}</div>
-            `;
-          },
-        },
-        legend: {
-          orient: 'horizontal',
-          bottom: 0,
-          data: topEndpoints.map((e) => e.endpoint_name),
-          textStyle: { fontSize: 11, color: '#6b7280' },
-          type: 'scroll',
-        },
-        series: [
-          {
-            type: 'pie',
-            radius: ['40%', '70%'],
-            center: ['50%', '45%'],
-            data: pieData,
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)',
-              },
-            },
-            label: {
-              show: true,
-              formatter: '{d}%',
-              fontSize: 12,
-              color: '#374151',
-            },
-            labelLine: {
-              show: true,
-            },
-          },
-        ],
-      };
-    }
-
-    // p95 레이턴시: 가로 막대(horizontal bar) 차트, y축에 엔드포인트 이름
-    const yAxisData = topEndpoints.map((e) => e.endpoint_name);
-    const barData = topEndpoints.map((e) => e.latency_p95_ms);
-
-    return {
-      backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderColor: 'transparent',
-        textStyle: { color: '#f9fafb', fontSize: 12 },
-        padding: 10,
-        formatter: (params: BarTooltipParams) => {
-          const idx = params.dataIndex;
-          const endpoint = topEndpoints[idx];
-          if (!endpoint) return '';
-          return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${
-              endpoint.endpoint_name
-            }</div>
-            <div style="margin:4px 0;font-size:12px;">p95 Latency: ${endpoint.latency_p95_ms.toFixed(
-              2,
-            )}ms</div>
-            <div style="margin:4px 0;font-size:12px;">Requests: ${endpoint.request_count.toLocaleString()}</div>
-            <div style="margin:4px 0;font-size:12px;">Error Rate: ${(
-              endpoint.error_rate * 100
-            ).toFixed(2)}%</div>
-          `;
-        },
-      },
-      legend: {
-        show: false,
-      },
-      grid: { left: 100, right: 20, top: 40, bottom: 80 },
-      xAxis: {
-        type: 'value',
-        axisLabel: {
-          color: '#6b7280',
-          fontSize: 11,
-          formatter: '{value}ms',
-        },
-        splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-      },
-      yAxis: {
-        type: 'category',
-        data: yAxisData,
-        axisLabel: {
-          color: '#6b7280',
-          fontSize: 12,
-        },
-        axisLine: { lineStyle: { color: '#e5e7eb' } },
-      },
-      series: [
-        {
-          type: 'bar',
-          data: barData.map((value, idx) => ({ value, itemStyle: { color: CHART_COLORS[idx] } })),
-          barWidth: 24,
-          label: {
-            show: true,
-            position: 'right',
-            formatter: function (v: { value: number }) {
-              return `${v.value.toFixed(2)}ms`;
-            },
-            color: '#374151',
-            fontSize: 11,
-          },
-        },
-      ],
-    };
-  }, [topEndpoints, selectedMetric]);
+  // 모든 메트릭에 대해 파이차트를 사용하도록 변경: EndpointPieChart가 툴팁/포맷을 담당합니다.
 
   // 페이지네이션 계산
   const totalPages = Math.max(1, Math.ceil(allEndpoints.length / ITEMS_PER_PAGE));
@@ -421,28 +268,31 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
           errorMessage="리소스 데이터를 불러올 수 없습니다"
           emptyMessage="선택한 시간 범위에 리소스 데이터가 없습니다"
         >
-          {/* 차트 영역 */}
+          {/* 차트 영역: 한 줄로 좌(원), 우(막대) 배치 */}
           <div className="border border-gray-200 rounded-lg p-4 mb-6">
             <h4 className="text-md font-semibold text-gray-800 mb-3">상위 3개 엔드포인트</h4>
-            <ReactECharts
-              option={chartOption}
-              style={{ height: 350 }}
-              notMerge={true}
-              lazyUpdate={true}
-              onEvents={{
-                click: (params: { name?: string; dataIndex?: number }) => {
-                  const endpointName =
-                    params.name ||
-                    (params.dataIndex !== undefined &&
-                      topEndpoints[params.dataIndex]?.endpoint_name);
-                  if (endpointName) {
-                    handleEndpointClick(endpointName);
-                  }
-                },
-              }}
-            />
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 rounded-lg border border-gray-100 p-2">
+                <EndpointPieChart
+                  items={topEndpoints}
+                  selectedMetric={selectedMetric}
+                  height={350}
+                  showLegend={true}
+                  colors={CHART_COLORS} // 동일 팔레트 적용
+                  onSliceClick={(name: string) => handleEndpointClick(name)}
+                />
+              </div>
+              <div className="flex-1 rounded-lg border border-gray-100 p-2">
+                <EndpointBarChart
+                  items={topEndpoints}
+                  selectedMetric={selectedMetric}
+                  height={350}
+                  colors={CHART_COLORS} // 동일 팔레트 적용
+                  onBarClick={(name: string) => handleEndpointClick(name)}
+                />
+              </div>
+            </div>
           </div>
-
           {/* 테이블 영역 */}
           <div className="mt-6">
             <Table<EndpointTableData>

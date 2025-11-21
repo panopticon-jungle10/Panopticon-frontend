@@ -10,6 +10,7 @@ import MapView from './view/MapView';
 import WaterfallView from './view/WaterfallView';
 import FlameGraphView from './view/FlameGraphView';
 import SelectedSpanDetailsView from './view/SelectedSpanDetailsView';
+import SlideOverLayout from '@/components/ui/SlideOverLayout';
 
 /**
  * Trace Analysis Component : Slide-over Panel 방식(모달 X)
@@ -60,6 +61,12 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
 
   if (!isOpen) return null;
 
+  const widthClass = 'w-[60%]';
+  const backdropClassName =
+    'fixed inset-0 bg-black/10 backdrop-blur-[2px] z-70 transition-opacity duration-300 opacity-100';
+  const panelClassName =
+    'fixed top-0 right-0 h-full bg-white shadow-2xl z-80 transform transition-transform duration-300 ease-in-out translate-x-0';
+
   // Root span 찾기 (parent_span_id가 null인 스팬)
   const rootSpan = data?.spans.find((span) => span.parent_span_id === null);
 
@@ -77,15 +84,13 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-60 transition-opacity duration-300 opacity-100"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Slide-over Panel */}
-      <div className="fixed top-0 right-0 h-full w-[70%] bg-white shadow-2xl z-70 transform transition-transform duration-300 ease-in-out translate-x-0">
+      <SlideOverLayout
+        isOpen={isOpen}
+        onClose={onClose}
+        widthClass={widthClass}
+        backdropClassName={backdropClassName}
+        panelClassName={panelClassName}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex-1">
@@ -255,7 +260,7 @@ export default function TraceAnalysis({ isOpen, onClose, traceId }: TraceAnalysi
             </div>
           </StateHandler>
         </div>
-      </div>
+      </SlideOverLayout>
     </>
   );
 }
