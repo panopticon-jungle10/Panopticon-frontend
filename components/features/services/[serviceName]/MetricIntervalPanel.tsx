@@ -341,7 +341,7 @@ export default function MetricIntervalPanel({
                 </div>
 
                 {/* Logs */}
-                <div>
+                <div className="py-4">
                   <StateHandler
                     isLoading={logsQuery.isLoading}
                     isError={logsQuery.isError}
