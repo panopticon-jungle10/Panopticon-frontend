@@ -162,7 +162,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
   });
 
   // 전체 엔드포인트 데이터 (테이블용)
-  const allEndpoints = useMemo(() => {
+  const allEndpoints = useMemo<EndpointTableData[]>(() => {
     if (!data?.endpoints) return [];
     return data.endpoints.map((endpoint) => ({
       endpoint_name: endpoint.endpoint_name,
@@ -176,7 +176,7 @@ export default function ResourcesSection({ serviceName }: ResourcesSectionProps)
   const topEndpoints = useMemo(() => {
     return allEndpoints.slice(0, 3).map((ep, idx) => ({
       ...ep,
-      color: CHART_COLORS[idx], // ★ Pie ↔ Bar 색상 완전 고정 ★
+      color: CHART_COLORS[idx], // Pie ↔ Bar 색상 완전 고정
     }));
   }, [allEndpoints]);
 
