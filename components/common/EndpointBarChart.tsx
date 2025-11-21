@@ -74,11 +74,11 @@ export default function EndpointBarChart({
         padding: 10,
         formatter: (params: any) => {
           const name = params.name ?? '';
-          const ep = items.find((i) => i.endpoint_name === name) || {};
-          const requests = ep.request_count ?? 0;
-          const p95 = ep.latency_p95_ms ?? 0;
+          const ep = items.find((i) => i.endpoint_name === name) as EndpointItem | undefined;
+          const requests = ep?.request_count ?? 0;
+          const p95 = ep?.latency_p95_ms ?? 0;
           const errorRate =
-            ep.error_rate !== undefined && ep.error_rate !== null ? ep.error_rate * 100 : null;
+            ep?.error_rate !== undefined && ep?.error_rate !== null ? ep.error_rate * 100 : null;
 
           const mainMetricLabel =
             selectedMetric === 'requests'
@@ -90,7 +90,7 @@ export default function EndpointBarChart({
             selectedMetric === 'requests'
               ? requests.toLocaleString()
               : selectedMetric === 'error_rate'
-              ? `${((ep.error_rate ?? 0) * 100).toFixed(2)}%`
+              ? `${((ep?.error_rate ?? 0) * 100).toFixed(2)}%`
               : `${p95.toFixed(2)} ms`;
 
           const errorRateText = errorRate !== null ? `${errorRate.toFixed(2)}%` : '-';
