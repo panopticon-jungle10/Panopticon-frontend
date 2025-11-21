@@ -26,7 +26,7 @@ const TOTAL_ENDPOINTS_LIMIT = 200;
 type MetricType = 'requests' | 'latency' | 'error_rate';
 
 // pie/bar 공통 팔레트
-const CHART_COLORS = ['#537FE7', '#5BC0BE', '#FFB562', '#C9D6DF', '#E85D75', '#9C6EE8', '#7AA2E3'];
+const CHART_COLORS = ['#537FE7', '#5BC0BE', '#FFB562'];
 
 // 엔드포인트 테이블용 데이터 타입
 interface EndpointTableData {
