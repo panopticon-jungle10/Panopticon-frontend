@@ -1,8 +1,6 @@
 // 알림 채널(Discord / Slack / Teams / Email)
 
 'use client';
-
-import { useEffect, useState } from 'react';
 import { FaDiscord, FaSlack } from 'react-icons/fa';
 import { BsMicrosoftTeams } from 'react-icons/bs';
 import { MdEmail } from 'react-icons/md';
@@ -50,6 +48,19 @@ const integrationConfig = {
   },
 };
 
+const initialNow = Date.now();
+
+const formatRelative = (value?: Date) => {
+  if (!value) return '';
+  const diff = initialNow - value.getTime();
+  const minutes = Math.max(1, Math.round(diff / 60000));
+
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  return `${Math.round(hours / 24)}일 전`;
+};
+
 export interface NotificationIntegrationCardProps {
   type: IntegrationType;
   isConnected?: boolean;
@@ -73,39 +84,24 @@ export default function NotificationIntegrationCard({
   onDisconnect,
   onConfigure,
 }: NotificationIntegrationCardProps) {
-  //  내부 상태: 외부 isConnected 변경 감지 및 hydration mismatch 예방
-  const [connected, setConnected] = useState(isConnected);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  useEffect(() => setConnected(isConnected), [isConnected]);
-  useEffect(() => setIsHydrated(true), []);
+  const connected = isConnected;
+  const relativeLastTest = formatRelative(lastTestAt);
 
   const config = integrationConfig[type];
 
-  //  연결/해제 toggle
+  //  ??/?? toggle
   const handleToggle = () => {
     if (connected) {
       onDisconnect?.();
-      setConnected(false);
     } else {
       onConnect?.();
     }
   };
 
-  //  설정 버튼 클릭 핸들러
+  //  ????? ?? ??
   const handleConfigure = () => onConfigure?.();
 
-  //  "몇 분 전" 형식 변환
-  const formatRelative = (value?: Date) => {
-    if (!value) return '';
-    const diff = Date.now() - value.getTime();
-    const minutes = Math.max(1, Math.round(diff / 60000));
 
-    if (minutes < 60) return `${minutes}분 전`;
-    const hours = Math.round(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-    return `${Math.round(hours / 24)}일 전`;
-  };
 
   return (
     <div
@@ -157,8 +153,8 @@ export default function NotificationIntegrationCard({
               lastTestResult === 'success' ? 'text-green-600' : 'text-red-600'
             }`}
           >
-            테스트 메시지: {lastTestResult === 'success' ? '성공' : '실패'} (
-            {isHydrated ? formatRelative(lastTestAt) : '—'})
+            ??? ???: {lastTestResult === 'success' ? '??' : '??'} (
+            {relativeLastTest || '?'}
           </div>
         )}
 

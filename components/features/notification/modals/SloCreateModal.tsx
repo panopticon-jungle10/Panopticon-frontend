@@ -46,7 +46,17 @@ export default function SloCreateModal({
   onSubmit,
   onClose,
 }: SloCreateModalProps) {
-  const [form, setForm] = useState({
+  type SloFormState = {
+    id: string;
+    name: string;
+    metric: SloCreateInput['metric'];
+    target: number;
+    connectedChannels: IntegrationType[];
+    tooltipTitle: string;
+    tooltipDescription: string;
+  };
+
+  const [form, setForm] = useState<SloFormState>({
     id: crypto.randomUUID(),
     name: 'New SLO',
     metric: 'availability' as SloCreateInput['metric'],
@@ -64,12 +74,14 @@ export default function SloCreateModal({
     } else {
       document.body.style.overflow = 'auto';
     }
-    return () => (document.body.style.overflow = 'auto');
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [open]);
 
   if (!open) return null;
 
-  const handleChange = (key: keyof typeof form, value: any) => {
+  const handleChange = <K extends keyof SloFormState>(key: K, value: SloFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 

@@ -1,12 +1,13 @@
 'use client';
 
 import type { ComputedSlo } from '@/src/types/notification';
+import type { ReactElement } from 'react';
 import { InfoTooltip } from './InfoTooltip';
 import { StatusBadge } from './StatusBadge';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // SLO 타입별 아이콘 추가
-const metricIcons: Record<string, JSX.Element> = {
+const metricIcons: Record<string, ReactElement> = {
   availability: (
     <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-green-50 text-green-600">
       <svg
@@ -78,7 +79,6 @@ export function SloCard({ slo, onEdit, onDelete, enabled = true, onToggle }: Slo
   const overPct = Math.max(0, slo.errorBudgetOverPct);
 
   const [active, setActive] = useState(enabled);
-  useEffect(() => setActive(enabled), [enabled]);
 
   const handleToggle = () => {
     const next = !active;

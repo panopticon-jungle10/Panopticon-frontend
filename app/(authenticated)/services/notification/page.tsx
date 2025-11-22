@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NotificationIntegrationCard from '@/components/features/notification/NotificationIntegrationCard';
@@ -48,8 +48,15 @@ function loadConnectionsFromStorage(): ConnectionState {
   return initial;
 }
 
+const deriveStatus = (usedRate: number) => {
+  const usedPercent = usedRate * 100;
+  if (usedPercent < 70) return 'GOOD' as const;
+  if (usedPercent < 100) return 'WARNING' as const;
+  return 'FAILED' as const;
+};
+
 export default function NotificationPage() {
-  const [connections, setConnections] = useState<ConnectionState>({});
+  const [connections, setConnections] = useState<ConnectionState>(() => loadConnectionsFromStorage());
   const [activeModal, setActiveModal] = useState<IntegrationType | null>(null);
   const [actionState, setActionState] = useState<{
     type: 'delete' | 'edit';
@@ -71,11 +78,6 @@ export default function NotificationPage() {
     [timeRange, timeRangeOptions],
   );
 
-  // 첫 로딩 때 localStorage → 연결 상태 불러오기
-  useEffect(() => {
-    const loaded = loadConnectionsFromStorage();
-    setConnections(loaded);
-  }, []);
 
   // ESC 누르면 모달 닫기
   useEffect(() => {
@@ -116,43 +118,39 @@ export default function NotificationPage() {
   }));
 
   // 허용치 기반 SLO 상태 계산 로직
-  const deriveStatus = (usedRate: number) => {
-    const usedPercent = usedRate * 100;
-    if (usedPercent < 70) return 'GOOD' as const;
-    if (usedPercent < 100) return 'WARNING' as const;
-    return 'FAILED' as const;
-  };
-
-  // SLO 전체 계산 함수
-  const computeSlo = (input: SloCreateInput): ComputedSlo => {
-    const totalMinutes = input.totalMinutes ?? currentRange.minutes;
-    const errorBudget = 1 - input.sliValue;
-    const allowedDowntime = totalMinutes * errorBudget;
-    const usedRate = allowedDowntime === 0 ? 0 : input.actualDowntimeMinutes / allowedDowntime;
-    return {
-      id: `custom-${input.id}`,
-      name: input.name,
-      metric: input.metric,
-      target: input.target,
-      sliValue: input.sliValue,
-      totalMinutes,
-      actualDowntimeMinutes: input.actualDowntimeMinutes,
-      allowedDowntimeMinutes: allowedDowntime,
-      errorBudgetUsedRate: usedRate,
-      errorBudgetRemainingPct: Math.max(0, (1 - usedRate) * 100),
-      errorBudgetOverPct: Math.max(0, usedRate * 100 - 100),
-      status: deriveStatus(usedRate),
-      tooltipTitle: input.tooltipTitle,
-      tooltipDescription: input.tooltipDescription,
-      connectedChannels: input.connectedChannels,
-      trend: [],
-    };
-  };
+  // SLO ?? ?? ??
+  const computeSlo = useCallback(
+    (input: SloCreateInput): ComputedSlo => {
+      const totalMinutes = input.totalMinutes ?? currentRange.minutes;
+      const errorBudget = 1 - input.sliValue;
+      const allowedDowntime = totalMinutes * errorBudget;
+      const usedRate = allowedDowntime === 0 ? 0 : input.actualDowntimeMinutes / allowedDowntime;
+      return {
+        id: `custom-${input.id}`,
+        name: input.name,
+        metric: input.metric,
+        target: input.target,
+        sliValue: input.sliValue,
+        totalMinutes,
+        actualDowntimeMinutes: input.actualDowntimeMinutes,
+        allowedDowntimeMinutes: allowedDowntime,
+        errorBudgetUsedRate: usedRate,
+        errorBudgetRemainingPct: Math.max(0, (1 - usedRate) * 100),
+        errorBudgetOverPct: Math.max(0, usedRate * 100 - 100),
+        status: deriveStatus(usedRate),
+        tooltipTitle: input.tooltipTitle,
+        tooltipDescription: input.tooltipDescription,
+        connectedChannels: input.connectedChannels,
+        trend: [],
+      };
+    },
+    [currentRange.minutes],
+  );
 
   // 유저 생성 SLO 계산
   const computedUserSlos = useMemo(
     () => userSlos.map((slo) => computeSlo(slo)),
-    [userSlos, currentRange.minutes],
+    [userSlos, computeSlo],
   );
 
   // 최종 SLO 리스트(기본 + 유저)
