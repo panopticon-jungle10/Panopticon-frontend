@@ -2,7 +2,7 @@
  * Agent 설치 흐름에서 사용되는 타입들
  */
 
-export type AgentRuntime = 'nodejs' | 'python' | 'java' | 'go';
+export type AgentRuntime = 'nodejs' | 'python' | 'java' | 'go' | 'php' | 'dotnet' | 'ruby';
 
 export interface Agent {
   id: AgentRuntime;
@@ -10,6 +10,7 @@ export interface Agent {
   description: string;
   icon?: string;
   frameworks: Framework[];
+  isComingSoon?: boolean;
 }
 
 export interface Framework {

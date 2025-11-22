@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SiNodedotjs, SiPython, SiGo } from 'react-icons/si';
+import { SiNodedotjs, SiPython, SiGo, SiPhp, SiDotnet, SiRuby } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa';
 import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
@@ -19,6 +19,12 @@ const getAgentIcon = (agentId: AgentRuntime) => {
       return <FaJava {...iconProps} />;
     case 'go':
       return <SiGo {...iconProps} />;
+    case 'php':
+      return <SiPhp {...iconProps} />;
+    case 'dotnet':
+      return <SiDotnet {...iconProps} />;
+    case 'ruby':
+      return <SiRuby {...iconProps} />;
     default:
       return null;
   }
@@ -35,6 +41,12 @@ const getAgentColorClasses = (agentId: AgentRuntime) => {
       return { text: 'text-[#5382A1]' };
     case 'go':
       return { text: 'text-[#00ADD8]' };
+    case 'php':
+      return { text: 'text-[#777BB4]' };
+    case 'dotnet':
+      return { text: 'text-[#512BD4]' };
+    case 'ruby':
+      return { text: 'text-[#CC342D]' };
     default:
       return { text: 'text-blue-600' };
   }
@@ -80,14 +92,31 @@ export default function AgentSelectionPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {AGENTS.map((agent) => {
             const colors = getAgentColorClasses(agent.id);
+            const isDisabled = agent.isComingSoon;
             return (
               <button
                 key={agent.id}
-                onClick={() => handleAgentSelect(agent.id)}
-                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-6 text-left transition-all hover:border-blue-400 hover:shadow-lg hover:cursor-pointer"
+                onClick={() => !isDisabled && handleAgentSelect(agent.id)}
+                disabled={isDisabled}
+                className={`group relative overflow-hidden rounded-lg border p-6 text-left transition-all ${
+                  isDisabled
+                    ? 'border-gray-200 bg-white cursor-not-allowed opacity-75'
+                    : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow-lg hover:cursor-pointer'
+                }`}
               >
                 {/* 배경 그라디언트 */}
-                <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                {!isDisabled && (
+                  <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                )}
+
+                {/* Coming Soon 배지 */}
+                {isDisabled && (
+                  <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[1px] z-20">
+                    <span className="text-2xl font-semibold text-gray-300 transform -rotate-20">
+                      준비 중
+                    </span>
+                  </div>
+                )}
 
                 <div className="relative z-10 space-y-3">
                   {/* 아이콘 */}

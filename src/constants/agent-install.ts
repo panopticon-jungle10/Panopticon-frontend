@@ -11,7 +11,7 @@ export const AGENTS: Agent[] = [
   {
     id: 'nodejs',
     label: 'Node.js',
-    description: 'JavaScript/TypeScript 기반 백엔드 서비스',
+    description: 'JS / TS 기반 백엔드 서비스',
     frameworks: [
       { id: 'express', label: 'Express', runtime: 'nodejs' },
       { id: 'nestjs', label: 'NestJS', runtime: 'nodejs' },
@@ -37,6 +37,7 @@ export const AGENTS: Agent[] = [
       { id: 'springboot', label: 'Spring Boot', runtime: 'java' },
       { id: 'quarkus', label: 'Quarkus', runtime: 'java' },
     ],
+    isComingSoon: true,
   },
   {
     id: 'go',
@@ -46,6 +47,34 @@ export const AGENTS: Agent[] = [
       { id: 'gin', label: 'Gin', runtime: 'go' },
       { id: 'echo', label: 'Echo', runtime: 'go' },
     ],
+    isComingSoon: true,
+  },
+  {
+    id: 'php',
+    label: 'PHP',
+    description: 'PHP 기반 백엔드 서비스',
+    frameworks: [
+      { id: 'laravel', label: 'Laravel', runtime: 'php' },
+      { id: 'symfony', label: 'Symfony', runtime: 'php' },
+    ],
+    isComingSoon: true,
+  },
+  {
+    id: 'dotnet',
+    label: '.NET',
+    description: '.NET 기반 백엔드 서비스',
+    frameworks: [{ id: 'aspnetcore', label: 'ASP.NET Core', runtime: 'dotnet' }],
+    isComingSoon: true,
+  },
+  {
+    id: 'ruby',
+    label: 'Ruby',
+    description: 'Ruby 기반 백엔드 서비스',
+    frameworks: [
+      { id: 'rails', label: 'Rails', runtime: 'ruby' },
+      { id: 'sinatra', label: 'Sinatra', runtime: 'ruby' },
+    ],
+    isComingSoon: true,
   },
 ];
 
