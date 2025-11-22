@@ -19,7 +19,6 @@ export default function ServiceCardGrid({
 }: ServiceCardGridProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {' '}
       {/* 서비스 추가 카드 (항상 제일 앞에 표시) */}
       <AddServiceCard onClick={onCreateClick} />
       {services.map((service) => (
