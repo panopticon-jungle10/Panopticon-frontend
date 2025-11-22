@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { SiNodedotjs, SiPython, SiGo, SiPhp, SiDotnet, SiRuby } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa';
-import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
+import type { AgentRuntime } from '@/types/agent-install';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
 import AgentSetupPanel from './AgentSetupPanel';
 import { AGENTS } from '@/src/constants/agent-install';
@@ -66,23 +66,15 @@ export default function AgentSelectionPage() {
     setSelectedAgent(null);
   };
 
-  const handleSetupComplete = (values: AgentSetupFormValues) => {
-    // TODO: 서비스 생성 API 호출
-    console.log('Setup complete:', values);
-    handlePanelClose();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
-            Agent Installation
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">에이전트 설치</h1>
+          <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">SDK Setup</p>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900">SDK 설치</h1>
           <p className="mt-2 text-gray-600">
-            서비스의 런타임 환경에 맞는 에이전트를 선택하여 설치를 시작하세요.
+            서비스의 런타임 환경에 맞는 SDK를 선택하여 설치를 시작하세요.
           </p>
         </div>
       </div>
@@ -146,11 +138,7 @@ export default function AgentSelectionPage() {
         panelClassName="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0 overflow-y-auto"
       >
         {selectedAgent && (
-          <AgentSetupPanel
-            agentRuntime={selectedAgent}
-            onClose={handlePanelClose}
-            onComplete={handleSetupComplete}
-          />
+          <AgentSetupPanel agentRuntime={selectedAgent} onClose={handlePanelClose} />
         )}
       </SlideOverLayout>
     </div>

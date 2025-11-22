@@ -88,16 +88,6 @@ export const INSTRUMENTATION_METHODS: {
     label: 'Auto Instrumentation',
     description: '자동으로 라이브러리를 감지하여 계측합니다',
   },
-  {
-    id: 'manual',
-    label: 'Manual Instrumentation',
-    description: '수동으로 코드를 작성하여 계측합니다',
-  },
-  {
-    id: 'container',
-    label: 'Container-based',
-    description: 'Docker/Kubernetes 환경에서 기본 설정으로 계측합니다',
-  },
 ];
 
 export const RUNTIME_ENVIRONMENTS: {
@@ -106,9 +96,6 @@ export const RUNTIME_ENVIRONMENTS: {
   description: string;
 }[] = [
   { id: 'docker', label: 'Docker', description: 'Docker 컨테이너 환경' },
-  { id: 'kubernetes', label: 'Kubernetes', description: 'Kubernetes 클러스터' },
-  { id: 'ecs', label: 'AWS ECS', description: 'Amazon ECS' },
-  { id: 'lambda', label: 'AWS Lambda', description: 'AWS Lambda 함수' },
   { id: 'linux-host', label: 'Linux Host', description: 'Linux VM 또는 베어메탈' },
   { id: 'windows', label: 'Windows', description: 'Windows 서버' },
 ];
@@ -119,10 +106,13 @@ export const TELEMETRY_TYPES: {
   description: string;
   default?: boolean;
 }[] = [
-  { id: 'traces', label: 'Traces', description: '요청 추적 (기본 필수)', default: true },
-  { id: 'metrics', label: 'Metrics', description: 'CPU, 메모리 등 메트릭', default: false },
-  { id: 'logs', label: 'Logs', description: '로그 수집', default: false },
-  { id: 'profiling', label: 'Profiling', description: 'CPU/Memory 프로파일링', default: false },
+  {
+    id: 'traces',
+    label: 'Traces',
+    description: 'HTTP 요청, 외부 API 호출, DB 쿼리 추적',
+    default: true,
+  },
+  { id: 'logs', label: 'Logs', description: '애플리케이션 로그 수집', default: false },
 ];
 
 export const getDefaultAgentSetupValues = (

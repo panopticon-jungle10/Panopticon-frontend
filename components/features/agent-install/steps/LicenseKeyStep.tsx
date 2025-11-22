@@ -9,9 +9,15 @@ interface LicenseKeyStepProps {
   formValues: AgentSetupFormValues;
   onChange: (values: AgentSetupFormValues) => void;
   onNext: (values?: Partial<AgentSetupFormValues>) => void;
+  onPrev?: () => void;
 }
 
-export default function LicenseKeyStep({ formValues, onChange, onNext }: LicenseKeyStepProps) {
+export default function LicenseKeyStep({
+  formValues,
+  onChange,
+  onNext,
+  onPrev,
+}: LicenseKeyStepProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showFullKey, setShowFullKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -106,7 +112,7 @@ export default function LicenseKeyStep({ formValues, onChange, onNext }: License
             <p className="text-sm text-blue-700 mb-4">
               {hasLicenseKey
                 ? '새로운 License Key를 생성하거나 기존 키를 사용할 수 있습니다.'
-                : '에이전트가 데이터를 전송하기 위한 License Key를 생성합니다.'}
+                : 'SDK가 데이터를 전송하기 위한 License Key를 생성합니다.'}
             </p>
 
             {hasLicenseKey ? (
@@ -217,14 +223,24 @@ export default function LicenseKeyStep({ formValues, onChange, onNext }: License
         </div>
       )}
 
-      {/* 다음 버튼 */}
-      <button
-        onClick={handleNext}
-        disabled={!hasLicenseKey || !formValues.serviceName.trim()}
-        className="w-full px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        다음 단계로
-      </button>
+      {/* 버튼 영역 */}
+      <div className="flex gap-3">
+        {onPrev && (
+          <button
+            onClick={onPrev}
+            className="flex-1 px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            이전 단계로
+          </button>
+        )}
+        <button
+          onClick={handleNext}
+          disabled={!hasLicenseKey || !formValues.serviceName.trim()}
+          className="flex-1 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          다음 단계로
+        </button>
+      </div>
     </div>
   );
 }

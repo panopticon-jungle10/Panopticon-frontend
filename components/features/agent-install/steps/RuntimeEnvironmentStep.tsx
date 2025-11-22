@@ -7,12 +7,14 @@ interface RuntimeEnvironmentStepProps {
   formValues: AgentSetupFormValues;
   onChange: (values: AgentSetupFormValues) => void;
   onNext: (values?: Partial<AgentSetupFormValues>) => void;
+  onPrev?: () => void;
 }
 
 export default function RuntimeEnvironmentStep({
   formValues,
   onChange,
   onNext,
+  onPrev,
 }: RuntimeEnvironmentStepProps) {
   const handleEnvironmentChange = (env: RuntimeEnvironment) => {
     onChange({ ...formValues, runtimeEnvironment: env });
@@ -23,7 +25,7 @@ export default function RuntimeEnvironmentStep({
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">실행 환경 선택</h3>
         <p className="text-gray-600">
-          에이전트가 실행될 환경을 선택하세요. 선택한 환경에 맞는 설치 가이드가 제공됩니다.
+          SDK가 실행될 환경을 선택하세요. 선택한 환경에 맞는 설치 가이드가 제공됩니다.
         </p>
       </div>
 
@@ -75,13 +77,7 @@ export default function RuntimeEnvironmentStep({
         <h4 className="font-medium text-blue-900 mb-2">📌 선택한 환경 설명</h4>
         <p className="text-sm text-blue-700">
           {formValues.runtimeEnvironment === 'docker'
-            ? 'Docker 컨테이너 환경에서 실행되는 애플리케이션입니다. docker run 명령어로 환경변수를 설정하여 실행할 수 있습니다.'
-            : formValues.runtimeEnvironment === 'kubernetes'
-            ? 'Kubernetes 클러스터에서 실행되는 애플리케이션입니다. Deployment/Pod에서 환경변수를 설정합니다.'
-            : formValues.runtimeEnvironment === 'ecs'
-            ? 'AWS ECS에서 실행되는 애플리케이션입니다. Task Definition에서 환경변수를 설정합니다.'
-            : formValues.runtimeEnvironment === 'lambda'
-            ? 'AWS Lambda 함수입니다. 환경변수와 Lambda Layer를 이용하여 계측합니다.'
+            ? 'Docker 컨테이너 환경에서 실행되는 애플리케이션입니다. 환경변수를 설정하여 실행할 수 있습니다.'
             : formValues.runtimeEnvironment === 'linux-host'
             ? 'Linux VM 또는 베어메탈에서 실행되는 애플리케이션입니다. Systemd 또는 직접 실행합니다.'
             : 'Windows 서버에서 실행되는 애플리케이션입니다. 환경변수와 PowerShell을 이용합니다.'}
@@ -94,17 +90,26 @@ export default function RuntimeEnvironmentStep({
         <ul className="space-y-1 text-sm text-amber-800">
           <li>• 선택한 환경이 실제 배포 환경과 일치해야 설치 가이드가 정확합니다.</li>
           <li>• 나중에 환경을 변경하면 설치 방법이 달라질 수 있습니다.</li>
-          <li>• AWS Lambda 환경은 특수한 설정이 필요합니다.</li>
         </ul>
       </div>
 
-      {/* 다음 버튼 */}
-      <button
-        onClick={() => onNext()}
-        className="w-full px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        다음 단계로
-      </button>
+      {/* 버튼 영역 */}
+      <div className="flex gap-3">
+        {onPrev && (
+          <button
+            onClick={onPrev}
+            className="flex-1 px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            이전 단계로
+          </button>
+        )}
+        <button
+          onClick={() => onNext()}
+          className="flex-1 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          다음 단계로
+        </button>
+      </div>
     </div>
   );
 }

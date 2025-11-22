@@ -1,24 +1,55 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HiCheckCircle, HiXCircle, HiArrowPath } from 'react-icons/hi2';
 import type { Agent, AgentSetupFormValues } from '@/types/agent-install';
 
 interface ValidationStepProps {
   agent: Agent;
   formValues: AgentSetupFormValues;
-  onComplete: () => void;
+  onPrev?: () => void;
 }
 
 type ValidationStatus = 'idle' | 'validating' | 'success' | 'failed';
 
-export default function ValidationStep({ agent, formValues, onComplete }: ValidationStepProps) {
+export default function ValidationStep({ agent, formValues, onPrev }: ValidationStepProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<ValidationStatus>('idle');
   const [message, setMessage] = useState<string>('');
 
+  // TODO: API 서버 복구 후 useQuery 활성화
+  // import { useQuery } from '@tanstack/react-query';
+  // import { getServices } from '@/src/api/apm';
+  // import { useEffect } from 'react';
+  // const { data: servicesData, isLoading, error } = useQuery({
+  //   queryKey: ['services'],
+  //   queryFn: getServices,
+  //   enabled: status === 'success',
+  //   refetchInterval: 5000, // 5초마다 폴링
+  //   select: (response) => {
+  //     if (!response?.services) return null;
+  //     const serviceExists = response.services.some(
+  //       (service) => service.service_name === formValues.serviceName,
+  //     );
+  //     return serviceExists ? response : null;
+  //   },
+  // });
+
+  // useEffect(() => {
+  //   if (servicesData) {
+  //     router.push('/services');
+  //   }
+  // }, [servicesData, router]);
+
+  const handleComplete = () => {
+    // 임시: 바로 /services로 라우팅
+    router.push('/services');
+  };
+
   const handleValidate = async () => {
     setStatus('validating');
-    setMessage('에이전트 신호를 감지 중입니다...');
+    setMessage('SDK 신호를 감지 중입니다...');
 
     // 실제로는 백엔드 API를 호출합니다
     // 여기서는 2초 후 성공으로 처리 (시뮬레이션)
@@ -26,7 +57,7 @@ export default function ValidationStep({ agent, formValues, onComplete }: Valida
       const isSuccess = Math.random() > 0.3; // 70% 성공률
       if (isSuccess) {
         setStatus('success');
-        setMessage('에이전트가 성공적으로 설치되고 신호를 보내고 있습니다!');
+        setMessage('SDK가 성공적으로 설치되고 신호를 보내고 있습니다!');
       } else {
         setStatus('failed');
         setMessage('아직 신호를 받지 못했습니다. 설치 단계를 다시 확인해주세요.');
@@ -37,8 +68,8 @@ export default function ValidationStep({ agent, formValues, onComplete }: Valida
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">에이전트 신호 감지</h3>
-        <p className="text-gray-600">에이전트가 올바르게 설치되었는지 확인합니다.</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">SDK 신호 감지</h3>
+        <p className="text-gray-600">SDK가 올바르게 설치되었는지 확인합니다.</p>
       </div>
 
       {/* 현재 설정 요약 */}
@@ -129,6 +160,15 @@ export default function ValidationStep({ agent, formValues, onComplete }: Valida
 
       {/* 버튼 */}
       <div className="flex gap-3">
+        {onPrev && status === 'idle' && (
+          <button
+            onClick={onPrev}
+            className="flex-1 px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            이전 단계로
+          </button>
+        )}
+
         {status !== 'validating' && (
           <button
             onClick={handleValidate}
@@ -140,7 +180,7 @@ export default function ValidationStep({ agent, formValues, onComplete }: Valida
 
         {status === 'success' && (
           <button
-            onClick={onComplete}
+            onClick={handleComplete}
             className="flex-1 px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
           >
             완료 및 대시보드로 이동
@@ -149,7 +189,7 @@ export default function ValidationStep({ agent, formValues, onComplete }: Valida
 
         {status === 'failed' && (
           <button
-            onClick={onComplete}
+            onClick={handleComplete}
             className="flex-1 px-6 py-3 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
           >
             나중에 검증 (서비스 생성)

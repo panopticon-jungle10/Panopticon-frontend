@@ -15,10 +15,7 @@ export function generateLicenseKey(serviceName: string): string {
     .substring(0, 10);
 
   // 난수 생성 (12자리)
-  const randomPart = Math.random()
-    .toString(36)
-    .substring(2, 14)
-    .padEnd(12, '0');
+  const randomPart = Math.random().toString(36).substring(2, 14).padEnd(12, '0');
 
   // 타임스탬프 (16진수)
   const timestamp = Date.now().toString(16);

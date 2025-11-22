@@ -9,6 +9,7 @@ interface InstallGuideStepProps {
   agent: Agent;
   formValues: AgentSetupFormValues;
   onNext: (values?: Partial<AgentSetupFormValues>) => void;
+  onPrev?: () => void;
 }
 
 interface GuideStep {
@@ -18,8 +19,14 @@ interface GuideStep {
   language?: string;
 }
 
-export default function InstallGuideStep({ agent, formValues, onNext }: InstallGuideStepProps) {
+export default function InstallGuideStep({
+  agent,
+  formValues,
+  onNext,
+  onPrev,
+}: InstallGuideStepProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [checkedItems, setCheckedItems] = useState<{ [key: number]: boolean }>({});
 
   const selectedFramework = agent.frameworks.find((f) => f.id === formValues.framework);
 
@@ -133,27 +140,52 @@ OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer%20${formValues.licenseKey}`;
         <h4 className="font-medium text-green-900 mb-3">✓ 완료 체크리스트</h4>
         <ul className="space-y-2 text-sm text-green-800">
           <li className="flex items-center gap-2">
-            <input type="checkbox" disabled className="h-4 w-4" />
-            <span>위 단계별로 에이전트를 설치했습니다</span>
+            <input
+              type="checkbox"
+              checked={checkedItems[0] || false}
+              onChange={(e) => setCheckedItems({ ...checkedItems, 0: e.target.checked })}
+              className="h-4 w-4 cursor-pointer"
+            />
+            <span>위 단계별로 SDK를 설치했습니다</span>
           </li>
           <li className="flex items-center gap-2">
-            <input type="checkbox" disabled className="h-4 w-4" />
+            <input
+              type="checkbox"
+              checked={checkedItems[1] || false}
+              onChange={(e) => setCheckedItems({ ...checkedItems, 1: e.target.checked })}
+              className="h-4 w-4 cursor-pointer"
+            />
             <span>환경변수를 설정했습니다</span>
           </li>
           <li className="flex items-center gap-2">
-            <input type="checkbox" disabled className="h-4 w-4" />
+            <input
+              type="checkbox"
+              checked={checkedItems[2] || false}
+              onChange={(e) => setCheckedItems({ ...checkedItems, 2: e.target.checked })}
+              className="h-4 w-4 cursor-pointer"
+            />
             <span>애플리케이션을 재시작했습니다</span>
           </li>
         </ul>
       </div>
 
-      {/* 다음 버튼 */}
-      <button
-        onClick={() => onNext()}
-        className="w-full px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        다음 단계로 (Validation)
-      </button>
+      {/* 버튼 영역 */}
+      <div className="flex gap-3">
+        {onPrev && (
+          <button
+            onClick={onPrev}
+            className="flex-1 px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            이전 단계로
+          </button>
+        )}
+        <button
+          onClick={() => onNext()}
+          className="flex-1 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          다음 단계로 (Validation)
+        </button>
+      </div>
     </div>
   );
 }
@@ -444,7 +476,7 @@ function getJavaGuides(_baseEnv: string, formValues: AgentSetupFormValues): Guid
   if (formValues.runtimeEnvironment === 'kubernetes') {
     baseGuides.push({
       title: 'Step 2: Kubernetes 배포 설정',
-      description: 'Deployment에 OpenTelemetry 에이전트를 주입합니다.',
+      description: 'Deployment에 OpenTelemetry SDK를 주입합니다.',
       code: `apiVersion: apps/v1
 kind: Deployment
 metadata:
