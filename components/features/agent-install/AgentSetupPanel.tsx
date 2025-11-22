@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { HiXMark, HiChevronLeft } from 'react-icons/hi2';
-import { AGENTS, INSTRUMENTATION_METHODS, getDefaultAgentSetupValues } from '@/types/install-agent';
+import { AGENTS, getDefaultAgentSetupValues } from '@/types/install-agent';
 import type { AgentRuntime, AgentSetupFormValues } from '@/types/install-agent';
 import InstrumentationMethodStep from './steps/InstrumentationMethodStep';
 import LicenseKeyStep from './steps/LicenseKeyStep';

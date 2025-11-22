@@ -11,12 +11,7 @@ interface LicenseKeyStepProps {
   onNext: (values?: Partial<AgentSetupFormValues>) => void;
 }
 
-export default function LicenseKeyStep({
-  agent,
-  formValues,
-  onChange,
-  onNext,
-}: LicenseKeyStepProps) {
+export default function LicenseKeyStep({ formValues, onChange, onNext }: LicenseKeyStepProps) {
   const [showKey, setShowKey] = useState(false);
   const [errors, setErrors] = useState<{ licenseKey?: string; serviceName?: string }>({});
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HiCheckCircle, HiXCircle, HiArrowPath } from 'react-icons/hi2';
 import type { Agent, AgentSetupFormValues } from '@/types/install-agent';
 
