@@ -56,7 +56,9 @@ const deriveStatus = (usedRate: number) => {
 };
 
 export default function NotificationPage() {
-  const [connections, setConnections] = useState<ConnectionState>(() => loadConnectionsFromStorage());
+  const [connections, setConnections] = useState<ConnectionState>(() =>
+    loadConnectionsFromStorage(),
+  );
   const [activeModal, setActiveModal] = useState<IntegrationType | null>(null);
   const [actionState, setActionState] = useState<{
     type: 'delete' | 'edit';
@@ -77,7 +79,6 @@ export default function NotificationPage() {
     () => timeRangeOptions.find((option) => option.key === timeRange) as TimeRangeOption,
     [timeRange, timeRangeOptions],
   );
-
 
   // ESC 누르면 모달 닫기
   useEffect(() => {

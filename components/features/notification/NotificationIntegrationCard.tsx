@@ -58,6 +58,7 @@ const formatRelative = (value?: Date) => {
   if (minutes < 60) return `${minutes}분 전`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours}시간 전`;
+
   return `${Math.round(hours / 24)}일 전`;
 };
 
@@ -89,7 +90,6 @@ export default function NotificationIntegrationCard({
 
   const config = integrationConfig[type];
 
-  //  ??/?? toggle
   const handleToggle = () => {
     if (connected) {
       onDisconnect?.();
@@ -98,10 +98,7 @@ export default function NotificationIntegrationCard({
     }
   };
 
-  //  ????? ?? ??
   const handleConfigure = () => onConfigure?.();
-
-
 
   return (
     <div
@@ -113,7 +110,7 @@ export default function NotificationIntegrationCard({
         hover:shadow-lg hover:scale-[1.015]
       `}
     >
-      {/* 연결 시 우측 상단에 상태 점 */}
+      {/* 연결 시 우측 상단 초록 점 */}
       {connected && (
         <div className="absolute top-2 right-2">
           <span className="relative flex h-2 w-2">
@@ -123,7 +120,7 @@ export default function NotificationIntegrationCard({
         </div>
       )}
 
-      {/* 아이콘 박스 */}
+      {/* 아이콘 */}
       <div
         className={`
           flex items-center justify-center w-14 h-14 rounded-xl
@@ -140,28 +137,30 @@ export default function NotificationIntegrationCard({
       {/* 설명 */}
       <p className="text-xs text-gray-500 mt-1 mb-3">{config.description}</p>
 
-      {/* 연결 상태 / SLO 수 / 테스트 결과 */}
+      {/* 상태 정보 */}
       <div className="w-full text-left text-xs text-gray-700 space-y-1 mb-4">
         <div className="flex items-center justify-between font-semibold">
           <span>{connected ? '연결됨' : '연결 안됨'}</span>
           <span>{connectedSloCount}개 SLO</span>
         </div>
 
+        {/* 테스트 결과 */}
         {lastTestResult && (
           <div
             className={`font-semibold ${
               lastTestResult === 'success' ? 'text-green-600' : 'text-red-600'
             }`}
           >
-            ??? ???: {lastTestResult === 'success' ? '??' : '??'} (
-            {relativeLastTest || '?'}
+            테스트 메시지: {lastTestResult === 'success' ? '성공' : '실패'} (
+            {relativeLastTest || '방금 전'})
           </div>
         )}
 
+        {/* 오류 메시지 */}
         {errorMessage && <div className="text-red-600">연동 오류 · {errorMessage}</div>}
       </div>
 
-      {/* 설정 버튼 (카드 전체 클릭 막기 위해 stopPropagation 유지) */}
+      {/* 설정 버튼 */}
       {connected && (
         <button
           onClick={(e) => {
