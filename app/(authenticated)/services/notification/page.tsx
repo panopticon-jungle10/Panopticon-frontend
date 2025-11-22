@@ -131,7 +131,7 @@ export default function NotificationPage() {
   // (GitHub/Jira/Trello 관련 코드 제거 — 사용하지 않음)
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+    <div className="bg-linear-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* 헤더 */}
         <div className="mb-8">
