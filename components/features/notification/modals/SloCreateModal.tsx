@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { HiXMark } from 'react-icons/hi2';
 import Dropdown from '@/components/ui/Dropdown';
 import type { IntegrationType, SloCreateInput } from '@/src/types/notification';
 
@@ -11,7 +12,6 @@ interface SloCreateModalProps {
   onClose: () => void;
 }
 
-/* Tooltip 설명 텍스트 */
 const metricDescriptions = {
   availability: {
     title: 'Availability SLO',
@@ -59,14 +59,15 @@ export default function SloCreateModal({
   const [form, setForm] = useState<SloFormState>({
     id: crypto.randomUUID(),
     name: 'New SLO',
-    metric: 'availability' as SloCreateInput['metric'],
+    metric: 'availability',
     target: 0.99,
-    connectedChannels: ['slack'] as IntegrationType[],
+    connectedChannels: ['slack'],
     tooltipTitle: metricDescriptions.availability.title,
     tooltipDescription: metricDescriptions.availability.description,
   });
 
-  /** 스크롤 잠금 */
+  const [targetError, setTargetError] = useState('');
+
   useEffect(() => {
     if (open) {
       window.scrollTo({ top: 0 });
@@ -89,6 +90,13 @@ export default function SloCreateModal({
     handleChange('metric', metric);
     handleChange('tooltipTitle', metricDescriptions[metric].title);
     handleChange('tooltipDescription', metricDescriptions[metric].description);
+
+    // Latency → target 기본값 재설정
+    if (metric === 'latency') {
+      handleChange('target', 200);
+    } else {
+      handleChange('target', 0.99);
+    }
   };
 
   const toggleChannel = (channel: IntegrationType) => {
@@ -113,14 +121,16 @@ export default function SloCreateModal({
     } as SloCreateInput);
   };
 
+  const isLatency = form.metric === 'latency';
+
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 backdrop-blur-sm px-4 pt-25 pb-10">
       <div
         className="
-        w-full max-w-lg max-h-[85vh] overflow-y-auto
-        rounded-2xl bg-white shadow-2xl border border-gray-100
-        px-7 py-5 animate-fadeIn
-      "
+          w-full max-w-lg max-h-[85vh] overflow-y-auto
+          rounded-2xl bg-white shadow-2xl border border-gray-100
+          px-7 py-5 animate-fadeIn
+        "
       >
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
@@ -133,13 +143,12 @@ export default function SloCreateModal({
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-sm font-semibold px-2"
+            aria-label="닫기"
+            className="text-gray-400 hover:text-gray-600 transition-colors px-2"
           >
-            닫기
+            <HiXMark className="w-5 h-5" />
           </button>
         </div>
-
-        <div className="h-px bg-gray-200 mb-6" />
 
         {/* FORM BODY */}
         <div className="space-y-6">
@@ -171,45 +180,74 @@ export default function SloCreateModal({
               />
             </div>
 
-            {/* CHANNELS */}
+            {/* CHANNELS → 버튼 스타일 */}
             <div>
               <label className="text-sm font-semibold text-gray-800">연결 채널</label>
 
-              <div className="mt-3 space-y-2">
-                {channelOptions.map((channel) => (
-                  <label
-                    key={channel.value}
-                    className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.connectedChannels.includes(channel.value)}
-                      onChange={() => toggleChannel(channel.value)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 accent-blue-600"
-                    />
-                    <span className="select-none">{channel.label}</span>
-                  </label>
-                ))}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {channelOptions.map((channel) => {
+                  const active = form.connectedChannels.includes(channel.value);
+
+                  return (
+                    <button
+                      key={channel.value}
+                      type="button"
+                      onClick={() => toggleChannel(channel.value)}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all
+                        ${
+                          active
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                        }
+                      `}
+                    >
+                      {channel.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* TARGET */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">목표값 (0 ~ 1)</label>
+            <label className="text-sm font-semibold text-gray-800">
+              목표값 {isLatency ? '(ms, 0~5000)' : '(0 ~ 1)'}
+            </label>
+
             <input
-              type="number"
-              step="0.001"
-              min="0"
-              max="1"
-              value={form.target}
-              onChange={(e) => handleChange('target', parseFloat(e.target.value) || 0)}
+              type="text"
+              placeholder="숫자만 입력 가능합니다"
+              value={String(form.target)}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                // 빈 값
+                if (value === '') {
+                  setTargetError('');
+                  handleChange('target', 0);
+                  return;
+                }
+
+                // 숫자 검증
+                if (!/^\d+(\.\d+)?$/.test(value)) {
+                  setTargetError('숫자만 입력 가능합니다.');
+                  return;
+                }
+
+                // 정상 숫자
+                setTargetError('');
+                handleChange('target', isLatency ? Number(value) : parseFloat(value));
+              }}
               className="
                 mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                 transition-all
               "
             />
+
+            {/* 에러 메시지 */}
+            {targetError && <p className="mt-1 text-xs text-red-500">{targetError}</p>}
           </div>
         </div>
 

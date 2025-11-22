@@ -118,7 +118,6 @@ export default function NotificationPage() {
   }));
 
   // 허용치 기반 SLO 상태 계산 로직
-  // SLO ?? ?? ??
   const computeSlo = useCallback(
     (input: SloCreateInput): ComputedSlo => {
       const totalMinutes = input.totalMinutes ?? currentRange.minutes;
