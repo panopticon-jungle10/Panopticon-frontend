@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { HiXMark, HiChevronLeft } from 'react-icons/hi2';
-import { AGENTS, getDefaultAgentSetupValues } from '@/types/agent-install';
+
 import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
 import InstrumentationMethodStep from './steps/InstrumentationMethodStep';
 import RuntimeEnvironmentStep from './steps/RuntimeEnvironmentStep';
@@ -10,6 +10,7 @@ import TelemetryTypeStep from './steps/TelemetryTypeStep';
 import LicenseKeyStep from './steps/LicenseKeyStep';
 import InstallGuideStep from './steps/InstallGuideStep';
 import ValidationStep from './steps/ValidationStep';
+import { AGENTS, getDefaultAgentSetupValues } from '@/src/constants/agent-install';
 
 interface AgentSetupPanelProps {
   agentRuntime: AgentRuntime;
@@ -31,6 +32,7 @@ export default function AgentSetupPanel({
       framework: AGENTS.find((a) => a.id === agentRuntime)?.frameworks[0].id,
     }),
   );
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const agent = AGENTS.find((a) => a.id === agentRuntime);
   if (!agent) return null;
@@ -45,6 +47,12 @@ export default function AgentSetupPanel({
   ];
   const currentStepIndex = stepSequence.indexOf(currentStep);
 
+  const scrollToTop = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  };
+
   const handleNext = (newValues?: Partial<AgentSetupFormValues>) => {
     if (newValues) {
       setFormValues((prev) => ({ ...prev, ...newValues }));
@@ -52,12 +60,14 @@ export default function AgentSetupPanel({
     const nextStepIndex = currentStepIndex + 1;
     if (nextStepIndex < stepSequence.length) {
       setCurrentStep(stepSequence[nextStepIndex]);
+      scrollToTop();
     }
   };
 
   const handlePrev = () => {
     if (currentStepIndex > 0) {
       setCurrentStep(stepSequence[currentStepIndex - 1]);
+      scrollToTop();
     }
   };
 
@@ -167,7 +177,7 @@ export default function AgentSetupPanel({
       </div>
 
       {/* 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div ref={contentRef} className="flex-1 overflow-y-auto px-6 py-8">
         {currentStep === 'instrumentation' && (
           <InstrumentationMethodStep
             agent={agent}

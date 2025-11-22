@@ -1,6 +1,6 @@
 'use client';
 
-import { TELEMETRY_TYPES } from '@/types/agent-install';
+import { TELEMETRY_TYPES } from '@/src/constants/agent-install';
 import type { AgentSetupFormValues, TelemetryType } from '@/types/agent-install';
 
 interface TelemetryTypeStepProps {
@@ -30,8 +30,6 @@ export default function TelemetryTypeStep({
       onChange({ ...formValues, telemetryTypes: newTypes });
     }
   };
-
-  const isTracesSelected = formValues.telemetryTypes.includes('traces');
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -64,7 +62,7 @@ export default function TelemetryTypeStep({
               />
               <div className="flex items-start gap-3">
                 <div
-                  className={`h-5 w-5 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center ${
+                  className={`h-5 w-5 rounded border-2 mt-0.5 shrink-0 flex items-center justify-center ${
                     isSelected
                       ? 'border-blue-500 bg-blue-500'
                       : isDisabled

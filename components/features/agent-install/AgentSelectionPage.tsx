@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { SiNodedotjs, SiPython, SiGo } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa';
-import { AGENTS } from '@/types/agent-install';
 import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
 import AgentSetupPanel from './AgentSetupPanel';
+import { AGENTS } from '@/src/constants/agent-install';
 
 const getAgentIcon = (agentId: AgentRuntime) => {
   const iconProps = { className: 'h-8 w-8' };

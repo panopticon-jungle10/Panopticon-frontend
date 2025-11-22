@@ -209,7 +209,7 @@ export default function LicenseKeyStep({ formValues, onChange, onNext }: License
       {/* 완료 상태 표시 */}
       {hasLicenseKey && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-start gap-3">
-          <HiCheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <HiCheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
           <div className="text-sm text-green-800">
             <p className="font-medium">License Key 생성 완료!</p>
             <p className="mt-1">다음 단계에서 설치 가이드를 확인하세요.</p>

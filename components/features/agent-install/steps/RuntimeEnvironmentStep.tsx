@@ -1,6 +1,6 @@
 'use client';
 
-import { RUNTIME_ENVIRONMENTS } from '@/types/agent-install';
+import { RUNTIME_ENVIRONMENTS } from '@/src/constants/agent-install';
 import type { AgentSetupFormValues, RuntimeEnvironment } from '@/types/agent-install';
 
 interface RuntimeEnvironmentStepProps {
@@ -48,7 +48,7 @@ export default function RuntimeEnvironmentStep({
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`h-5 w-5 rounded-full border-2 mt-0.5 flex-shrink-0 ${
+                  className={`h-5 w-5 rounded-full border-2 mt-0.5 shrink-0 ${
                     formValues.runtimeEnvironment === env.id
                       ? 'border-blue-500 bg-blue-500'
                       : 'border-gray-300'

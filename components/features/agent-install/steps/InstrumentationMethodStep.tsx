@@ -1,6 +1,6 @@
 'use client';
 
-import { INSTRUMENTATION_METHODS } from '@/types/agent-install';
+import { INSTRUMENTATION_METHODS } from '@/src/constants/agent-install';
 import type { Agent, AgentSetupFormValues, InstrumentationMethod } from '@/types/agent-install';
 
 interface InstrumentationMethodStepProps {
