@@ -162,7 +162,8 @@ export function useNotificationMock() {
   const integrationStatuses: IntegrationStatus[] = useMemo(() => {
     return integrationDefaults.map((integration) => ({
       ...integration,
-      connectedSloCount: sloList.filter((slo) => slo.connectedChannels.includes(integration.type)).length,
+      connectedSloCount: sloList.filter((slo) => slo.connectedChannels.includes(integration.type))
+        .length,
     }));
   }, [sloList]);
 

@@ -5,7 +5,7 @@ import type { SloStatus } from '@/src/types/notification';
 // 상태별 스타일 매핑 객체
 const badgeConfig: Record<
   SloStatus,
-  { label: string; color: string; dot: string; background: string; text: string; }
+  { label: string; color: string; dot: string; background: string; text: string }
 > = {
   GOOD: {
     label: 'GOOD',
@@ -33,14 +33,10 @@ const badgeConfig: Record<
 interface StatusBadgeProps {
   status: SloStatus;
   variant?: 'pill' | 'dot'; // pill: 알약형 배지 / dot: 점 + 라벨
-  size?: 'sm' | 'md';        // 크기 옵션
+  size?: 'sm' | 'md'; // 크기 옵션
 }
 
-export function StatusBadge({
-  status,
-  variant = 'pill',
-  size = 'md',
-}: StatusBadgeProps) {
+export function StatusBadge({ status, variant = 'pill', size = 'md' }: StatusBadgeProps) {
   const config = badgeConfig[status];
 
   // --- DOT 스타일 렌더링 (심플하고 리스트에서 주로 사용됨) ---

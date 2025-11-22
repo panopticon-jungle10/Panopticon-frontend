@@ -1,44 +1,113 @@
-// 하나의 SLO(가용성/레이턴시/에러율)에 대한 상세 상태를 카드 형태로 보여주는 컴포넌트
-
 'use client';
 
 import type { ComputedSlo } from '@/src/types/notification';
 import { InfoTooltip } from './InfoTooltip';
 import { StatusBadge } from './StatusBadge';
+import { useState, useEffect } from 'react';
+
+// SLO 타입별 아이콘 추가
+const metricIcons: Record<string, JSX.Element> = {
+  availability: (
+    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-green-50 text-green-600">
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    </div>
+  ),
+
+  latency: (
+    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-yellow-50 text-yellow-600">
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    </div>
+  ),
+
+  error_rate: (
+    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-600">
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 9v2m0 4h.01M5.06 19h13.88c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.7-1.33-3.46 0L3.33 16c-.77 1.33.19 3 1.73 3z"
+        />
+      </svg>
+    </div>
+  ),
+};
 
 interface SloCardProps {
   slo: ComputedSlo;
   onEdit: (slo: ComputedSlo) => void;
   onDelete: (slo: ComputedSlo) => void;
+  onToggle?: (slo: ComputedSlo, enabled: boolean) => void;
+  enabled?: boolean;
 }
 
-// 상태 색상 매핑
 const statusColorMap = {
   GOOD: 'text-green-600',
   WARNING: 'text-yellow-600',
   FAILED: 'text-red-600',
 } as const;
 
-export function SloCard({ slo, onEdit, onDelete }: SloCardProps) {
-  // 허용치 관련 파생값 계산
-  const usedPct = slo.errorBudgetUsedRate * 100; // 사용률 퍼센트 (0~100+)
-  const remainingPct = Math.max(0, slo.errorBudgetRemainingPct); // 남은 에러버짓
-  const overPct = Math.max(0, slo.errorBudgetOverPct); // 초과량
+export function SloCard({ slo, onEdit, onDelete, enabled = true, onToggle }: SloCardProps) {
+  const usedPct = slo.errorBudgetUsedRate * 100;
+  const remainingPct = Math.max(0, slo.errorBudgetRemainingPct);
+  const overPct = Math.max(0, slo.errorBudgetOverPct);
+
+  const [active, setActive] = useState(enabled);
+  useEffect(() => setActive(enabled), [enabled]);
+
+  const handleToggle = () => {
+    const next = !active;
+    setActive(next);
+    onToggle?.(slo, next);
+  };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-150 hover:shadow-md">
-      {/* ─────────────────────────────────────────────
-          1) 카드 상단 - 제목 / 설명 tooltip / 상태 badge / 액션 버튼
-      ───────────────────────────────────────────── */}
+    <div
+      className={`rounded-2xl border p-6 shadow-sm transition-all duration-150 ${
+        active
+          ? 'bg-white border-gray-200 hover:shadow-md'
+          : 'bg-gray-50 border-gray-300 opacity-70'
+      }`}
+    >
+      {/* 상단: 아이콘 + 제목 + tooltip + 상태 + 액션 + 토글 */}
       <div className="flex items-start justify-between w-full">
-        {/* 왼쪽: 제목 + Tooltip */}
-        <div className="flex items-center gap-2">
-          <h3 className="text-xl font-semibold text-gray-900">{slo.name}</h3>
-          <InfoTooltip title={slo.tooltipTitle} description={slo.tooltipDescription} />
+        {/* 왼쪽: 아이콘 + 제목 */}
+        <div className="flex items-center gap-3">
+          {/* 아이콘 */}
+          {metricIcons[slo.metric]}
+
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-gray-900">{slo.name}</h3>
+            <InfoTooltip title={slo.tooltipTitle} description={slo.tooltipDescription} />
+          </div>
         </div>
 
-        {/* 오른쪽: 상태 배지 + 수정/삭제 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <StatusBadge status={slo.status} />
 
           <button
@@ -56,81 +125,89 @@ export function SloCard({ slo, onEdit, onDelete }: SloCardProps) {
           >
             삭제
           </button>
+
+          {/* 토글 */}
+          <button
+            onClick={handleToggle}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+              active ? 'bg-blue-600' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                active ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
       </div>
 
-      {/* ─────────────────────────────────────────────
-          2) 중단 - SLI / 남은 허용치 / 초과량
-          Datadog 스타일의 "3개 요약 지표" 레이아웃
-      ───────────────────────────────────────────── */}
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* SLI 박스 */}
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
-          <div className="text-xs text-gray-500">SLI(지표)</div>
-          <div className="mt-1 text-3xl font-bold text-gray-900">
-            {(slo.sliValue * 100).toFixed(2)}%
-          </div>
-          <div className="mt-1 text-xs text-gray-500">
-            목표 {Math.round(slo.target * 10000) / 100}%
-          </div>
-        </div>
+      {!active && <div className="mt-4 text-xs text-gray-400">(이 SLO는 비활성화 상태입니다)</div>}
 
-        {/* 남은 Budget */}
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
-          <div className="text-xs text-gray-500">남은 허용치</div>
-          <div className="mt-1 text-3xl font-bold text-gray-900">{remainingPct.toFixed(1)}%</div>
-          <div className={`mt-1 text-xs font-semibold ${statusColorMap[slo.status]}`}>
-            사용률 {usedPct.toFixed(1)}%
-          </div>
-        </div>
+      {active && (
+        <>
+          {/* 중단 지표 */}
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
+              <div className="text-xs text-gray-500">SLI(지표)</div>
+              <div className="mt-1 text-3xl font-bold text-gray-900">
+                {(slo.sliValue * 100).toFixed(2)}%
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                목표 {Math.round(slo.target * 10000) / 100}%
+              </div>
+            </div>
 
-        {/* 초과량 */}
-        <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
-          <div className="text-xs text-gray-500">허용치 초과</div>
-          <div className="mt-1 text-3xl font-bold text-gray-900">
-            {overPct > 0 ? `+${overPct.toFixed(1)}%` : '0%'}
-          </div>
-          <div className="mt-1 text-xs text-gray-500">
-            허용 {slo.allowedDowntimeMinutes.toFixed(1)}분 · 실제{' '}
-            {slo.actualDowntimeMinutes.toFixed(1)}분
-          </div>
-        </div>
-      </div>
+            <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
+              <div className="text-xs text-gray-500">남은 허용치</div>
+              <div className="mt-1 text-3xl font-bold text-gray-900">
+                {remainingPct.toFixed(1)}%
+              </div>
+              <div className={`mt-1 text-xs font-semibold ${statusColorMap[slo.status]}`}>
+                사용률 {usedPct.toFixed(1)}%
+              </div>
+            </div>
 
-      {/* ─────────────────────────────────────────────
-          3) 하단 - ErrorBudget Bar
-      ───────────────────────────────────────────── */}
-      <div className="mt-5 space-y-2">
-        {/* 제목 + 퍼센트 */}
-        <div className="flex justify-between items-center text-sm font-semibold text-gray-800">
-          <span>허용치</span>
-          <span className={statusColorMap[slo.status]}>사용률 {usedPct.toFixed(1)}%</span>
-        </div>
-
-        {/* Progress Bar (Rounded + Smooth Style) */}
-        <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden">
-          <div
-            className={`
-              h-full transition-all duration-300
-              ${
-                slo.status === 'FAILED'
-                  ? 'bg-red-500'
-                  : slo.status === 'WARNING'
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500'
-              }
-            `}
-            style={{ width: `${Math.min(100, usedPct)}%` }}
-          />
-        </div>
-
-        {/* 초과 안내 */}
-        {overPct > 0 && (
-          <div className="text-xs font-semibold text-red-600">
-            허용치 초과 +{overPct.toFixed(1)}%
+            <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
+              <div className="text-xs text-gray-500">허용치 초과</div>
+              <div className="mt-1 text-3xl font-bold text-gray-900">
+                {overPct > 0 ? `+${overPct.toFixed(1)}%` : '0%'}
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                허용 {slo.allowedDowntimeMinutes.toFixed(1)}분 · 실제{' '}
+                {slo.actualDowntimeMinutes.toFixed(1)}분
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Progress Bar */}
+          <div className="mt-5 space-y-2">
+            <div className="flex justify-between items-center text-sm font-semibold text-gray-800">
+              <span>허용치</span>
+              <span className={statusColorMap[slo.status]}>사용률 {usedPct.toFixed(1)}%</span>
+            </div>
+
+            <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  slo.status === 'FAILED'
+                    ? 'bg-red-500'
+                    : slo.status === 'WARNING'
+                    ? 'bg-yellow-500'
+                    : 'bg-green-500'
+                }`}
+                style={{ width: `${Math.min(100, usedPct)}%` }}
+              />
+            </div>
+
+            {overPct > 0 && (
+              <div className="text-xs font-semibold text-red-600">
+                허용치 초과 +{overPct.toFixed(1)}%
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

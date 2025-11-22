@@ -6,12 +6,12 @@ import type { IntegrationType, SloCreateInput } from '@/src/types/notification';
 
 interface SloCreateModalProps {
   open: boolean;
-  defaultMinutes: number; // 백엔드 계산용, UI에서는 사용 안 함
+  defaultMinutes: number;
   onSubmit: (input: SloCreateInput) => void;
   onClose: () => void;
 }
 
-/** 메트릭별 Tooltip 텍스트 정의 */
+/* Tooltip 설명 텍스트 */
 const metricDescriptions = {
   availability: {
     title: 'Availability SLO',
@@ -46,18 +46,17 @@ export default function SloCreateModal({
   onSubmit,
   onClose,
 }: SloCreateModalProps) {
-  /** 사용자 입력값만 유지 */
   const [form, setForm] = useState({
     id: crypto.randomUUID(),
     name: 'New SLO',
     metric: 'availability' as SloCreateInput['metric'],
-    target: 0.99, // SLO 목표치
+    target: 0.99,
     connectedChannels: ['slack'] as IntegrationType[],
     tooltipTitle: metricDescriptions.availability.title,
     tooltipDescription: metricDescriptions.availability.description,
   });
 
-  /** 모달이 열리면 스크롤 잠금 */
+  /** 스크롤 잠금 */
   useEffect(() => {
     if (open) {
       window.scrollTo({ top: 0 });
@@ -65,19 +64,15 @@ export default function SloCreateModal({
     } else {
       document.body.style.overflow = 'auto';
     }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    return () => (document.body.style.overflow = 'auto');
   }, [open]);
 
   if (!open) return null;
 
-  /** 공통 입력 핸들러 */
   const handleChange = (key: keyof typeof form, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  /** 메트릭 변경 시 Tooltip 자동 변경 */
   const handleMetricChange = (metric: SloCreateInput['metric']) => {
     handleChange('metric', metric);
     handleChange('tooltipTitle', metricDescriptions[metric].title);
@@ -96,70 +91,83 @@ export default function SloCreateModal({
     });
   };
 
-  /** 제출 시 백엔드 계산이 필요한 값은 자동 채워서 전달 */
   const handleSubmit = () => {
     onSubmit({
       ...form,
       id: crypto.randomUUID(),
-      /** 아래 값들은 백엔드에서 계산될 예정 */
-      sliValue: 0, // placeholder
+      sliValue: 0,
       actualDowntimeMinutes: 0,
       totalMinutes: defaultMinutes,
     } as SloCreateInput);
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-center bg-black/30 px-4 py-24 overflow-hidden">
-      <div className="w-full max-w-lg rounded-2xl bg-white pt-12 px-6 pb-8 shadow-2xl border border-gray-200 max-h-[85vh] overflow-hidden">
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+    <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 backdrop-blur-sm px-4 pt-25 pb-10">
+      <div
+        className="
+        w-full max-w-lg max-h-[85vh] overflow-y-auto
+        rounded-2xl bg-white shadow-2xl border border-gray-100
+        px-7 py-5 animate-fadeIn
+      "
+      >
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">SLO 생성</h2>
-            <p className="text-xs text-gray-500">목표값과 메트릭을 기반으로 SLO가 생성됩니다.</p>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">SLO 생성</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              목표값과 메트릭 정보를 기반으로 새로운 SLO를 생성합니다.
+            </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm font-semibold">
+
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-sm font-semibold px-2"
+          >
             닫기
           </button>
         </div>
 
-        {/* Body */}
-        <div className="space-y-5 mt-6">
+        <div className="h-px bg-gray-200 mb-6" />
 
-          {/* 이름 */}
+        {/* FORM BODY */}
+        <div className="space-y-6">
+          {/* NAME */}
           <div>
-            <label className="text-xs font-semibold text-gray-700">이름</label>
+            <label className="text-sm font-semibold text-gray-800">이름</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="
+                mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                transition-all
+              "
             />
           </div>
 
-          {/* 메트릭 + 연결 채널 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            {/* 메트릭 선택 */}
+          {/* METRIC + CHANNELS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* METRIC */}
             <div>
-              <label className="text-xs font-semibold text-gray-700">메트릭</label>
+              <label className="text-sm font-semibold text-gray-800">메트릭</label>
               <Dropdown
                 value={form.metric}
                 onChange={handleMetricChange}
                 options={metricOptions}
-                className="mt-1 w-full"
+                className="mt-2 w-full"
               />
             </div>
 
-            {/* 연결 채널 */}
+            {/* CHANNELS */}
             <div>
-              <label className="text-xs font-semibold text-gray-700">연결 채널</label>
-              <div className="mt-2 space-y-2">
+              <label className="text-sm font-semibold text-gray-800">연결 채널</label>
+
+              <div className="mt-3 space-y-2">
                 {channelOptions.map((channel) => (
                   <label
                     key={channel.value}
-                    className="flex items-center gap-2 text-sm text-gray-700"
+                    className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
                   >
                     <input
                       type="checkbox"
@@ -167,16 +175,16 @@ export default function SloCreateModal({
                       onChange={() => toggleChannel(channel.value)}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 accent-blue-600"
                     />
-                    <span>{channel.label}</span>
+                    <span className="select-none">{channel.label}</span>
                   </label>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* 목표값 */}
+          {/* TARGET */}
           <div>
-            <label className="text-xs font-semibold text-gray-700">목표값 (0~1)</label>
+            <label className="text-sm font-semibold text-gray-800">목표값 (0 ~ 1)</label>
             <input
               type="number"
               step="0.001"
@@ -184,30 +192,37 @@ export default function SloCreateModal({
               max="1"
               value={form.target}
               onChange={(e) => handleChange('target', parseFloat(e.target.value) || 0)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="
+                mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                transition-all
+              "
             />
           </div>
-
         </div>
 
-        {/* Footer */}
-        <div className="mt-6 flex justify-end gap-2">
+        {/* FOOTER */}
+        <div className="mt-8 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="
+              rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700
+              hover:bg-gray-50 transition-all
+            "
           >
             취소
           </button>
 
           <button
             onClick={handleSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="
+              rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white
+              hover:bg-blue-700 shadow-sm transition-all
+            "
           >
             생성
           </button>
         </div>
-
       </div>
     </div>
   );

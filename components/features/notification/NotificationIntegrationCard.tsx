@@ -73,8 +73,7 @@ export default function NotificationIntegrationCard({
   onDisconnect,
   onConfigure,
 }: NotificationIntegrationCardProps) {
-
-    //  내부 상태: 외부 isConnected 변경 감지 및 hydration mismatch 예방
+  //  내부 상태: 외부 isConnected 변경 감지 및 hydration mismatch 예방
   const [connected, setConnected] = useState(isConnected);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -83,7 +82,7 @@ export default function NotificationIntegrationCard({
 
   const config = integrationConfig[type];
 
-    //  연결/해제 toggle
+  //  연결/해제 toggle
   const handleToggle = () => {
     if (connected) {
       onDisconnect?.();
@@ -93,10 +92,10 @@ export default function NotificationIntegrationCard({
     }
   };
 
-    //  설정 버튼 클릭 핸들러
+  //  설정 버튼 클릭 핸들러
   const handleConfigure = () => onConfigure?.();
 
-    //  "몇 분 전" 형식 변환
+  //  "몇 분 전" 형식 변환
   const formatRelative = (value?: Date) => {
     if (!value) return '';
     const diff = Date.now() - value.getTime();
@@ -153,7 +152,11 @@ export default function NotificationIntegrationCard({
         </div>
 
         {lastTestResult && (
-          <div className={`font-semibold ${lastTestResult === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+          <div
+            className={`font-semibold ${
+              lastTestResult === 'success' ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             테스트 메시지: {lastTestResult === 'success' ? '성공' : '실패'} (
             {isHydrated ? formatRelative(lastTestAt) : '—'})
           </div>
