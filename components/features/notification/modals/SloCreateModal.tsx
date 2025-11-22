@@ -91,7 +91,6 @@ export default function SloCreateModal({
     handleChange('tooltipTitle', metricDescriptions[metric].title);
     handleChange('tooltipDescription', metricDescriptions[metric].description);
 
-    // Latency → target 기본값 재설정
     if (metric === 'latency') {
       handleChange('target', 200);
     } else {
@@ -124,10 +123,16 @@ export default function SloCreateModal({
   const isLatency = form.metric === 'latency';
 
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 backdrop-blur-sm px-4 pt-25 pb-10">
+    <div
+      className="
+        fixed inset-0 z-40 flex items-center justify-center
+        bg-black/40 backdrop-blur-sm px-4 pt-25 pb-10
+      "
+    >
       <div
         className="
-          w-full max-w-lg max-h-[85vh] overflow-y-auto
+          w-full max-w-lg
+          max-h-none overflow-visible
           rounded-2xl bg-white shadow-2xl border border-gray-100
           px-7 py-5 animate-fadeIn
         "
@@ -167,45 +172,42 @@ export default function SloCreateModal({
             />
           </div>
 
-          {/* METRIC + CHANNELS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* METRIC */}
-            <div>
-              <label className="text-sm font-semibold text-gray-800">메트릭</label>
-              <Dropdown
-                value={form.metric}
-                onChange={handleMetricChange}
-                options={metricOptions}
-                className="mt-2 w-full"
-              />
-            </div>
+          {/* METRIC */}
+          <div>
+            <label className="text-sm font-semibold text-gray-800">메트릭</label>
+            <Dropdown
+              value={form.metric}
+              onChange={handleMetricChange}
+              options={metricOptions}
+              className="mt-2 w-full"
+            />
+          </div>
 
-            {/* CHANNELS → 버튼 스타일 */}
-            <div>
-              <label className="text-sm font-semibold text-gray-800">연결 채널</label>
+          {/* CHANNELS */}
+          <div>
+            <label className="text-sm font-semibold text-gray-800">연결 채널</label>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {channelOptions.map((channel) => {
-                  const active = form.connectedChannels.includes(channel.value);
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {channelOptions.map((channel) => {
+                const active = form.connectedChannels.includes(channel.value);
 
-                  return (
-                    <button
-                      key={channel.value}
-                      type="button"
-                      onClick={() => toggleChannel(channel.value)}
-                      className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all
-                        ${
-                          active
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                        }
-                      `}
-                    >
-                      {channel.label}
-                    </button>
-                  );
-                })}
-              </div>
+                return (
+                  <button
+                    key={channel.value}
+                    type="button"
+                    onClick={() => toggleChannel(channel.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all
+                      ${
+                        active
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                      }
+                    `}
+                  >
+                    {channel.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -222,20 +224,17 @@ export default function SloCreateModal({
               onChange={(e) => {
                 const value = e.target.value;
 
-                // 빈 값
                 if (value === '') {
                   setTargetError('');
                   handleChange('target', 0);
                   return;
                 }
 
-                // 숫자 검증
                 if (!/^\d+(\.\d+)?$/.test(value)) {
                   setTargetError('숫자만 입력 가능합니다.');
                   return;
                 }
 
-                // 정상 숫자
                 setTargetError('');
                 handleChange('target', isLatency ? Number(value) : parseFloat(value));
               }}
@@ -246,7 +245,6 @@ export default function SloCreateModal({
               "
             />
 
-            {/* 에러 메시지 */}
             {targetError && <p className="mt-1 text-xs text-red-500">{targetError}</p>}
           </div>
         </div>
