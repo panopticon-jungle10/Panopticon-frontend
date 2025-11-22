@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Dropdown from '@/components/ui/Dropdown';
 import type { IntegrationType, SloCreateInput } from '@/src/types/notification';
 
 interface SloCreateModalProps {
@@ -25,6 +26,19 @@ const metricDescriptions = {
     description: '전체 요청 중 오류가 발생한 비율입니다.',
   },
 };
+
+const metricOptions = [
+  { label: 'Availability', value: 'availability' as const },
+  { label: 'Latency (P95)', value: 'latency' as const },
+  { label: 'Error Rate', value: 'error_rate' as const },
+];
+
+const channelOptions: { label: string; value: IntegrationType }[] = [
+  { label: 'Slack', value: 'slack' },
+  { label: 'Email', value: 'email' },
+  { label: 'Teams', value: 'teams' },
+  { label: 'Discord', value: 'discord' },
+];
 
 export default function SloCreateModal({
   open,
@@ -70,6 +84,18 @@ export default function SloCreateModal({
     handleChange('tooltipDescription', metricDescriptions[metric].description);
   };
 
+  const toggleChannel = (channel: IntegrationType) => {
+    setForm((prev) => {
+      const hasChannel = prev.connectedChannels.includes(channel);
+      return {
+        ...prev,
+        connectedChannels: hasChannel
+          ? prev.connectedChannels.filter((c) => c !== channel)
+          : [...prev.connectedChannels, channel],
+      };
+    });
+  };
+
   /** 제출 시 백엔드 계산이 필요한 값은 자동 채워서 전달 */
   const handleSubmit = () => {
     onSubmit({
@@ -83,8 +109,8 @@ export default function SloCreateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-center bg-black/30 px-4 py-16 overflow-y-auto">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-40 flex justify-center bg-black/30 px-4 py-24 overflow-hidden">
+      <div className="w-full max-w-lg rounded-2xl bg-white pt-12 px-6 pb-8 shadow-2xl border border-gray-200 max-h-[85vh] overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -98,7 +124,7 @@ export default function SloCreateModal({
         </div>
 
         {/* Body */}
-        <div className="space-y-5">
+        <div className="space-y-5 mt-6">
 
           {/* 이름 */}
           <div>
@@ -118,39 +144,33 @@ export default function SloCreateModal({
             {/* 메트릭 선택 */}
             <div>
               <label className="text-xs font-semibold text-gray-700">메트릭</label>
-              <select
+              <Dropdown
                 value={form.metric}
-                onChange={(e) => handleMetricChange(e.target.value as SloCreateInput['metric'])}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="availability">Availability</option>
-                <option value="latency">Latency (P95)</option>
-                <option value="error_rate">Error Rate</option>
-              </select>
+                onChange={handleMetricChange}
+                options={metricOptions}
+                className="mt-1 w-full"
+              />
             </div>
 
             {/* 연결 채널 */}
             <div>
               <label className="text-xs font-semibold text-gray-700">연결 채널</label>
-              <select
-                multiple
-                value={form.connectedChannels}
-                onChange={(e) =>
-                  handleChange(
-                    'connectedChannels',
-                    Array.from(e.target.selectedOptions).map((opt) => opt.value as IntegrationType),
-                  )
-                }
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                           h-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="slack">Slack</option>
-                <option value="email">Email</option>
-                <option value="teams">Teams</option>
-                <option value="discord">Discord</option>
-              </select>
-              <p className="text-[11px] text-gray-500 mt-1">Ctrl/Cmd + 클릭으로 복수 선택 가능</p>
+              <div className="mt-2 space-y-2">
+                {channelOptions.map((channel) => (
+                  <label
+                    key={channel.value}
+                    className="flex items-center gap-2 text-sm text-gray-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.connectedChannels.includes(channel.value)}
+                      onChange={() => toggleChannel(channel.value)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 accent-blue-600"
+                    />
+                    <span>{channel.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
 
