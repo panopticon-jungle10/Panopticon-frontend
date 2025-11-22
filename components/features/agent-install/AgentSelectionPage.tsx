@@ -1,10 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { AGENTS } from '@/types/install-agent';
-import type { AgentRuntime, AgentSetupFormValues } from '@/types/install-agent';
+import { SiNodedotjs, SiPython, SiGo } from 'react-icons/si';
+import { FaJava } from 'react-icons/fa';
+import { AGENTS } from '@/types/agent-install';
+import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
 import SlideOverLayout from '@/components/ui/SlideOverLayout';
 import AgentSetupPanel from './AgentSetupPanel';
+
+const getAgentIcon = (agentId: AgentRuntime) => {
+  const iconProps = { className: 'h-8 w-8' };
+  switch (agentId) {
+    case 'nodejs':
+      return <SiNodedotjs {...iconProps} />;
+    case 'python':
+      return <SiPython {...iconProps} />;
+    case 'java':
+      return <FaJava {...iconProps} />;
+    case 'go':
+      return <SiGo {...iconProps} />;
+    default:
+      return null;
+  }
+};
+
+// 에이전트별 아이콘 색상 클래스 반환
+const getAgentColorClasses = (agentId: AgentRuntime) => {
+  switch (agentId) {
+    case 'nodejs':
+      return { text: 'text-[#83cd29]' };
+    case 'python':
+      return { text: 'text-[#3776AB]' };
+    case 'java':
+      return { text: 'text-[#5382A1]' };
+    case 'go':
+      return { text: 'text-[#00ADD8]' };
+    default:
+      return { text: 'text-blue-600' };
+  }
+};
 
 export default function AgentSelectionPage() {
   const [selectedAgent, setSelectedAgent] = useState<AgentRuntime | null>(null);
@@ -44,62 +78,34 @@ export default function AgentSelectionPage() {
       {/* 메인 콘텐츠 */}
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {AGENTS.map((agent) => (
-            <button
-              key={agent.id}
-              onClick={() => handleAgentSelect(agent.id)}
-              className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-6 text-left transition-all hover:border-blue-400 hover:shadow-lg"
-            >
-              {/* 배경 그라디언트 */}
-              <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          {AGENTS.map((agent) => {
+            const colors = getAgentColorClasses(agent.id);
+            return (
+              <button
+                key={agent.id}
+                onClick={() => handleAgentSelect(agent.id)}
+                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-6 text-left transition-all hover:border-blue-400 hover:shadow-lg hover:cursor-pointer"
+              >
+                {/* 배경 그라디언트 */}
+                <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-              <div className="relative z-10 space-y-4">
-                {/* 아이콘 또는 레이블 */}
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-lg font-bold text-blue-600">
-                  {agent.label.charAt(0)}
-                </div>
-
-                {/* 타이틀 */}
-                <h3 className="text-lg font-semibold text-gray-900">{agent.label}</h3>
-
-                {/* 설명 */}
-                <p className="text-sm text-gray-600">{agent.description}</p>
-
-                {/* 프레임워크 목록 */}
-                <div className="space-y-1 border-t border-gray-200 pt-4">
-                  <p className="text-xs font-medium text-gray-500">지원하는 프레임워크</p>
-                  <ul className="space-y-1">
-                    {agent.frameworks.slice(0, 3).map((fw) => (
-                      <li key={fw.id} className="text-xs text-gray-600">
-                        • {fw.label}
-                      </li>
-                    ))}
-                    {agent.frameworks.length > 3 && (
-                      <li className="text-xs text-gray-500">외 {agent.frameworks.length - 3}개</li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Arrow 아이콘 */}
-                <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                  <span className="text-sm font-medium text-blue-600">설치 시작</span>
-                  <svg
-                    className="h-4 w-4 text-blue-600 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="relative z-10 space-y-3">
+                  {/* 아이콘 */}
+                  <div
+                    className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white ${colors.text}`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                    {getAgentIcon(agent.id)}
+                  </div>
+
+                  {/* 타이틀 */}
+                  <h3 className="text-lg font-semibold text-gray-900">{agent.label}</h3>
+
+                  {/* 설명 */}
+                  <p className="text-sm text-gray-600">{agent.description}</p>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -107,7 +113,7 @@ export default function AgentSelectionPage() {
       <SlideOverLayout
         isOpen={isPanelOpen}
         onClose={handlePanelClose}
-        widthClass="w-full md:w-[900px] lg:w-[1000px]"
+        widthClass="w-full md:w-[700px] lg:w-[750px]"
         panelClassName="fixed top-0 right-0 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-0 overflow-y-auto"
       >
         {selectedAgent && (

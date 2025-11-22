@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { HiCheckCircle, HiXCircle, HiArrowPath } from 'react-icons/hi2';
-import type { Agent, AgentSetupFormValues } from '@/types/install-agent';
+import type { Agent, AgentSetupFormValues } from '@/types/agent-install';
 
 interface ValidationStepProps {
   agent: Agent;

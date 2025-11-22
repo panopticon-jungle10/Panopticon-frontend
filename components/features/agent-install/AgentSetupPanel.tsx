@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { HiXMark, HiChevronLeft } from 'react-icons/hi2';
-import { AGENTS, getDefaultAgentSetupValues } from '@/types/install-agent';
-import type { AgentRuntime, AgentSetupFormValues } from '@/types/install-agent';
+import { AGENTS, getDefaultAgentSetupValues } from '@/types/agent-install';
+import type { AgentRuntime, AgentSetupFormValues } from '@/types/agent-install';
 import InstrumentationMethodStep from './steps/InstrumentationMethodStep';
+import RuntimeEnvironmentStep from './steps/RuntimeEnvironmentStep';
+import TelemetryTypeStep from './steps/TelemetryTypeStep';
 import LicenseKeyStep from './steps/LicenseKeyStep';
 import InstallGuideStep from './steps/InstallGuideStep';
 import ValidationStep from './steps/ValidationStep';
@@ -15,7 +17,7 @@ interface AgentSetupPanelProps {
   onComplete?: (values: AgentSetupFormValues) => void;
 }
 
-type SetupStep = 'instrumentation' | 'license' | 'guide' | 'validation';
+type SetupStep = 'instrumentation' | 'runtime' | 'telemetry' | 'license' | 'guide' | 'validation';
 
 export default function AgentSetupPanel({
   agentRuntime,
@@ -33,8 +35,14 @@ export default function AgentSetupPanel({
   const agent = AGENTS.find((a) => a.id === agentRuntime);
   if (!agent) return null;
 
-  const selectedFramework = agent.frameworks.find((f) => f.id === formValues.framework);
-  const stepSequence: SetupStep[] = ['instrumentation', 'license', 'guide', 'validation'];
+  const stepSequence: SetupStep[] = [
+    'instrumentation',
+    'runtime',
+    'telemetry',
+    'license',
+    'guide',
+    'validation',
+  ];
   const currentStepIndex = stepSequence.indexOf(currentStep);
 
   const handleNext = (newValues?: Partial<AgentSetupFormValues>) => {
@@ -57,19 +65,25 @@ export default function AgentSetupPanel({
     onComplete?.(formValues);
   };
 
+  const stepLabels: Record<SetupStep, string> = {
+    instrumentation: 'Instrumentation',
+    runtime: 'Runtime Env',
+    telemetry: 'Telemetry',
+    license: 'License Key',
+    guide: 'Install Guide',
+    validation: 'Validation',
+  };
+
   return (
     <div className="flex h-full flex-col bg-white">
       {/* 헤더 */}
       <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
               Agent Setup
             </p>
-            <h2 className="mt-1 text-xl font-bold text-gray-900">{agent.label} 에이전트 설치</h2>
-            {selectedFramework && (
-              <p className="mt-1 text-sm text-gray-600">프레임워크: {selectedFramework.label}</p>
-            )}
+            <h2 className="mt-1 text-lg font-bold text-gray-900">{agent.label}</h2>
           </div>
           <button
             onClick={onClose}
@@ -80,42 +94,75 @@ export default function AgentSetupPanel({
           </button>
         </div>
 
-        {/* 진행 상황 표시 */}
-        <div className="mt-6 flex items-center justify-between">
-          {stepSequence.map((step, index) => {
-            const isActive = step === currentStep;
-            const isCompleted = index < currentStepIndex;
-            const stepLabels = {
-              instrumentation: 'Instrumentation',
-              license: 'License Key',
-              guide: 'Install Guide',
-              validation: 'Validation',
-            };
+        {/* 진행 상황 표시 - 2줄 */}
+        <div className="space-y-3">
+          {/* 첫 번째 줄: Step 1-3 */}
+          <div className="flex items-center justify-between gap-2">
+            {stepSequence.slice(0, 3).map((step, index) => {
+              const isActive = step === currentStep;
+              const isCompleted = stepSequence.indexOf(step) < currentStepIndex;
 
-            return (
-              <div key={step} className="flex flex-1 items-center">
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-600 text-white'
-                      : isCompleted
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {isCompleted ? '✓' : index + 1}
-                </div>
-                <span className="ml-2 text-xs font-medium text-gray-600">{stepLabels[step]}</span>
-                {index < stepSequence.length - 1 && (
+              return (
+                <div key={step} className="flex flex-1 items-center gap-2">
                   <div
-                    className={`ml-auto flex-1 border-t-2 ${
-                      isCompleted ? 'border-green-600' : 'border-gray-200'
+                    className={`h-7 w-7 rounded-full text-xs font-medium flex items-center justify-center shrink-0 transition-colors ${
+                      isActive
+                        ? 'bg-blue-600 text-white'
+                        : isCompleted
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
                     }`}
-                  />
-                )}
-              </div>
-            );
-          })}
+                  >
+                    {isCompleted ? '✓' : index + 1}
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 truncate">
+                    {stepLabels[step]}
+                  </span>
+                  {index < 2 && (
+                    <div
+                      className={`flex-1 border-t-2 min-w-2 ${
+                        isCompleted ? 'border-green-600' : 'border-gray-200'
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 두 번째 줄: Step 4-6 */}
+          <div className="flex items-center justify-between gap-2">
+            {stepSequence.slice(3).map((step, index) => {
+              const isActive = step === currentStep;
+              const isCompleted = stepSequence.indexOf(step) < currentStepIndex;
+
+              return (
+                <div key={step} className="flex flex-1 items-center gap-2">
+                  <div
+                    className={`h-7 w-7 rounded-full text-xs font-medium flex items-center justify-center shrink-0 transition-colors ${
+                      isActive
+                        ? 'bg-blue-600 text-white'
+                        : isCompleted
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {isCompleted ? '✓' : index + 4}
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 truncate">
+                    {stepLabels[step]}
+                  </span>
+                  {index < 2 && (
+                    <div
+                      className={`flex-1 border-t-2 min-w-2 ${
+                        isCompleted ? 'border-green-600' : 'border-gray-200'
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -130,13 +177,20 @@ export default function AgentSetupPanel({
           />
         )}
 
-        {currentStep === 'license' && (
-          <LicenseKeyStep
-            agent={agent}
+        {currentStep === 'runtime' && (
+          <RuntimeEnvironmentStep
             formValues={formValues}
             onChange={setFormValues}
             onNext={handleNext}
           />
+        )}
+
+        {currentStep === 'telemetry' && (
+          <TelemetryTypeStep formValues={formValues} onChange={setFormValues} onNext={handleNext} />
+        )}
+
+        {currentStep === 'license' && (
+          <LicenseKeyStep formValues={formValues} onChange={setFormValues} onNext={handleNext} />
         )}
 
         {currentStep === 'guide' && (
