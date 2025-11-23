@@ -46,7 +46,7 @@ export const UserProfile = () => {
         className="flex items-center gap-2 hover:opacity-80 transition"
         aria-label="User menu"
       >
-        {(user.avatarUrl || user.avatar_url) ? (
+        {user.avatarUrl || user.avatar_url ? (
           <Image
             src={user.avatarUrl || user.avatar_url!}
             alt={user.displayName || user.login || user.email}
@@ -69,7 +69,7 @@ export const UserProfile = () => {
           {/* 사용자 정보 */}
           <div className="px-4 py-3 border-b border-zinc-200">
             <div className="flex items-center gap-3">
-              {(user.avatarUrl || user.avatar_url) ? (
+              {user.avatarUrl || user.avatar_url ? (
                 <Image
                   src={user.avatarUrl || user.avatar_url!}
                   alt={user.displayName || user.login || user.email}
@@ -83,7 +83,9 @@ export const UserProfile = () => {
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-zinc-900 truncate">{user.displayName || user.login || user.email}</p>
+                <p className="text-sm font-semibold text-zinc-900 truncate">
+                  {user.displayName || user.login || user.email}
+                </p>
                 <p className="text-xs text-zinc-500 truncate">{user.email}</p>
               </div>
             </div>

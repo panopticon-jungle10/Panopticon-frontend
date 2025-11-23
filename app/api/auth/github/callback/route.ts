@@ -114,10 +114,7 @@ export async function GET(request: NextRequest) {
     const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE_URL;
 
     if (!authApiBase) {
-      return NextResponse.json(
-        { error: 'Auth server is not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Auth server is not configured' }, { status: 500 });
     }
 
     let jwt = '';
@@ -150,12 +147,15 @@ export async function GET(request: NextRequest) {
       }
 
       console.log('[Auth] User upserted successfully from authserver');
-      console.log('[Auth] AuthServer response:', { token: jwt ? '***' : 'MISSING', user: authData.user });
+      console.log('[Auth] AuthServer response:', {
+        token: jwt ? '***' : 'MISSING',
+        user: authData.user,
+      });
     } catch (e) {
       console.error('[Auth] Error upserting user to authserver:', e);
       return NextResponse.json(
         { error: 'Failed to authenticate with auth server' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

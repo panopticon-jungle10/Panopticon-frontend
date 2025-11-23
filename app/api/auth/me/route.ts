@@ -16,7 +16,7 @@ export async function GET() {
     if (!authApiBase) {
       return NextResponse.json(
         { authenticated: false, error: 'Auth server is not configured' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function GET() {
     console.error('Auth me error:', error);
     return NextResponse.json(
       { authenticated: false, error: 'Failed to fetch user info' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
