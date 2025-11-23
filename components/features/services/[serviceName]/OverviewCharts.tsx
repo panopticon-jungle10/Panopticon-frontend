@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { TIME_RANGE_DURATION_MS } from '@/src/utils/timeRange';
 import StateHandler from '@/components/ui/StateHandler';
@@ -32,6 +32,15 @@ export default function OverviewCharts({
   serviceName,
 }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [legendSelection, setLegendSelection] = useState<{
+    requests: Record<string, boolean>;
+    errorRate: Record<string, boolean>;
+    latency: Record<string, boolean>;
+  }>(() => ({
+    requests: extractLegendState(requestsOption),
+    errorRate: extractLegendState(errorRateOption),
+    latency: extractLegendState(latencyOption),
+  }));
 
   const toggle = (key: string) => {
     setSelected((prev) => (prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]));
@@ -58,14 +67,40 @@ export default function OverviewCharts({
     setPanelOpen(true);
   };
 
+  useEffect(() => {
+    setLegendSelection((prev) => ({
+      ...prev,
+      requests: syncLegendSelection(prev.requests, requestsOption),
+    }));
+  }, [requestsOption]);
+
+  useEffect(() => {
+    setLegendSelection((prev) => ({
+      ...prev,
+      errorRate: syncLegendSelection(prev.errorRate, errorRateOption),
+    }));
+  }, [errorRateOption]);
+
+  useEffect(() => {
+    setLegendSelection((prev) => ({
+      ...prev,
+      latency: syncLegendSelection(prev.latency, latencyOption),
+    }));
+  }, [latencyOption]);
+
   const renderChartByKey = (key: string) => {
     if (key === 'requests')
       return (
         <ReactECharts
-          option={requestsOption}
+          option={withLegendSelection(requestsOption, legendSelection.requests)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
+            legendselectchanged: (params: any) => {
+              if (params?.selected) {
+                setLegendSelection((prev) => ({ ...prev, requests: { ...params.selected } }));
+              }
+            },
             click: (params: any) => {
               const ts =
                 (params?.value && (Array.isArray(params.value) ? params.value[0] : params.value)) ||
@@ -78,10 +113,15 @@ export default function OverviewCharts({
     if (key === 'errorRate')
       return (
         <ReactECharts
-          option={errorRateOption}
+          option={withLegendSelection(errorRateOption, legendSelection.errorRate)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
+            legendselectchanged: (params: any) => {
+              if (params?.selected) {
+                setLegendSelection((prev) => ({ ...prev, errorRate: { ...params.selected } }));
+              }
+            },
             click: (params: any) => {
               const ts =
                 (params?.value && (Array.isArray(params.value) ? params.value[0] : params.value)) ||
@@ -94,10 +134,15 @@ export default function OverviewCharts({
     if (key === 'latency')
       return (
         <ReactECharts
-          option={latencyOption}
+          option={withLegendSelection(latencyOption, legendSelection.latency)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
+            legendselectchanged: (params: any) => {
+              if (params?.selected) {
+                setLegendSelection((prev) => ({ ...prev, latency: { ...params.selected } }));
+              }
+            },
             click: (params: any) => {
               const ts =
                 (params?.value && (Array.isArray(params.value) ? params.value[0] : params.value)) ||
@@ -164,10 +209,15 @@ export default function OverviewCharts({
                 emptyMessage="표시할 메트릭 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={requestsOption}
+                  option={withLegendSelection(requestsOption, legendSelection.requests)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
+                    legendselectchanged: (params: any) => {
+                      if (params?.selected) {
+                        setLegendSelection((prev) => ({ ...prev, requests: { ...params.selected } }));
+                      }
+                    },
                     click: (params: any) => {
                       const ts =
                         (params?.value &&
@@ -191,10 +241,15 @@ export default function OverviewCharts({
                 emptyMessage="표시할 에러율 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={errorRateOption}
+                  option={withLegendSelection(errorRateOption, legendSelection.errorRate)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
+                    legendselectchanged: (params: any) => {
+                      if (params?.selected) {
+                        setLegendSelection((prev) => ({ ...prev, errorRate: { ...params.selected } }));
+                      }
+                    },
                     click: (params: any) => {
                       const ts =
                         (params?.value &&
@@ -218,10 +273,15 @@ export default function OverviewCharts({
                 emptyMessage="표시할 레이턴시 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={latencyOption}
+                  option={withLegendSelection(latencyOption, legendSelection.latency)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
+                    legendselectchanged: (params: any) => {
+                      if (params?.selected) {
+                        setLegendSelection((prev) => ({ ...prev, latency: { ...params.selected } }));
+                      }
+                    },
                     click: (params: any) => {
                       const ts =
                         (params?.value &&
@@ -285,4 +345,40 @@ export default function OverviewCharts({
       />
     </div>
   );
+}
+
+function extractLegendState(option: any) {
+  const series = Array.isArray(option?.series) ? option.series : [];
+  const names = series.map((s) => s?.name).filter(Boolean);
+  return names.reduce<Record<string, boolean>>((acc, name) => {
+    acc[name as string] = true;
+    return acc;
+  }, {});
+}
+
+function syncLegendSelection(prev: Record<string, boolean>, option: any) {
+  const series = Array.isArray(option?.series) ? option.series : [];
+  const names = series.map((s) => s?.name).filter(Boolean);
+  if (!names.length) return prev;
+
+  const next = names.reduce<Record<string, boolean>>((acc, name) => {
+    acc[name as string] = prev?.[name as string] ?? true;
+    return acc;
+  }, {});
+
+  const unchanged =
+    Object.keys(next).length === Object.keys(prev || {}).length &&
+    Object.entries(next).every(([key, value]) => prev?.[key] === value);
+
+  return unchanged ? prev : next;
+}
+
+function withLegendSelection(option: any, selected: Record<string, boolean>) {
+  return {
+    ...option,
+    legend: {
+      ...(option?.legend || {}),
+      selected: selected || {},
+    },
+  };
 }
