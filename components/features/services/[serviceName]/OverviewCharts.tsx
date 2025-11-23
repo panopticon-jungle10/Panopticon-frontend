@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
 import { TIME_RANGE_DURATION_MS } from '@/src/utils/timeRange';
 import StateHandler from '@/components/ui/StateHandler';
@@ -43,6 +43,15 @@ export default function OverviewCharts({
     latency: extractLegendState(latencyOption),
   }));
 
+  const syncedLegendSelection = useMemo(
+    () => ({
+      requests: syncLegendSelection(legendSelection.requests, requestsOption),
+      errorRate: syncLegendSelection(legendSelection.errorRate, errorRateOption),
+      latency: syncLegendSelection(legendSelection.latency, latencyOption),
+    }),
+    [legendSelection, requestsOption, errorRateOption, latencyOption],
+  );
+
   const toggle = (key: string) => {
     setSelected((prev) => {
       if (prev.includes(key)) {
@@ -78,32 +87,11 @@ export default function OverviewCharts({
     setPanelOpen(true);
   };
 
-  useEffect(() => {
-    setLegendSelection((prev) => ({
-      ...prev,
-      requests: syncLegendSelection(prev.requests, requestsOption),
-    }));
-  }, [requestsOption]);
-
-  useEffect(() => {
-    setLegendSelection((prev) => ({
-      ...prev,
-      errorRate: syncLegendSelection(prev.errorRate, errorRateOption),
-    }));
-  }, [errorRateOption]);
-
-  useEffect(() => {
-    setLegendSelection((prev) => ({
-      ...prev,
-      latency: syncLegendSelection(prev.latency, latencyOption),
-    }));
-  }, [latencyOption]);
-
   const renderChartByKey = (key: string) => {
     if (key === 'requests')
       return (
         <ReactECharts
-          option={withLegendSelection(requestsOption, legendSelection.requests)}
+          option={withLegendSelection(requestsOption, syncedLegendSelection.requests)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
@@ -124,7 +112,7 @@ export default function OverviewCharts({
     if (key === 'errorRate')
       return (
         <ReactECharts
-          option={withLegendSelection(errorRateOption, legendSelection.errorRate)}
+          option={withLegendSelection(errorRateOption, syncedLegendSelection.errorRate)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
@@ -145,7 +133,7 @@ export default function OverviewCharts({
     if (key === 'latency')
       return (
         <ReactECharts
-          option={withLegendSelection(latencyOption, legendSelection.latency)}
+          option={withLegendSelection(latencyOption, syncedLegendSelection.latency)}
           style={{ height: selectedCount === 1 ? 420 : 320 }}
           notMerge={true}
           onEvents={{
@@ -220,7 +208,7 @@ export default function OverviewCharts({
                 emptyMessage="표시할 메트릭 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={withLegendSelection(requestsOption, legendSelection.requests)}
+                  option={withLegendSelection(requestsOption, syncedLegendSelection.requests)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
@@ -255,7 +243,7 @@ export default function OverviewCharts({
                 emptyMessage="표시할 에러율 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={withLegendSelection(errorRateOption, legendSelection.errorRate)}
+                  option={withLegendSelection(errorRateOption, syncedLegendSelection.errorRate)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
@@ -290,7 +278,7 @@ export default function OverviewCharts({
                 emptyMessage="표시할 레이턴시 데이터가 없습니다"
               >
                 <ReactECharts
-                  option={withLegendSelection(latencyOption, legendSelection.latency)}
+                  option={withLegendSelection(latencyOption, syncedLegendSelection.latency)}
                   style={{ height: 250 }}
                   notMerge={true}
                   onEvents={{
