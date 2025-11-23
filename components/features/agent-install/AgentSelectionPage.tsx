@@ -111,7 +111,7 @@ export default function AgentSelectionPage() {
       backdrop-blur-[1px] /* 흐림 */
     "
                   >
-                    <span class="text-2xl font-medium tracking-normal text-black-900">
+                    <span className="text-2xl font-medium tracking-normal text-black-900">
                       Coming soon
                     </span>
                   </div>
