@@ -116,6 +116,14 @@ export default function EndpointBarChart({
       xAxis: {
         type: 'category',
         data: items.map((i) => i.endpoint_name),
+        axisLabel: {
+          // always show every label so middle items do not disappear on narrow charts
+          interval: 0,
+          color: '#374151',
+        },
+        axisTick: {
+          alignWithLabel: true,
+        },
       },
 
       yAxis: {
