@@ -215,8 +215,8 @@ export default function EndpointBarChart({
                 yAxis: averageValue,
                 lineStyle: {
                   type: 'dashed',
-                  color: 'rgba(100, 100, 100, 0.3)',
-                  width: 1,
+                  color: 'rgba(100, 100, 100, 0.7)',
+                  width: 2,
                 },
               },
             ],
