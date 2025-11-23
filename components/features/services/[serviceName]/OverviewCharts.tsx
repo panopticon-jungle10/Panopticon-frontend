@@ -9,6 +9,7 @@ import StateHandler from '@/components/ui/StateHandler';
 import MetricIntervalPanel from './MetricIntervalPanel';
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
+const CHART_ORDER = ['requests', 'errorRate', 'latency'] as const;
 
 interface Props {
   requestsOption: any;
@@ -43,7 +44,15 @@ export default function OverviewCharts({
   }));
 
   const toggle = (key: string) => {
-    setSelected((prev) => (prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]));
+    setSelected((prev) => {
+      if (prev.includes(key)) {
+        return prev.filter((p) => p !== key);
+      }
+      const next = [...prev, key];
+      return next.sort(
+        (a, b) => CHART_ORDER.indexOf(a as (typeof CHART_ORDER)[number]) - CHART_ORDER.indexOf(b as (typeof CHART_ORDER)[number]),
+      );
+    });
   };
 
   const selectedCount = selected.length;
