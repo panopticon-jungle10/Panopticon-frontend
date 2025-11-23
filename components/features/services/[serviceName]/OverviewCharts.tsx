@@ -50,7 +50,9 @@ export default function OverviewCharts({
       }
       const next = [...prev, key];
       return next.sort(
-        (a, b) => CHART_ORDER.indexOf(a as (typeof CHART_ORDER)[number]) - CHART_ORDER.indexOf(b as (typeof CHART_ORDER)[number]),
+        (a, b) =>
+          CHART_ORDER.indexOf(a as (typeof CHART_ORDER)[number]) -
+          CHART_ORDER.indexOf(b as (typeof CHART_ORDER)[number]),
       );
     });
   };
@@ -224,7 +226,10 @@ export default function OverviewCharts({
                   onEvents={{
                     legendselectchanged: (params: any) => {
                       if (params?.selected) {
-                        setLegendSelection((prev) => ({ ...prev, requests: { ...params.selected } }));
+                        setLegendSelection((prev) => ({
+                          ...prev,
+                          requests: { ...params.selected },
+                        }));
                       }
                     },
                     click: (params: any) => {
@@ -256,7 +261,10 @@ export default function OverviewCharts({
                   onEvents={{
                     legendselectchanged: (params: any) => {
                       if (params?.selected) {
-                        setLegendSelection((prev) => ({ ...prev, errorRate: { ...params.selected } }));
+                        setLegendSelection((prev) => ({
+                          ...prev,
+                          errorRate: { ...params.selected },
+                        }));
                       }
                     },
                     click: (params: any) => {
@@ -288,7 +296,10 @@ export default function OverviewCharts({
                   onEvents={{
                     legendselectchanged: (params: any) => {
                       if (params?.selected) {
-                        setLegendSelection((prev) => ({ ...prev, latency: { ...params.selected } }));
+                        setLegendSelection((prev) => ({
+                          ...prev,
+                          latency: { ...params.selected },
+                        }));
                       }
                     },
                     click: (params: any) => {

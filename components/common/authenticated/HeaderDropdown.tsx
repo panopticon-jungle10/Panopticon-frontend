@@ -71,7 +71,7 @@ export const HeaderDropdown = ({
 
       {/* Dropdown */}
       <div
-      className={`absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-150 ${
+        className={`absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-150 ${
           isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-1'
         }`}
         onMouseEnter={openDropdown}
