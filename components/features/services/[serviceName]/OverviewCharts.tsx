@@ -349,22 +349,26 @@ export default function OverviewCharts({
 
 function extractLegendState(option: any) {
   const series = Array.isArray(option?.series) ? option.series : [];
-  const names = series.map((s) => s?.name).filter(Boolean);
-  return names.reduce<Record<string, boolean>>((acc, name) => {
-    acc[name as string] = true;
+  const names = series
+    .map((s: any) => s?.name)
+    .filter((name): name is string => typeof name === 'string' && Boolean(name));
+  return names.reduce((acc, name) => {
+    acc[name] = true;
     return acc;
-  }, {});
+  }, {} as Record<string, boolean>);
 }
 
 function syncLegendSelection(prev: Record<string, boolean>, option: any) {
   const series = Array.isArray(option?.series) ? option.series : [];
-  const names = series.map((s) => s?.name).filter(Boolean);
+  const names = series
+    .map((s: any) => s?.name)
+    .filter((name): name is string => typeof name === 'string' && Boolean(name));
   if (!names.length) return prev;
 
-  const next = names.reduce<Record<string, boolean>>((acc, name) => {
-    acc[name as string] = prev?.[name as string] ?? true;
+  const next = names.reduce((acc, name) => {
+    acc[name] = prev?.[name] ?? true;
     return acc;
-  }, {});
+  }, {} as Record<string, boolean>);
 
   const unchanged =
     Object.keys(next).length === Object.keys(prev || {}).length &&
