@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     let jwt = '';
     try {
-      const authResponse = await fetch(`${authApiBase.replace(/\/$/, '')}/users`, {
+      const authResponse = await fetch(`${authApiBase.replace(/\/$/, '')}/users/oauth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,6 +115,8 @@ export async function GET(request: NextRequest) {
       });
 
       if (!authResponse.ok) {
+        const errorData = await authResponse.json().catch(() => ({}));
+        console.error('[Auth] Auth server error response:', errorData);
         throw new Error(`Auth server responded with status ${authResponse.status}`);
       }
 
