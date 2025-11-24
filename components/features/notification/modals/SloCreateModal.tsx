@@ -173,7 +173,7 @@ export default function SloCreateModal({
       <div
         className="
           w-full max-w-lg
-          max-h-none overflow-visible
+          max-h-[85vh] overflow-y-auto
           rounded-2xl bg-white shadow-2xl border border-gray-100
           px-7 py-5 animate-fadeIn
         "
