@@ -10,12 +10,11 @@
  */
 
 export type LogCategory =
-  | 'EXTERNAL_SERVICE'  // Bedrock, 외부 API 등
-  | 'REQUEST_PAYLOAD'   // 요청 데이터 전체
-  | 'POST_CREATION'     // 게시물 생성 (wantsToPost, postData)
-  | 'CONVERSATION'      // 대화/질문 처리
-  | 'AI_RECOMMEND'      // AI 추천 조회
-  | 'USER_ACTION'       // 사용자 액션 추적
+  | 'REQUEST_DATA'      // 요청 데이터 관련 (request, payload 등)
+  | 'DATA_PROCESSING'   // 데이터 처리/계산 (calculation, processing 등)
+  | 'ACTION_TRACKING'   // 사용자/시스템 액션 추적 (tracking, action 등)
+  | 'OPERATION'         // 작업 수행 (completed, finished, 시작/완료 등)
+  | 'ERROR'             // 에러 및 예외 (error, failed, exception)
   | 'GENERAL';          // 일반 로그
 
 export interface LogCategoryInfo {
@@ -29,12 +28,11 @@ export interface LogCategoryInfo {
  * 로그 레벨과 별도로, 메시지 카테고리 자체도 우선순위를 가집니다.
  */
 const categoryPriority: Record<LogCategory, number> = {
-  EXTERNAL_SERVICE: 0,  // 외부 서비스 호출 (Bedrock 등)
-  REQUEST_PAYLOAD: 1,   // 요청 데이터
-  POST_CREATION: 2,     // 게시물 생성
-  CONVERSATION: 3,      // 대화 처리
-  AI_RECOMMEND: 4,      // AI 추천
-  USER_ACTION: 5,       // 사용자 액션
+  ERROR: 0,             // 에러 및 예외
+  REQUEST_DATA: 1,      // 요청 데이터
+  DATA_PROCESSING: 2,   // 데이터 처리/계산
+  ACTION_TRACKING: 3,   // 사용자/시스템 액션 추적
+  OPERATION: 4,         // 작업 수행
   GENERAL: 99,          // 일반
 };
 
@@ -42,12 +40,11 @@ const categoryPriority: Record<LogCategory, number> = {
  * 카테고리별 설명
  */
 const categoryDescriptions: Record<LogCategory, string> = {
-  EXTERNAL_SERVICE: '외부 서비스',
-  REQUEST_PAYLOAD: '요청 데이터',
-  POST_CREATION: '게시물 생성',
-  CONVERSATION: '대화 처리',
-  AI_RECOMMEND: 'AI 추천',
-  USER_ACTION: '사용자 액션',
+  ERROR: '에러',
+  REQUEST_DATA: '요청 데이터',
+  DATA_PROCESSING: '데이터 처리',
+  ACTION_TRACKING: '액션 추적',
+  OPERATION: '작업 수행',
   GENERAL: '일반',
 };
 
@@ -57,53 +54,46 @@ const categoryDescriptions: Record<LogCategory, string> = {
  * ⚠️ 규칙 추가 시 주의:
  * - 패턴 순서가 중요합니다 (위에서부터 순서대로 매칭됨)
  * - 더 구체적인 패턴을 먼저 배치하세요
- * - 예: "bedrock" 패턴이 "error" 패턴보다 위에 있어야 "Bedrock failed" 에러가 EXTERNAL_SERVICE로 분류됨
+ * - 예: "error" 패턴이 가장 위에 있어야 에러 로그를 우선 분류함
  */
 const patterns: Array<{
   regex: RegExp;
   category: LogCategory;
   description?: string; // 패턴 설명 (참고용)
 }> = [
-  // 외부 서비스 (최상위 우선순위)
+  // 에러 및 예외 (최상위 우선순위)
   {
-    regex: /bedrock|external|third.?party|api.?call.?to/i,
-    category: 'EXTERNAL_SERVICE',
-    description: 'Bedrock, 외부 API 호출',
+    regex: /error|failed|exception|failed|failure|traceback/i,
+    category: 'ERROR',
+    description: '에러 및 예외 처리',
   },
 
   // 요청 데이터
   {
-    regex: /full\s+request\s+data|request\s+data:|요청\s+데이터/i,
-    category: 'REQUEST_PAYLOAD',
+    regex: /request|payload|full\s+request|incoming|input/i,
+    category: 'REQUEST_DATA',
     description: '요청 데이터 로깅',
   },
 
-  // 게시물 생성 (wantsToPost, postData 포함)
+  // 데이터 처리/계산
   {
-    regex: /wantstopost|postdata|post\s+creation|게시물\s+생성|post\s+.*title|post\s+.*password/i,
-    category: 'POST_CREATION',
-    description: '게시물 생성/업로드 관련',
+    regex: /calculation|processing|computed|calculate|metric|처리|계산|조회/i,
+    category: 'DATA_PROCESSING',
+    description: '데이터 처리/계산',
   },
 
-  // 대화/질문 처리
+  // 사용자/시스템 액션 추적
   {
-    regex: /conversation|originalquestion|질문|답변|chat|message|dialogue/i,
-    category: 'CONVERSATION',
-    description: '대화/질문 처리',
+    regex: /tracking|action|user|session|behavior|behavior|activity|page_view|started|began/i,
+    category: 'ACTION_TRACKING',
+    description: '액션 추적',
   },
 
-  // AI 추천
+  // 작업 수행 (시작, 완료 등)
   {
-    regex: /ai\s+추천|추천\s+결과|추천\s+조회|recommendation|suggest/i,
-    category: 'AI_RECOMMEND',
-    description: 'AI 추천 기능',
-  },
-
-  // 사용자 행동 추적
-  {
-    regex: /사용자\s+행동|user\s+action|tracking|session|behavior|page_view|action=|user_id/i,
-    category: 'USER_ACTION',
-    description: '사용자 행동 추적',
+    regex: /completed|finished|done|성공|완료|시작|시작|complete|end/i,
+    category: 'OPERATION',
+    description: '작업 수행',
   },
 ];
 
@@ -168,12 +158,11 @@ export function getCategoryInfo(category: LogCategory): LogCategoryInfo {
  */
 export function getAllCategories(): LogCategoryInfo[] {
   const categories: LogCategory[] = [
-    'EXTERNAL_SERVICE',
-    'REQUEST_PAYLOAD',
-    'POST_CREATION',
-    'CONVERSATION',
-    'AI_RECOMMEND',
-    'USER_ACTION',
+    'ERROR',
+    'REQUEST_DATA',
+    'DATA_PROCESSING',
+    'ACTION_TRACKING',
+    'OPERATION',
     'GENERAL',
   ];
 

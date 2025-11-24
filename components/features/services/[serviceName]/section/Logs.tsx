@@ -32,8 +32,11 @@ function normalizeMessage(msg: string): string {
     }
   }
 
-  // 일반 메시지 정규화
-  return msg
+  // 콜론(:)이 있으면 콜론 앞부분만 추출
+  const beforeColon = msg.split(':')[0].trim();
+  const baseMessage = beforeColon || msg;
+
+  return baseMessage
     .toLowerCase()
     .replace(/0x[a-f0-9]+/gi, ' ')
     .replace(/\d+/g, ' ')

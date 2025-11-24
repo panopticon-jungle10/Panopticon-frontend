@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import type { LogEntry } from '@/types/apm';
-import { categorizeLog, getCategoryInfo, LogCategory } from '@/src/utils/logCategorizer';
 
 interface LogGroup {
   key: string;
@@ -13,8 +12,6 @@ interface LogGroup {
 interface ExtendedGroup extends LogGroup {
   primaryLevel: string;
   primaryPriority: number;
-  primaryCategory: LogCategory;
-  categoryPriority: number;
 }
 
 interface Props {
@@ -33,9 +30,10 @@ function extractExceptionType(msg: string): string | null {
   return match?.[1] || null;
 }
 
-// Traceback의 경우 Exception 타입만 표시, 일반 메시지는 원본 유지
-function formatGroupTitle(message: string): string {
-  // Traceback인 경우
+// 원본 메시지에서 콜론 앞 부분을 추출하여 title 생성
+// 예: "Full request data: {...}" -> "Full request data:"
+function extractTitleFromMessage(message: string): string {
+  // Traceback인 경우 특별 처리
   if (message.includes('Traceback') || message.includes('File "')) {
     const exceptionType = extractExceptionType(message);
     if (exceptionType) {
@@ -44,8 +42,9 @@ function formatGroupTitle(message: string): string {
     return '[Traceback] Unknown Exception';
   }
 
-  // 일반 메시지는 원본 유지 (너무 길면 생략)
-  return message.length > 200 ? message.substring(0, 200) + '...' : message;
+  // 일반 메시지: 콜론 앞부분 추출
+  const beforeColon = message.split(':')[0].trim();
+  return beforeColon || message.substring(0, 100);
 }
 
 // 간단한 메시지 정규화: 소문자, 숫자/헥스/특수문자 제거, 공백 축약, 길이 제한
@@ -58,8 +57,14 @@ function normalizeMessage(msg: string): string {
     }
   }
 
-  // 일반 메시지 정규화
-  return msg
+  // 콜론(:)이 있으면 콜론 앞부분만 추출 (e.g., "Full request data: {...}" -> "Full request data")
+  // 이를 통해 내용만 다른 같은 종류의 로그들을 함께 그룹화
+  const beforeColon = msg.split(':')[0].trim();
+
+  // 콜론 앞부분이 있으면 그것을 기준으로 정규화
+  const baseMessage = beforeColon || msg;
+
+  return baseMessage
     .toLowerCase()
     .replace(/0x[a-f0-9]+/gi, ' ') // hex
     .replace(/\d+/g, ' ') // numbers
@@ -96,27 +101,22 @@ export function computeGroups(items: LogEntry[]): ExtendedGroup[] {
       return levelPriority(it.level) < levelPriority(best) ? it.level : best;
     }, null as string | null);
 
-    // 첫 번째 메시지로 카테고리 판정
-    const primaryCategory = categorizeLog(v[0]?.message || '');
-    const categoryInfo = getCategoryInfo(primaryCategory);
+    // 그룹의 첫 번째 메시지에서 title 추출 (원본 메시지 기반)
+    const title = extractTitleFromMessage(v[0]?.message || k);
 
     return {
       key: k,
-      title: formatGroupTitle(v[0]?.message || k),
+      title,
       items: v,
       primaryLevel: primary || 'INFO',
       primaryPriority: levelPriority(primary || 'INFO'),
-      primaryCategory,
-      categoryPriority: categoryInfo.priority,
     };
   });
 
   arr.sort((a: ExtendedGroup, b: ExtendedGroup) => {
     // 1차: 로그 레벨 우선순위
     if (a.primaryPriority !== b.primaryPriority) return a.primaryPriority - b.primaryPriority;
-    // 2차: 카테고리 우선순위
-    if (a.categoryPriority !== b.categoryPriority) return a.categoryPriority - b.categoryPriority;
-    // 3차: 메시지 발생 횟수 (많을수록 먼저)
+    // 2차: 메시지 발생 횟수 (많을수록 먼저)
     return b.items.length - a.items.length;
   });
 
@@ -173,9 +173,6 @@ export default function LogGroups({ items, maxGroups = 20, page, pageSize, onGro
                 <div className="flex gap-2 mt-2">
                   <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 shrink-0">
                     {g.primaryLevel}
-                  </span>
-                  <span className="inline-block px-2 py-1 bg-blue-50 rounded text-xs text-blue-600 border border-blue-200 flex-shrink-0">
-                    {getCategoryInfo(g.primaryCategory).description}
                   </span>
                 </div>
               </div>
