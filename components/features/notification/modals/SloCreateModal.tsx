@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HiXMark } from 'react-icons/hi2';
 import Dropdown from '@/components/ui/Dropdown';
 import type { IntegrationType, SloCreateInput, TimeRangeKey } from '@/src/types/notification';
@@ -67,7 +68,7 @@ export default function SloCreateModal({
     tooltipDescription: string;
   };
 
-  const getInitialForm = (): SloFormState => {
+  const getInitialForm = useCallback((): SloFormState => {
     if (editingData) {
       return {
         id: editingData.id,
@@ -92,15 +93,20 @@ export default function SloCreateModal({
       tooltipTitle: metricDescriptions.availability.title,
       tooltipDescription: metricDescriptions.availability.description,
     };
-  };
+  }, [editingData]);
 
-  const [form, setForm] = useState<SloFormState>(getInitialForm());
+  const [form, setForm] = useState<SloFormState>(() => getInitialForm());
   const [targetError, setTargetError] = useState('');
   const isEditMode = !!editingData;
 
+  // editingData가 변경될 때 form을 초기화
+  useEffect(() => {
+    setForm(getInitialForm());
+  }, [editingData, getInitialForm]);
+
+  // 모달 열릴 때: DOM 업데이트만 (scroll, overflow)
   useEffect(() => {
     if (open) {
-      setForm(getInitialForm());
       window.scrollTo({ top: 0 });
       document.body.style.overflow = 'hidden';
     } else {
@@ -109,7 +115,7 @@ export default function SloCreateModal({
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [open, editingData]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -148,8 +154,8 @@ export default function SloCreateModal({
     onSubmit({
       ...form,
       id: isEditMode ? form.id : crypto.randomUUID(),
-      sliValue: isEditMode ? (editingData?.sliValue ?? 0) : 0,
-      actualDowntimeMinutes: isEditMode ? (editingData?.actualDowntimeMinutes ?? 0) : 0,
+      sliValue: isEditMode ? editingData?.sliValue ?? 0 : 0,
+      actualDowntimeMinutes: isEditMode ? editingData?.actualDowntimeMinutes ?? 0 : 0,
       totalMinutes,
       timeRangeKey: form.timeRangeKey,
     } as SloCreateInput);
@@ -247,9 +253,7 @@ export default function SloCreateModal({
               options={timeRangeOptions.map((t) => ({ label: t.label, value: t.value }))}
               className="mt-2 w-full"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              이 SLO를 평가할 시간 범위를 선택하세요.
-            </p>
+            <p className="text-xs text-gray-500 mt-1">이 SLO를 평가할 시간 범위를 선택하세요.</p>
           </div>
 
           {/* CHANNELS */}

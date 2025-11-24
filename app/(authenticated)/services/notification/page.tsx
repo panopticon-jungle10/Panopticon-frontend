@@ -172,35 +172,32 @@ export default function NotificationPage() {
   });
 
   // 허용치 기반 SLO 상태 계산 로직
-  const computeSlo = useCallback(
-    (input: SloCreateInput): ComputedSlo => {
-      // SLO 생성 시 지정된 totalMinutes 사용 (필수)
-      const totalMinutes = input.totalMinutes || 60 * 24; // 기본값: 24시간
-      const errorBudget = 1 - input.sliValue;
-      const allowedDowntime = totalMinutes * errorBudget;
-      const usedRate = allowedDowntime === 0 ? 0 : input.actualDowntimeMinutes / allowedDowntime;
-      return {
-        id: input.id,
-        name: input.name,
-        metric: input.metric,
-        target: input.target,
-        sliValue: input.sliValue,
-        totalMinutes,
-        actualDowntimeMinutes: input.actualDowntimeMinutes,
-        allowedDowntimeMinutes: allowedDowntime,
-        errorBudgetUsedRate: usedRate,
-        errorBudgetRemainingPct: Math.max(0, (1 - usedRate) * 100),
-        errorBudgetOverPct: Math.max(0, usedRate * 100 - 100),
-        status: deriveStatus(usedRate),
-        tooltipTitle: input.tooltipTitle,
-        tooltipDescription: input.tooltipDescription,
-        connectedChannels: input.connectedChannels,
-        description: input.description,
-        trend: [],
-      };
-    },
-    [],
-  );
+  const computeSlo = useCallback((input: SloCreateInput): ComputedSlo => {
+    // SLO 생성 시 지정된 totalMinutes 사용 (필수)
+    const totalMinutes = input.totalMinutes || 60 * 24; // 기본값: 24시간
+    const errorBudget = 1 - input.sliValue;
+    const allowedDowntime = totalMinutes * errorBudget;
+    const usedRate = allowedDowntime === 0 ? 0 : input.actualDowntimeMinutes / allowedDowntime;
+    return {
+      id: input.id,
+      name: input.name,
+      metric: input.metric,
+      target: input.target,
+      sliValue: input.sliValue,
+      totalMinutes,
+      actualDowntimeMinutes: input.actualDowntimeMinutes,
+      allowedDowntimeMinutes: allowedDowntime,
+      errorBudgetUsedRate: usedRate,
+      errorBudgetRemainingPct: Math.max(0, (1 - usedRate) * 100),
+      errorBudgetOverPct: Math.max(0, usedRate * 100 - 100),
+      status: deriveStatus(usedRate),
+      tooltipTitle: input.tooltipTitle,
+      tooltipDescription: input.tooltipDescription,
+      connectedChannels: input.connectedChannels,
+      description: input.description,
+      trend: [],
+    };
+  }, []);
 
   // 유저 생성 SLO 계산
   const computedUserSlos = useMemo(
@@ -261,7 +258,12 @@ export default function NotificationPage() {
                   metric: updatedSlo.metric as 'availability' | 'latency' | 'error_rate',
                   target: updatedSlo.target,
                   totalMinutes: updatedSlo.totalMinutes,
-                  connectedChannels: updatedSlo.connectedChannels as ('slack' | 'email' | 'teams' | 'discord')[],
+                  connectedChannels: updatedSlo.connectedChannels as (
+                    | 'slack'
+                    | 'email'
+                    | 'teams'
+                    | 'discord'
+                  )[],
                   description: updatedSlo.description,
                 }
               : slo,
@@ -293,7 +295,12 @@ export default function NotificationPage() {
           sliValue: createdSlo.sliValue,
           actualDowntimeMinutes: createdSlo.actualDowntimeMinutes,
           totalMinutes: createdSlo.totalMinutes,
-          connectedChannels: createdSlo.connectedChannels as ('slack' | 'email' | 'teams' | 'discord')[],
+          connectedChannels: createdSlo.connectedChannels as (
+            | 'slack'
+            | 'email'
+            | 'teams'
+            | 'discord'
+          )[],
           tooltipTitle: '',
           tooltipDescription: '',
           description: createdSlo.description,
@@ -429,8 +436,18 @@ export default function NotificationPage() {
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center">
                 <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-7 h-7 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <p className="text-gray-500 text-sm">생성된 SLO가 없습니다.</p>

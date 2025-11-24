@@ -128,9 +128,7 @@ export function SloCard({ slo, onEdit, onDelete, enabled = true, onToggle }: Slo
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-semibold text-gray-900">{slo.name}</h3>
             </div>
-            {slo.description && (
-              <p className="mt-1 text-sm text-gray-600">{slo.description}</p>
-            )}
+            {slo.description && <p className="mt-1 text-sm text-gray-600">{slo.description}</p>}
           </div>
         </div>
 
@@ -180,9 +178,7 @@ export function SloCard({ slo, onEdit, onDelete, enabled = true, onToggle }: Slo
               <div className="mt-1 text-3xl font-bold text-gray-900">
                 {formatSliValue(slo.sliValue)}
               </div>
-              <div className="mt-1 text-xs text-gray-500">
-                목표 {formatTargetValue(slo.target)}
-              </div>
+              <div className="mt-1 text-xs text-gray-500">목표 {formatTargetValue(slo.target)}</div>
             </div>
 
             <div className="rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">

@@ -48,7 +48,8 @@ const integrationConfig = {
   },
 };
 
-export interface NotificationIntegrationCardProps extends Omit<IntegrationStatus, 'connectedSloCount'> {
+export interface NotificationIntegrationCardProps
+  extends Omit<IntegrationStatus, 'connectedSloCount'> {
   isConnected?: boolean;
   onConnect?: () => void;
   onDisconnect?: () => void;
@@ -129,8 +130,7 @@ export default function NotificationIntegrationCard({
             <p className="text-xs text-gray-400 mt-1">
               {typeof lastTestAt === 'string'
                 ? new Date(lastTestAt).toLocaleDateString('ko-KR')
-                : lastTestAt.toLocaleDateString('ko-KR')
-              }
+                : lastTestAt.toLocaleDateString('ko-KR')}
             </p>
           )}
         </div>

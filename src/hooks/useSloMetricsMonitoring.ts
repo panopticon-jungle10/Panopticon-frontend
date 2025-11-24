@@ -121,7 +121,10 @@ export function useSloMetricsMonitoring(serviceName: string) {
           });
 
           if (!response.ok) {
-            console.error(`Failed to send ${channel} alert for SLO ${slo.id}:`, response.statusText);
+            console.error(
+              `Failed to send ${channel} alert for SLO ${slo.id}:`,
+              response.statusText,
+            );
           } else {
             console.log(`[SLO Alert] ${channel}: ${slo.name}`);
           }
@@ -171,7 +174,11 @@ export function useSloMetricsMonitoring(serviceName: string) {
           }
 
           // 상태 변화 감지 및 알림 발송
-          if (previousStatus !== newStatus && newStatus === 'FAILED' && !alertedSlosRef.current[slo.id]) {
+          if (
+            previousStatus !== newStatus &&
+            newStatus === 'FAILED' &&
+            !alertedSlosRef.current[slo.id]
+          ) {
             // GOOD/WARNING → FAILED 전환 시 알림 발송
             await dispatchAlert(slo, newSliValue, metricValue);
             alertedSlosRef.current[slo.id] = true;

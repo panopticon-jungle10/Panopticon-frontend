@@ -21,7 +21,6 @@ export interface EmailConfig {
 
 export default function EmailConfigModal({ isOpen, onClose, onSave }: EmailConfigModalProps) {
   const [recipientEmail, setRecipientEmail] = useState('');
-  const [senderName, setSenderName] = useState('Panopticon Alert');
   const [smtpHost, setSmtpHost] = useState('');
   const [smtpPort, setSmtpPort] = useState(587);
   const [smtpUser, setSmtpUser] = useState('');
@@ -69,7 +68,6 @@ export default function EmailConfigModal({ isOpen, onClose, onSave }: EmailConfi
         toast.success('테스트 메시지가 전송되었습니다!');
         onSave({
           recipientEmail,
-          senderName,
           webhookId: config.id,
           lastTestResult: 'success',
           lastTestAt: new Date().toISOString(),
@@ -116,7 +114,6 @@ export default function EmailConfigModal({ isOpen, onClose, onSave }: EmailConfi
       setWebhookConfig(config);
       onSave({
         recipientEmail,
-        senderName,
         webhookId: config.id,
         lastTestResult: webhookConfig?.lastTestedAt ? 'success' : undefined,
         lastTestAt: webhookConfig?.lastTestedAt,
