@@ -46,7 +46,7 @@ export interface IntegrationStatus {
   connected: boolean;
   connectedSloCount: number;
   lastTestResult: 'success' | 'failure' | null;
-  lastTestAt?: Date;
+  lastTestAt?: Date | string;
   errorMessage?: string;
 }
 
