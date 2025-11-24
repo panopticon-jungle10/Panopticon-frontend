@@ -224,7 +224,6 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
           isOpen={isLogGroupPanelOpen}
           group={selectedLogGroup}
           onClose={() => setIsLogGroupPanelOpen(false)}
-          widthClass="w-[60%]"
         />
       )}
     </div>

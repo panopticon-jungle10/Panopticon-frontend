@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import SlideOverLayout from '@/components/ui/SlideOverLayout';
+import { useState, useEffect, useRef } from 'react';
 import { IoClose } from 'react-icons/io5';
 import PullUpPanelLayout from '@/components/ui/PullUpPanelLayout';
 import { LogEntry, LogLevel } from '@/types/apm';
 import LevelBadge from '@/components/features/services/[serviceName]/logs/LevelBadge';
 import { FiClock, FiTag, FiLink } from 'react-icons/fi';
+import { useOverlayStack } from '@/components/ui/OverlayStackContext';
 
 interface GroupShape {
   key: string;
@@ -18,17 +18,51 @@ interface Props {
   isOpen: boolean;
   group: GroupShape | null;
   onClose: () => void;
-  widthClass?: string;
 }
 
-export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-[65%]' }: Props) {
+export default function LogGroupPanel({ isOpen, group, onClose }: Props) {
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+  const overlayStack = useOverlayStack();
+  const idRef = useRef<string | null>(null);
 
-  if (!group) return null;
+  // Register/unregister with overlay stack for ESC key handling
+  useEffect(() => {
+    const id =
+      idRef.current ??
+      `log-group-panel-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    idRef.current = id;
+
+    if (isOpen) {
+      if (overlayStack?.register) {
+        overlayStack.register(id, onClose);
+        return () => overlayStack.unregister(id);
+      }
+
+      // Fallback: if no overlayStack provider, keep per-instance ESC handling
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
+      window.addEventListener('keydown', handleEsc);
+      return () => window.removeEventListener('keydown', handleEsc);
+    }
+
+    // if not open, ensure unregistered
+    if (overlayStack) overlayStack.unregister(id);
+    return;
+  }, [isOpen, overlayStack, onClose]);
+
+  if (!isOpen || !group) return null;
 
   return (
     <>
-      <SlideOverLayout isOpen={isOpen} onClose={onClose} widthClass={widthClass}>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 min-h-screen bg-black/10 backdrop-blur-[2px] z-50 transition-opacity duration-300 opacity-100"
+        style={{ bottom: '0px' }}
+        onClick={onClose}
+      />
+      {/* Panel */}
+      <div className="fixed top-0 right-0 h-full bg-white shadow-2xl z-60 transform transition-transform duration-300 ease-in-out translate-x-0 w-[85%] md:w-[75%] lg:w-[65%]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex-1">
             <h2 className="text-xl font-semibold text-gray-900">{group.title}</h2>
@@ -189,7 +223,7 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
             </PullUpPanelLayout>
           )}
         </div>
-      </SlideOverLayout>
+      </div>
     </>
   );
 }
