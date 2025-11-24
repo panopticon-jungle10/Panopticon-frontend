@@ -44,7 +44,7 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
         </div>
 
         <div className="p-6 relative h-[calc(100%-73px)] overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 h-full overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto">
             {group.items.map((it, idx) => (
               <div
                 key={`${it.service}-${it.timestamp}-${idx}`}
@@ -58,7 +58,7 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
                     timestamp: it.timestamp,
                   });
                 }}
-                className="flex flex-col justify-between min-w-0 border-b border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="flex flex-col min-w-0 border-b border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-xs text-gray-600 font-mono flex-1 min-w-0 truncate">
@@ -146,7 +146,9 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
                         <FiTag className="w-4 h-4" />
                         서비스
                       </label>
-                      <div className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedLog.service}</div>
+                      <div className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                        {selectedLog.service}
+                      </div>
                     </div>
                   </div>
 
@@ -166,7 +168,9 @@ export default function LogGroupPanel({ isOpen, group, onClose, widthClass = 'w-
 
                     {/* Log ID */}
                     <div className="mb-6">
-                      <label className="block text-sm font-medium text-gray-500 mb-2">로그 ID</label>
+                      <label className="block text-sm font-medium text-gray-500 mb-2">
+                        로그 ID
+                      </label>
                       <div className="text-gray-600 font-mono text-xs bg-gray-50 p-3 rounded-lg break-all">
                         {selectedLog.id}
                       </div>
