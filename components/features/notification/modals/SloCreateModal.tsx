@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { HiXMark } from 'react-icons/hi2';
 import Dropdown from '@/components/ui/Dropdown';
-import type { IntegrationType, SloCreateInput } from '@/src/types/notification';
+import type { IntegrationType, SloCreateInput, TimeRangeKey } from '@/src/types/notification';
 
 interface SloCreateModalProps {
   open: boolean;
   defaultMinutes: number;
   onSubmit: (input: SloCreateInput) => void;
   onClose: () => void;
+  editingData?: SloCreateInput | null;
 }
 
 const metricDescriptions = {
@@ -26,6 +27,13 @@ const metricDescriptions = {
     description: '전체 요청 중 오류가 발생한 비율입니다.',
   },
 };
+
+const timeRangeOptions: { label: string; value: TimeRangeKey; minutes: number }[] = [
+  { label: '1시간', value: '1h', minutes: 60 },
+  { label: '24시간', value: '24h', minutes: 60 * 24 },
+  { label: '7일', value: '7d', minutes: 60 * 24 * 7 },
+  { label: '30일', value: '30d', minutes: 60 * 24 * 30 },
+];
 
 const metricOptions = [
   { label: 'Availability', value: 'availability' as const },
@@ -45,31 +53,54 @@ export default function SloCreateModal({
   defaultMinutes,
   onSubmit,
   onClose,
+  editingData,
 }: SloCreateModalProps) {
   type SloFormState = {
     id: string;
     name: string;
+    description?: string;
     metric: SloCreateInput['metric'];
     target: number;
+    timeRangeKey: TimeRangeKey;
     connectedChannels: IntegrationType[];
     tooltipTitle: string;
     tooltipDescription: string;
   };
 
-  const [form, setForm] = useState<SloFormState>({
-    id: crypto.randomUUID(),
-    name: 'New SLO',
-    metric: 'availability',
-    target: 0.99,
-    connectedChannels: ['slack'],
-    tooltipTitle: metricDescriptions.availability.title,
-    tooltipDescription: metricDescriptions.availability.description,
-  });
+  const getInitialForm = (): SloFormState => {
+    if (editingData) {
+      return {
+        id: editingData.id,
+        name: editingData.name,
+        description: editingData.description,
+        metric: editingData.metric,
+        target: editingData.target,
+        timeRangeKey: editingData.timeRangeKey || '24h',
+        connectedChannels: editingData.connectedChannels,
+        tooltipTitle: editingData.tooltipTitle,
+        tooltipDescription: editingData.tooltipDescription,
+      };
+    }
+    return {
+      id: '', // 서버가 생성할 임시 빈 값
+      name: 'New SLO',
+      description: '',
+      metric: 'availability',
+      target: 0.99,
+      timeRangeKey: '24h',
+      connectedChannels: ['slack'],
+      tooltipTitle: metricDescriptions.availability.title,
+      tooltipDescription: metricDescriptions.availability.description,
+    };
+  };
 
+  const [form, setForm] = useState<SloFormState>(getInitialForm());
   const [targetError, setTargetError] = useState('');
+  const isEditMode = !!editingData;
 
   useEffect(() => {
     if (open) {
+      setForm(getInitialForm());
       window.scrollTo({ top: 0 });
       document.body.style.overflow = 'hidden';
     } else {
@@ -78,7 +109,7 @@ export default function SloCreateModal({
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [open]);
+  }, [open, editingData]);
 
   if (!open) return null;
 
@@ -111,12 +142,16 @@ export default function SloCreateModal({
   };
 
   const handleSubmit = () => {
+    const selectedTimeRange = timeRangeOptions.find((t) => t.value === form.timeRangeKey);
+    const totalMinutes = selectedTimeRange?.minutes || defaultMinutes;
+
     onSubmit({
       ...form,
-      id: crypto.randomUUID(),
-      sliValue: 0,
-      actualDowntimeMinutes: 0,
-      totalMinutes: defaultMinutes,
+      id: isEditMode ? form.id : crypto.randomUUID(),
+      sliValue: isEditMode ? (editingData?.sliValue ?? 0) : 0,
+      actualDowntimeMinutes: isEditMode ? (editingData?.actualDowntimeMinutes ?? 0) : 0,
+      totalMinutes,
+      timeRangeKey: form.timeRangeKey,
     } as SloCreateInput);
   };
 
@@ -140,9 +175,13 @@ export default function SloCreateModal({
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">SLO 생성</h2>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+              {isEditMode ? 'SLO 수정' : 'SLO 생성'}
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
-              목표값과 메트릭 정보를 기반으로 새로운 SLO를 생성합니다.
+              {isEditMode
+                ? '기존 SLO의 정보를 수정합니다.'
+                : '목표값과 메트릭 정보를 기반으로 새로운 SLO를 생성합니다.'}
             </p>
           </div>
 
@@ -172,6 +211,22 @@ export default function SloCreateModal({
             />
           </div>
 
+          {/* DESCRIPTION */}
+          <div>
+            <label className="text-sm font-semibold text-gray-800">설명</label>
+            <textarea
+              value={form.description || ''}
+              onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="이 SLO에 대한 설명을 입력하세요"
+              rows={3}
+              className="
+                mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                transition-all
+              "
+            />
+          </div>
+
           {/* METRIC */}
           <div>
             <label className="text-sm font-semibold text-gray-800">메트릭</label>
@@ -181,6 +236,20 @@ export default function SloCreateModal({
               options={metricOptions}
               className="mt-2 w-full"
             />
+          </div>
+
+          {/* TIME RANGE / WINDOW */}
+          <div>
+            <label className="text-sm font-semibold text-gray-800">평가 기간</label>
+            <Dropdown
+              value={form.timeRangeKey}
+              onChange={(value: TimeRangeKey) => handleChange('timeRangeKey', value)}
+              options={timeRangeOptions.map((t) => ({ label: t.label, value: t.value }))}
+              className="mt-2 w-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              이 SLO를 평가할 시간 범위를 선택하세요.
+            </p>
           </div>
 
           {/* CHANNELS */}
@@ -268,7 +337,7 @@ export default function SloCreateModal({
               hover:bg-blue-700 shadow-sm transition-all
             "
           >
-            생성
+            {isEditMode ? '수정' : '생성'}
           </button>
         </div>
       </div>
