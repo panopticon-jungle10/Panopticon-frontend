@@ -129,7 +129,9 @@ export default function TraceAnalysisPullUpPanel({
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">서비스명</span>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{selectedSpan.service_name}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">
+                    {selectedSpan.service_name}
+                  </p>
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">Span ID</span>
@@ -181,13 +183,17 @@ export default function TraceAnalysisPullUpPanel({
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">환경</span>
-                  <p className="text-sm font-medium text-gray-900 mt-1">{selectedSpan.environment}</p>
+                  <p className="text-sm font-medium text-gray-900 mt-1">
+                    {selectedSpan.environment}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* HTTP 정보 */}
-            {(selectedSpan.http_method || selectedSpan.http_path || selectedSpan.http_status_code) && (
+            {(selectedSpan.http_method ||
+              selectedSpan.http_path ||
+              selectedSpan.http_status_code) && (
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">HTTP 정보</h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -204,7 +210,9 @@ export default function TraceAnalysisPullUpPanel({
                   {selectedSpan.http_path && (
                     <div>
                       <span className="text-sm text-gray-500">경로</span>
-                      <p className="text-sm font-mono text-gray-900 mt-1">{selectedSpan.http_path}</p>
+                      <p className="text-sm font-mono text-gray-900 mt-1">
+                        {selectedSpan.http_path}
+                      </p>
                     </div>
                   )}
                   {selectedSpan.http_status_code && (

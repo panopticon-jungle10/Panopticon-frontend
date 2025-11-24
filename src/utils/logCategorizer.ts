@@ -10,12 +10,12 @@
  */
 
 export type LogCategory =
-  | 'REQUEST_DATA'      // 요청 데이터 관련 (request, payload 등)
-  | 'DATA_PROCESSING'   // 데이터 처리/계산 (calculation, processing 등)
-  | 'ACTION_TRACKING'   // 사용자/시스템 액션 추적 (tracking, action 등)
-  | 'OPERATION'         // 작업 수행 (completed, finished, 시작/완료 등)
-  | 'ERROR'             // 에러 및 예외 (error, failed, exception)
-  | 'GENERAL';          // 일반 로그
+  | 'REQUEST_DATA' // 요청 데이터 관련 (request, payload 등)
+  | 'DATA_PROCESSING' // 데이터 처리/계산 (calculation, processing 등)
+  | 'ACTION_TRACKING' // 사용자/시스템 액션 추적 (tracking, action 등)
+  | 'OPERATION' // 작업 수행 (completed, finished, 시작/완료 등)
+  | 'ERROR' // 에러 및 예외 (error, failed, exception)
+  | 'GENERAL'; // 일반 로그
 
 export interface LogCategoryInfo {
   category: LogCategory;
@@ -28,12 +28,12 @@ export interface LogCategoryInfo {
  * 로그 레벨과 별도로, 메시지 카테고리 자체도 우선순위를 가집니다.
  */
 const categoryPriority: Record<LogCategory, number> = {
-  ERROR: 0,             // 에러 및 예외
-  REQUEST_DATA: 1,      // 요청 데이터
-  DATA_PROCESSING: 2,   // 데이터 처리/계산
-  ACTION_TRACKING: 3,   // 사용자/시스템 액션 추적
-  OPERATION: 4,         // 작업 수행
-  GENERAL: 99,          // 일반
+  ERROR: 0, // 에러 및 예외
+  REQUEST_DATA: 1, // 요청 데이터
+  DATA_PROCESSING: 2, // 데이터 처리/계산
+  ACTION_TRACKING: 3, // 사용자/시스템 액션 추적
+  OPERATION: 4, // 작업 수행
+  GENERAL: 99, // 일반
 };
 
 /**
@@ -166,7 +166,5 @@ export function getAllCategories(): LogCategoryInfo[] {
     'GENERAL',
   ];
 
-  return categories
-    .map(getCategoryInfo)
-    .sort((a, b) => a.priority - b.priority);
+  return categories.map(getCategoryInfo).sort((a, b) => a.priority - b.priority);
 }
