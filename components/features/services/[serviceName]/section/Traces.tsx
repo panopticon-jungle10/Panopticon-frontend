@@ -257,13 +257,13 @@ export default function TracesSection({ serviceName }: TracesSectionProps) {
         });
 
         return `
-          <div style="font-weight:700;margin-bottom:6px;font-size:28px;line-height:1.2;">${status}</div>
-          <div style="line-height:1.2;font-size:20px;">Trace ID: ${trace.trace_id}</div>
-          <div style="line-height:1.2;font-size:20px;">Service: ${trace.service_name}</div>
-          <div style="line-height:1.2;font-size:20px;">Resource: ${trace.root_span_name}</div>
-          <div style="line-height:1.2;font-size:20px;">Time: ${formattedTime}</div>
-          <div style="line-height:1.2;font-size:20px;">Duration: ${duration.toFixed(2)} ms</div>
-          <div style="margin-top:8px;color:#3b82f6;font-size:18px;">Click to view details</div>
+          <div style="font-weight:700;margin-bottom:6px;font-size:28px;line-height:1.2;${status === "Error" ? 'color:#ef4444;' : 'color:#10b981;'}">${status}</div>
+          <div style="line-height:1.2;font-size:20px;">트레이스 ID: ${trace.trace_id}</div>
+          <div style="line-height:1.2;font-size:20px;">서비스: ${trace.service_name}</div>
+          <div style="line-height:1.2;font-size:20px;">리소스: ${trace.root_span_name}</div>
+          <div style="line-height:1.2;font-size:20px;">타임 스탬프: ${formattedTime}</div>
+          <div style="line-height:1.2;font-size:20px;">총 시간: ${duration.toFixed(2)} ms</div>
+          <div style="margin-top:6px;color:#3b82f6;font-size:14px;${status === "Error" ? 'color:#ef4444;' : 'color:#10b981;'}">클릭하여 세부 정보 보기</div>
         `;
       },
     },
