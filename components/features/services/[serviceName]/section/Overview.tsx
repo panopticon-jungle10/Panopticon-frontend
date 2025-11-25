@@ -148,6 +148,41 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       textStyle: { color: '#f9fafb', fontSize: 18 },
       padding: 20,
       borderRadius: 8,
+      formatter: (params: unknown) => {
+        interface TooltipParam {
+          axisValue: string | number;
+          color: string;
+          seriesName: string;
+          value: number[];
+        }
+        const list = Array.isArray(params) ? params : [params as TooltipParam];
+        if (!list?.length) return '';
+
+        const timestamp =
+          typeof list[0].axisValue === 'number'
+            ? list[0].axisValue
+            : new Date(list[0].axisValue).getTime();
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+
+        const header = `<div style="margin-bottom:8px; font-size:16px;"><b>${formattedDate}</b></div>`;
+        const lines = list
+          .map(
+            (p) =>
+              `<div style="margin:6px 0; font-size:16px;"><span style="color:${p.color}">●</span> ${
+                p.seriesName
+              }: ${Math.round(p.value[1] ?? 0)}</div>`,
+          )
+          .join('');
+        return header + lines;
+      },
     },
     series: [
       {
