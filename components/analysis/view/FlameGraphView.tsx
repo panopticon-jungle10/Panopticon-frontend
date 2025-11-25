@@ -134,10 +134,10 @@ export default function FlameGraphView({ spans, onSpanSelect, height = '500px' }
           const statusText = getBucketLabel(ratio);
           return `
             <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${data.name}</div>
-            <div style="line-height:1.2;font-size:20px;">Duration: ${data.duration_ms}ms</div>
-            <div style="line-height:1.2;font-size:20px;">Service: ${data.service_name}</div>
-            <div style="line-height:1.2;font-size:20px;">Kind: ${data.kind}</div>
-            <div style="line-height:1.2;font-size:20px;">Status: ${statusText}</div>
+            <div style="line-height:1.2;font-size:20px;">총 시간: ${data.duration_ms.toFixed(2)}ms</div>
+            <div style="line-height:1.2;font-size:20px;">서비스: ${data.service_name}</div>
+            <div style="line-height:1.2;font-size:20px;">종류: ${data.kind}</div>
+            <div style="line-height:1.2;font-size:20px;">상태: ${statusText}</div>
             ${
               data.http_method
                 ? `<div style="line-height:1.2;font-size:20px;">HTTP: ${data.http_method} ${

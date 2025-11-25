@@ -101,13 +101,13 @@ export default function WaterfallView({ spans, onSpanSelect, height = '500px' }:
                 ${span.name}
               </div>
               <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">
-                Duration:
+                총 시간:
                 <span style="color:#fff;font-weight:600;">
                   ${(span.duration_ms ?? 0).toFixed(2)} ms
                 </span>
               </div>
               <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">
-                Status: ${statusText}
+                상태: ${statusText}
               </div>
               <div style="color:#94a3b8;font-size:18px;margin-top:8px;font-family:monospace;">
                 ${span.span_id}

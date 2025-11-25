@@ -177,10 +177,10 @@ export default function MapView({ spans, onSpanSelect, height = '600px' }: MapVi
               <div style="font-weight: 700; font-size: 24px; margin-bottom: 6px; color: #fff;line-height:1.2;">${
                 span.name
               }</div>
-              <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">Duration: <span style="color: #fff; font-weight: 600;">${(
+              <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">총 시간: <span style="color: #fff; font-weight: 600;">${(
                 span.duration_ms ?? 0
               ).toFixed(2)} ms</span></div>
-              <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">Status: ${statusText}</div>
+              <div style="color: #e2e8f0; font-size: 20px;line-height:1.2;">상태: ${statusText}</div>
               <div style="color: #94a3b8; font-size: 18px; margin-top: 10px; font-family: monospace;">${
                 span.span_id
               }</div>
