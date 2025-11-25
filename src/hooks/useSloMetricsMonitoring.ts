@@ -208,7 +208,7 @@ export function useSloMetricsMonitoring(serviceName: string) {
     };
 
     updateSloAndAlert();
-  }, [metrics, slos, getMetricValue, monitoringState, dispatchAlert]);
+  }, [metrics, slos, getMetricValue, dispatchAlert]);
 
   return {
     monitoringState,
