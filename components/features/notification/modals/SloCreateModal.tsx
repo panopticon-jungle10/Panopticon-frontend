@@ -2,8 +2,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { HiXMark } from 'react-icons/hi2';
 import Dropdown from '@/components/ui/Dropdown';
+import { getServices } from '@/src/api/apm';
 import type { IntegrationType, SloCreateInput, TimeRangeKey } from '@/src/types/notification';
 
 interface SloCreateModalProps {
@@ -58,6 +60,7 @@ export default function SloCreateModal({
 }: SloCreateModalProps) {
   type SloFormState = {
     id: string;
+    serviceName: string;
     name: string;
     description?: string;
     metric: SloCreateInput['metric'];
@@ -72,6 +75,7 @@ export default function SloCreateModal({
     if (editingData) {
       return {
         id: editingData.id,
+        serviceName: editingData.serviceName || '',
         name: editingData.name,
         description: editingData.description,
         metric: editingData.metric,
@@ -84,6 +88,7 @@ export default function SloCreateModal({
     }
     return {
       id: '', // 서버가 생성할 임시 빈 값
+      serviceName: '',
       name: 'New SLO',
       description: '',
       metric: 'availability',
@@ -98,6 +103,18 @@ export default function SloCreateModal({
   const [form, setForm] = useState<SloFormState>(() => getInitialForm());
   const [targetError, setTargetError] = useState('');
   const isEditMode = !!editingData;
+
+  // 서비스 목록 조회
+  const { data: servicesData, isLoading: servicesLoading } = useQuery({
+    queryKey: ['services'],
+    queryFn: () => getServices(),
+    enabled: open, // 모달이 열릴 때만 쿼리 실행
+  });
+
+  const serviceOptions = servicesData?.services.map((service) => ({
+    label: service.service_name,
+    value: service.service_name,
+  })) || [];
 
   // editingData가 변경될 때 form을 초기화
   useEffect(() => {
@@ -202,6 +219,26 @@ export default function SloCreateModal({
 
         {/* FORM BODY */}
         <div className="space-y-6">
+          {/* SERVICE */}
+          <div>
+            <label className="text-sm font-semibold text-gray-800">서비스</label>
+            {servicesLoading ? (
+              <div className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500">
+                서비스 목록 로딩 중...
+              </div>
+            ) : (
+              <Dropdown
+                value={form.serviceName}
+                onChange={(value: string) => handleChange('serviceName', value)}
+                options={serviceOptions}
+                className="mt-2 w-full"
+              />
+            )}
+            {!servicesLoading && serviceOptions.length === 0 && (
+              <p className="mt-1 text-xs text-amber-600">사용 가능한 서비스가 없습니다.</p>
+            )}
+          </div>
+
           {/* NAME */}
           <div>
             <label className="text-sm font-semibold text-gray-800">이름</label>

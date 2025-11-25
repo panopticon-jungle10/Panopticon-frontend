@@ -61,6 +61,7 @@ export interface NotificationSummary {
 
 export interface SloCreateInput {
   id: string;
+  serviceName: string;
   name: string;
   description?: string;
   metric: SloMetric;

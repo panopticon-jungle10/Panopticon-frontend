@@ -11,6 +11,7 @@ import { fetchWithAuth } from './auth';
 export interface SloResponse {
   id: string;
   userId: string;
+  serviceName: string;
   name: string;
   metric: 'availability' | 'latency' | 'error_rate';
   target: number;
@@ -24,6 +25,7 @@ export interface SloResponse {
 }
 
 export interface CreateSloDto {
+  serviceName: string;
   name: string;
   metric: 'availability' | 'latency' | 'error_rate';
   target: number;
@@ -35,6 +37,7 @@ export interface CreateSloDto {
 }
 
 export interface UpdateSloDto {
+  serviceName?: string;
   name?: string;
   metric?: 'availability' | 'latency' | 'error_rate';
   target?: number;
