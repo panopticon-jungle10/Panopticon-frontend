@@ -90,8 +90,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       trigger: 'axis',
       backgroundColor: 'rgba(0,0,0,0.7)',
       borderColor: 'transparent',
-      textStyle: { color: '#f9fafb', fontSize: 12 },
-      padding: 6,
+      textStyle: { color: '#f9fafb', fontSize: 18 },
+      padding: 20,
+      borderRadius: 8,
     },
     xAxis: {
       type: 'time',
@@ -144,8 +145,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       trigger: 'axis',
       backgroundColor: 'rgba(0,0,0,0.7)',
       borderColor: 'transparent',
-      textStyle: { color: '#f9fafb', fontSize: 12 },
-      padding: 6,
+      textStyle: { color: '#f9fafb', fontSize: 18 },
+      padding: 20,
+      borderRadius: 8,
     },
     series: [
       {
@@ -200,8 +202,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       trigger: 'axis',
       backgroundColor: 'rgba(0,0,0,0.7)',
       borderColor: 'transparent',
-      textStyle: { color: '#f9fafb', fontSize: 12 },
-      padding: 6,
+      textStyle: { color: '#f9fafb', fontSize: 18 },
+      padding: 20,
+      borderRadius: 8,
       formatter: (params: unknown) => {
         interface TooltipParam {
           axisValue: string | number;
@@ -226,11 +229,11 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
           second: '2-digit',
         });
 
-        const header = `<div style="margin-bottom:4px;"><b>${formattedDate}</b></div>`;
+        const header = `<div style="margin-bottom:8px; font-size:16px;"><b>${formattedDate}</b></div>`;
         const lines = list
           .map(
             (p) =>
-              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${
+              `<div style="margin:6px 0; font-size:16px;"><span style="color:${p.color}">●</span> ${
                 p.seriesName
               }: ${(p.value[1] ?? 0).toFixed(2)}%</div>`,
           )
@@ -326,8 +329,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       trigger: 'axis',
       backgroundColor: 'rgba(0,0,0,0.7)',
       borderColor: 'transparent',
-      textStyle: { color: '#f9fafb', fontSize: 12 },
-      padding: 6,
+      textStyle: { color: '#f9fafb', fontSize: 18 },
+      padding: 20,
+      borderRadius: 8,
       formatter: (params: unknown) => {
         interface TooltipParam {
           axisValue: string | number;
@@ -352,11 +356,11 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
           second: '2-digit',
         });
 
-        const header = `<div style="margin-bottom:4px;"><b>${formattedDate}</b></div>`;
+        const header = `<div style="margin-bottom:8px; font-size:16px;"><b>${formattedDate}</b></div>`;
         const lines = list
           .map(
             (p) =>
-              `<div style="margin:2px 0;"><span style="color:${p.color}">●</span> ${
+              `<div style="margin:6px 0; font-size:16px;"><span style="color:${p.color}">●</span> ${
                 p.seriesName
               }: ${(p.value[1] ?? 0).toFixed(2)}ms</div>`,
           )
