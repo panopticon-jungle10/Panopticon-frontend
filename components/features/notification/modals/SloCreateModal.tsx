@@ -90,10 +90,11 @@ export default function SloCreateModal({
     enabled: open, // 모달이 열릴 때만 쿼리 실행
   });
 
-  const serviceOptions = servicesData?.services.map((service) => ({
-    label: service.service_name,
-    value: service.service_name,
-  })) || [];
+  const serviceOptions =
+    servicesData?.services.map((service) => ({
+      label: service.service_name,
+      value: service.service_name,
+    })) || [];
 
   // editingData가 변경될 때 form을 초기화
   useEffect(() => {

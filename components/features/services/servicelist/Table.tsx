@@ -48,11 +48,7 @@ const columns = [
       const errorRate = value as number;
       const rate = (errorRate * 100).toFixed(2);
       const healthy = isErrorHealthy(errorRate);
-      return (
-        <span className={healthy ? 'text-emerald-600' : 'text-rose-600'}>
-          {rate}%
-        </span>
-      );
+      return <span className={healthy ? 'text-emerald-600' : 'text-rose-600'}>{rate}%</span>;
     },
   },
   {

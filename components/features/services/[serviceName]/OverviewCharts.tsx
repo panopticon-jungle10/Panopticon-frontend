@@ -70,11 +70,16 @@ export default function OverviewCharts({
   // interval panel 상태
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelRange, setPanelRange] = useState<{ start: number; end: number } | null>(null);
-  const [selectedChartType, setSelectedChartType] = useState<'requests' | 'error_rate' | 'latency'>('requests');
+  const [selectedChartType, setSelectedChartType] = useState<'requests' | 'error_rate' | 'latency'>(
+    'requests',
+  );
 
   const { timeRange } = useTimeRangeStore();
 
-  const openIntervalAround = (timestamp: number, chartType: 'requests' | 'error_rate' | 'latency') => {
+  const openIntervalAround = (
+    timestamp: number,
+    chartType: 'requests' | 'error_rate' | 'latency',
+  ) => {
     const tsNum = Number(timestamp);
     if (Number.isNaN(tsNum)) return;
     const totalRangeMs = TIME_RANGE_DURATION_MS[timeRange];

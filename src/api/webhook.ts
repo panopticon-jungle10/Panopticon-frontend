@@ -52,7 +52,6 @@ export interface TestWebhookResponse {
   message: string;
 }
 
-
 // ==================== API 함수들 ====================
 
 /**

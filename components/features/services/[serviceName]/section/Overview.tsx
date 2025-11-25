@@ -176,9 +176,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         const lines = list
           .map(
             (p) =>
-              `<div style="line-height:1.2;font-size:20px;"><span style="color:${p.color}">●</span> ${
-                p.seriesName
-              }: ${Math.round(p.value[1] ?? 0)}</div>`,
+              `<div style="line-height:1.2;font-size:20px;"><span style="color:${
+                p.color
+              }">●</span> ${p.seriesName}: ${Math.round(p.value[1] ?? 0)}</div>`,
           )
           .join('');
         return header + lines;
@@ -268,9 +268,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         const lines = list
           .map(
             (p) =>
-              `<div style="line-height:1.2;font-size:20px;"><span style="color:${p.color}">●</span> ${
-                p.seriesName
-              }: ${(p.value[1] ?? 0).toFixed(2)}%</div>`,
+              `<div style="line-height:1.2;font-size:20px;"><span style="color:${
+                p.color
+              }">●</span> ${p.seriesName}: ${(p.value[1] ?? 0).toFixed(2)}%</div>`,
           )
           .join('');
         return header + lines;
@@ -395,9 +395,9 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         const lines = list
           .map(
             (p) =>
-              `<div style="line-height:1.2;font-size:20px;"><span style="color:${p.color}">●</span> ${
-                p.seriesName
-              }: ${(p.value[1] ?? 0).toFixed(2)}ms</div>`,
+              `<div style="line-height:1.2;font-size:20px;"><span style="color:${
+                p.color
+              }">●</span> ${p.seriesName}: ${(p.value[1] ?? 0).toFixed(2)}ms</div>`,
           )
           .join('');
         return header + lines;

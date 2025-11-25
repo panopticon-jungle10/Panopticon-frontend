@@ -32,7 +32,11 @@ interface WaterfallViewProps {
 import { getBucketColor, getBucketLabel, getBucketByIndex } from '@/src/utils/durationBuckets';
 import StateHandler from '@/components/ui/StateHandler';
 
-export default function WaterfallView({ spans, onSpanSelect, height = '500px' }: WaterfallViewProps) {
+export default function WaterfallView({
+  spans,
+  onSpanSelect,
+  height = '500px',
+}: WaterfallViewProps) {
   const chartOption = useMemo<EChartsOption | null>(() => {
     if (!spans || spans.length === 0) return null;
 
@@ -173,7 +177,11 @@ export default function WaterfallView({ spans, onSpanSelect, height = '500px' }:
   };
 
   return (
-    <StateHandler isEmpty={!spans || spans.length === 0 || !chartOption} type="chart" height={height}>
+    <StateHandler
+      isEmpty={!spans || spans.length === 0 || !chartOption}
+      type="chart"
+      height={height}
+    >
       <div className="h-full flex flex-col">
         <div className="flex items-center justify-end mb-4 px-1">
           <div className="flex items-center gap-3 text-xs text-gray-600">

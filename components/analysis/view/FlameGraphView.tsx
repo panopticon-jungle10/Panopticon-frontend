@@ -22,7 +22,11 @@ interface FlameBlock {
   widthRatio: number;
 }
 
-export default function FlameGraphView({ spans, onSpanSelect, height = '500px' }: FlameGraphViewProps) {
+export default function FlameGraphView({
+  spans,
+  onSpanSelect,
+  height = '500px',
+}: FlameGraphViewProps) {
   // 스팬을 Flame Graph 블록으로 변환
   const { flameBlocks, maxDepth } = useMemo(() => {
     if (!spans || spans.length === 0) return { flameBlocks: [], maxDepth: 0 };
@@ -133,8 +137,12 @@ export default function FlameGraphView({ spans, onSpanSelect, height = '500px' }
             Math.max(1, spans.find((s) => !s.parent_span_id)?.duration_ms || 1);
           const statusText = getBucketLabel(ratio);
           return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${data.name}</div>
-            <div style="line-height:1.2;font-size:20px;">총 시간: ${data.duration_ms.toFixed(2)}ms</div>
+            <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${
+              data.name
+            }</div>
+            <div style="line-height:1.2;font-size:20px;">총 시간: ${data.duration_ms.toFixed(
+              2,
+            )}ms</div>
             <div style="line-height:1.2;font-size:20px;">서비스: ${data.service_name}</div>
             <div style="line-height:1.2;font-size:20px;">종류: ${data.kind}</div>
             <div style="line-height:1.2;font-size:20px;">상태: ${statusText}</div>

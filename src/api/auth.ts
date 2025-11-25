@@ -24,10 +24,7 @@ const getAuthServerUrl = (): string => {
 
 // ==================== Fetch 헬퍼 ====================
 
-export async function fetchWithAuth<T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> {
+export async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise<T> {
   const baseUrl = getAuthServerUrl();
   const fullUrl = `${baseUrl}${url}`;
 

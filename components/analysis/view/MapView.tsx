@@ -250,7 +250,11 @@ export default function MapView({ spans, onSpanSelect, height = '600px' }: MapVi
   };
 
   return (
-    <StateHandler isEmpty={!spans || spans.length === 0 || !chartOption} type="chart" height={height}>
+    <StateHandler
+      isEmpty={!spans || spans.length === 0 || !chartOption}
+      type="chart"
+      height={height}
+    >
       <div className="h-full flex flex-col">
         <div className="flex items-center justify-end mb-4 px-1">
           <div className="flex items-center gap-3 text-xs text-gray-600">

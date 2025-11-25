@@ -163,9 +163,7 @@ export default function EndpointTraceAnalysis({
       key: 'timestamp',
       header: 'Time',
       width: '20%',
-      render: (timestamp) => (
-        <span>{new Date(timestamp).toLocaleString('ko-KR')}</span>
-      ),
+      render: (timestamp) => <span>{new Date(timestamp).toLocaleString('ko-KR')}</span>,
       sortable: false,
     },
   ];

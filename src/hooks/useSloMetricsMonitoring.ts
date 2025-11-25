@@ -167,9 +167,8 @@ export function useSloMetricsMonitoring(serviceName: string) {
 
           // actualDowntimeMinutes 계산
           // SLI가 목표 미만이면 1분 추가 (폴링 주기 = 1분)
-          const actualDowntimeMinutes = newSliValue < slo.target
-            ? slo.actualDowntimeMinutes + 1
-            : slo.actualDowntimeMinutes;
+          const actualDowntimeMinutes =
+            newSliValue < slo.target ? slo.actualDowntimeMinutes + 1 : slo.actualDowntimeMinutes;
 
           // 상태 판정
           const newStatus = deriveSloStatus(newSliValue, slo.target);
@@ -177,8 +176,10 @@ export function useSloMetricsMonitoring(serviceName: string) {
           const previousStatus = previousState?.currentStatus || 'GOOD';
 
           // 값이 변경되었을 경우만 업데이트
-          if (Math.abs(newSliValue - slo.sliValue) > 0.001 ||
-              actualDowntimeMinutes !== slo.actualDowntimeMinutes) {
+          if (
+            Math.abs(newSliValue - slo.sliValue) > 0.001 ||
+            actualDowntimeMinutes !== slo.actualDowntimeMinutes
+          ) {
             await updateSlo(slo.id, {
               sliValue: newSliValue,
               actualDowntimeMinutes: actualDowntimeMinutes,
@@ -220,7 +221,7 @@ export function useSloMetricsMonitoring(serviceName: string) {
     };
 
     updateSloAndAlert();
-  }, [metrics, slos, getMetricValue, dispatchAlert]);
+  }, [metrics, slos, getMetricValue, dispatchAlert, monitoringState]);
 
   return {
     monitoringState,
