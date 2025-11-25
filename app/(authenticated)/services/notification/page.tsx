@@ -79,6 +79,10 @@ export default function NotificationPage() {
       try {
         // 웹훅 정보 불러오기
         const webhooks = await getWebhooks();
+
+        if (!webhooks || webhooks.length === 0) {
+          console.warn('No webhooks found');
+        }
         const newConnections: ConnectionState = {};
 
         webhooks.forEach((webhook) => {
