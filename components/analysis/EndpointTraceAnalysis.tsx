@@ -5,7 +5,7 @@ import { IoClose } from 'react-icons/io5';
 import { useQuery } from '@tanstack/react-query';
 import { getEndpointTraces } from '@/src/api/apm';
 import { TraceStatusFilter, EndpointTraceItem } from '@/types/apm';
-import { useTimeRangeStore } from '@/src/store/timeRangeStore';
+import { useTimeRangeStore, POLLING_INTERVAL } from '@/src/store/timeRangeStore';
 import StateHandler from '@/components/ui/StateHandler';
 import Dropdown from '@/components/ui/Dropdown';
 import Table, { TableColumn } from '@/components/ui/Table';
@@ -39,7 +39,7 @@ export default function EndpointTraceAnalysis({
   // sortOption에서 status 추출
   const status: TraceStatusFilter = sortOption === 'SLOW' ? 'SLOW' : 'ERROR';
 
-  // 트레이스 데이터 가져오기
+  // 트레이스 데이터 가져오기 (10초마다 폴링)
   const {
     data: rawData,
     isLoading,
@@ -54,6 +54,9 @@ export default function EndpointTraceAnalysis({
         limit: 20,
       }),
     enabled: isOpen && !!serviceName && !!endpointName,
+    refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true,
+    staleTime: 2000, // 2초 동안은 fresh 상태 유지
   });
 
   // sortOption에 따른 정렬
