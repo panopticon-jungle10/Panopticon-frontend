@@ -125,7 +125,7 @@ export default function FlameGraphView({ spans, onSpanSelect, height = '500px' }
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: 'transparent',
-        textStyle: { color: '#f9fafb', fontSize: 14 },
+        textStyle: { color: '#f9fafb', fontSize: 28 },
         formatter: (params: any) => {
           const data = params.data.spanData;
           const ratio =
@@ -133,21 +133,21 @@ export default function FlameGraphView({ spans, onSpanSelect, height = '500px' }
             Math.max(1, spans.find((s) => !s.parent_span_id)?.duration_ms || 1);
           const statusText = getBucketLabel(ratio);
           return `
-            <div style="font-weight:700;margin-bottom:8px;font-size:16px;">${data.name}</div>
-            <div style="margin:4px 0;font-size:15px;">Duration: ${data.duration_ms}ms</div>
-            <div style="margin:4px 0;font-size:15px;">Service: ${data.service_name}</div>
-            <div style="margin:4px 0;font-size:15px;">Kind: ${data.kind}</div>
-            <div style="margin:4px 0;font-size:15px;">Status: ${statusText}</div>
+            <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${data.name}</div>
+            <div style="line-height:1.2;font-size:20px;">Duration: ${data.duration_ms}ms</div>
+            <div style="line-height:1.2;font-size:20px;">Service: ${data.service_name}</div>
+            <div style="line-height:1.2;font-size:20px;">Kind: ${data.kind}</div>
+            <div style="line-height:1.2;font-size:20px;">Status: ${statusText}</div>
             ${
               data.http_method
-                ? `<div style="margin:4px 0;font-size:14px;">HTTP: ${data.http_method} ${
+                ? `<div style="line-height:1.2;font-size:20px;">HTTP: ${data.http_method} ${
                     data.http_path || ''
                   }</div>`
                 : ''
             }
             ${
               data.db_statement
-                ? `<div style="margin:4px 0;font-size:14px;">DB: ${data.db_statement.substring(
+                ? `<div style="line-height:1.2;font-size:20px;">DB: ${data.db_statement.substring(
                     0,
                     50,
                   )}...</div>`

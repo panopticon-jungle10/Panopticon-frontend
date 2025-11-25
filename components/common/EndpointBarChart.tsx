@@ -97,8 +97,8 @@ export default function EndpointBarChart({
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: 'transparent',
-        textStyle: { color: '#f9fafb', fontSize: 12 },
-        padding: 10,
+        textStyle: { color: '#f9fafb', fontSize: 32 },
+        padding: 12,
 
         // 호버: 선택된 엔드포인트 정보 또는 평균선 정보 표시
         formatter: (params: { name?: string; dataIndex?: number }) => {
@@ -118,8 +118,8 @@ export default function EndpointBarChart({
             })();
 
             return `
-              <div style="font-weight:700;margin-bottom:6px;font-size:14px;">평균</div>
-              <div>${metricLabel}: ${metricValue}</div>
+              <div style="font-weight:700;margin-bottom:6px;font-size:24px;">평균</div>
+              <div style="font-size:22px;">${metricLabel}: ${metricValue}</div>
             `;
           }
 
@@ -152,10 +152,10 @@ export default function EndpointBarChart({
           const errorRateText = errorRate !== null ? `${errorRate.toFixed(2)}%` : '-';
 
           return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
-            <div>${mainMetricLabel}: ${mainMetricValue}</div>
-            <div>지연시간(P95): ${p95.toFixed(2)} ms</div>
-            <div>에러율: ${errorRateText}</div>
+            <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${name}</div>
+            <div style="line-height:1.2;font-size:20px;">${mainMetricLabel}: ${mainMetricValue}</div>
+            <div style="line-height:1.2;font-size:20px;">지연시간(P95): ${p95.toFixed(2)} ms</div>
+            <div style="line-height:1.2;font-size:20px;">에러율: ${errorRateText}</div>
           `;
         },
       },

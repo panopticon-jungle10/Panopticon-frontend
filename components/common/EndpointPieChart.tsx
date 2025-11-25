@@ -54,8 +54,8 @@ export default function EndpointPieChart({
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.8)',
         borderColor: 'transparent',
-        textStyle: { color: '#f9fafb', fontSize: 12 },
-        padding: 10,
+        textStyle: { color: '#f9fafb', fontSize: 32 },
+        padding: 12,
         confine: true,
         formatter: (params: any) => {
           const d = params.data?.endpointData || params.data || {};
@@ -69,10 +69,10 @@ export default function EndpointPieChart({
           const requestsText = requests.toLocaleString();
 
           return `
-            <div style="font-weight:700;margin-bottom:6px;font-size:14px;">${name}</div>
-            <div style="margin:4px 0;font-size:12px;">요청수: ${requestsText}</div>
-            <div style="margin:4px 0;font-size:12px;">에러율: ${errorRateText}</div>
-            <div style="margin:4px 0;font-size:12px;">지연시간: ${p95.toFixed(2)} ms</div>
+            <div style="font-weight:700;margin-bottom:6px;font-size:24px;line-height:1.2;">${name}</div>
+            <div style="line-height:1.2;font-size:20px;">요청수: ${requestsText}</div>
+            <div style="line-height:1.2;font-size:20px;">에러율: ${errorRateText}</div>
+            <div style="line-height:1.2;font-size:20px;">지연시간: ${p95.toFixed(2)} ms</div>
           `;
         },
       },

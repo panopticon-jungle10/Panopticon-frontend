@@ -32,7 +32,7 @@ export default function EndpointTraceAnalysis({
   endpointName,
 }: EndpointTraceAnalysisProps) {
   // 상태 관리
-  const [sortOption, setSortOption] = useState<SortOption>('ERROR_SLOW');
+  const [sortOption, setSortOption] = useState<SortOption>('SLOW');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const { startTime, endTime } = useTimeRangeStore();
 
@@ -100,9 +100,9 @@ export default function EndpointTraceAnalysis({
 
   // 정렬 옵션
   const sortOptions = [
+    { label: '느린순', value: 'SLOW' as const },
     { label: '에러(느린순)', value: 'ERROR_SLOW' as const },
     { label: '에러(최신순)', value: 'ERROR_LATEST' as const },
-    { label: '느린순', value: 'SLOW' as const },
   ];
 
   // 트레이스 클릭 핸들러
