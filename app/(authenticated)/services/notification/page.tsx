@@ -68,9 +68,9 @@ export default function NotificationPage() {
   const [userSlos, setUserSlos] = useState<SloCreateInput[]>([]);
   const [integrationStatuses, setIntegrationStatusesState] = useState<IntegrationStatus[]>([
     { type: 'slack', connected: false, connectedSloCount: 0, lastTestResult: null },
-    { type: 'email', connected: false, connectedSloCount: 0, lastTestResult: null },
-    { type: 'teams', connected: false, connectedSloCount: 0, lastTestResult: null },
     { type: 'discord', connected: false, connectedSloCount: 0, lastTestResult: null },
+    { type: 'teams', connected: false, connectedSloCount: 0, lastTestResult: null },
+    { type: 'email', connected: false, connectedSloCount: 0, lastTestResult: null },
   ]);
 
   // authserver에서 웹훅 및 SLO 정보 불러오기 (페이지 마운트시 한 번 실행)
@@ -121,8 +121,6 @@ export default function NotificationPage() {
           actualDowntimeMinutes: slo.actualDowntimeMinutes,
           totalMinutes: slo.totalMinutes,
           connectedChannels: slo.connectedChannels as ('slack' | 'email' | 'teams' | 'discord')[],
-          tooltipTitle: '',
-          tooltipDescription: '',
           description: slo.description,
           timeRangeKey: '24h',
         }));
@@ -185,6 +183,7 @@ export default function NotificationPage() {
     const usedRate = allowedDowntime === 0 ? 0 : input.actualDowntimeMinutes / allowedDowntime;
     return {
       id: input.id,
+      serviceName: input.serviceName,
       name: input.name,
       metric: input.metric,
       target: input.target,
@@ -196,8 +195,6 @@ export default function NotificationPage() {
       errorBudgetRemainingPct: Math.max(0, (1 - usedRate) * 100),
       errorBudgetOverPct: Math.max(0, usedRate * 100 - 100),
       status: deriveStatus(usedRate),
-      tooltipTitle: input.tooltipTitle,
-      tooltipDescription: input.tooltipDescription,
       connectedChannels: input.connectedChannels,
       description: input.description,
       trend: [],
@@ -227,8 +224,6 @@ export default function NotificationPage() {
       sliValue: slo.sliValue,
       totalMinutes: slo.totalMinutes,
       actualDowntimeMinutes: slo.actualDowntimeMinutes,
-      tooltipTitle: slo.tooltipTitle,
-      tooltipDescription: slo.tooltipDescription,
       connectedChannels: slo.connectedChannels,
       timeRangeKey: userSlo?.timeRangeKey || '24h',
     };
@@ -262,7 +257,7 @@ export default function NotificationPage() {
             slo.id === input.id
               ? {
                   ...slo,
-                  serviceName: updatedSlo.serviceName,
+                  serviceName: updatedSlo.serviceName ?? '',
                   name: updatedSlo.name,
                   metric: updatedSlo.metric as 'availability' | 'latency' | 'error_rate',
                   target: updatedSlo.target,
@@ -299,7 +294,7 @@ export default function NotificationPage() {
         // 로컬 상태에 추가
         const newInput: SloCreateInput = {
           id: createdSlo.id,
-          serviceName: createdSlo.serviceName,
+          serviceName: createdSlo.serviceName ?? '',
           name: createdSlo.name,
           metric: createdSlo.metric as 'availability' | 'latency' | 'error_rate',
           target: createdSlo.target,
@@ -312,8 +307,6 @@ export default function NotificationPage() {
             | 'teams'
             | 'discord'
           )[],
-          tooltipTitle: '',
-          tooltipDescription: '',
           description: createdSlo.description,
           timeRangeKey: '24h',
         };
@@ -472,7 +465,7 @@ export default function NotificationPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {displayedSlos.map((slo) => (
                 <SloCard key={slo.id} slo={slo} onEdit={handleSloEdit} onDelete={handleSloDelete} />
               ))}

@@ -16,21 +16,6 @@ interface SloCreateModalProps {
   editingData?: SloCreateInput | null;
 }
 
-const metricDescriptions = {
-  availability: {
-    title: 'Availability SLO',
-    description: '비정상 응답 없이 처리된 요청의 비율입니다.',
-  },
-  latency: {
-    title: 'Latency P95',
-    description: '전체 요청 중 가장 느린 5%를 제외한 응답 시간입니다.',
-  },
-  error_rate: {
-    title: 'Error Rate',
-    description: '전체 요청 중 오류가 발생한 비율입니다.',
-  },
-};
-
 const timeRangeOptions: { label: string; value: TimeRangeKey; minutes: number }[] = [
   { label: '1시간', value: '1h', minutes: 60 },
   { label: '24시간', value: '24h', minutes: 60 * 24 },
@@ -67,8 +52,6 @@ export default function SloCreateModal({
     target: number;
     timeRangeKey: TimeRangeKey;
     connectedChannels: IntegrationType[];
-    tooltipTitle: string;
-    tooltipDescription: string;
   };
 
   const getInitialForm = useCallback((): SloFormState => {
@@ -82,8 +65,6 @@ export default function SloCreateModal({
         target: editingData.target,
         timeRangeKey: editingData.timeRangeKey || '24h',
         connectedChannels: editingData.connectedChannels,
-        tooltipTitle: editingData.tooltipTitle,
-        tooltipDescription: editingData.tooltipDescription,
       };
     }
     return {
@@ -95,8 +76,6 @@ export default function SloCreateModal({
       target: 0.99,
       timeRangeKey: '24h',
       connectedChannels: ['slack'],
-      tooltipTitle: metricDescriptions.availability.title,
-      tooltipDescription: metricDescriptions.availability.description,
     };
   }, [editingData]);
 
@@ -142,8 +121,6 @@ export default function SloCreateModal({
 
   const handleMetricChange = (metric: SloCreateInput['metric']) => {
     handleChange('metric', metric);
-    handleChange('tooltipTitle', metricDescriptions[metric].title);
-    handleChange('tooltipDescription', metricDescriptions[metric].description);
 
     if (metric === 'latency') {
       handleChange('target', 200);
@@ -272,7 +249,7 @@ export default function SloCreateModal({
 
           {/* METRIC */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">메트릭</label>
+            <label className="text-sm font-semibold text-gray-800">모니터링 요소</label>
             <Dropdown
               value={form.metric}
               onChange={handleMetricChange}
@@ -283,7 +260,7 @@ export default function SloCreateModal({
 
           {/* TIME RANGE / WINDOW */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">평가 기간</label>
+            <label className="text-sm font-semibold text-gray-800">모니터링 기간</label>
             <Dropdown
               value={form.timeRangeKey}
               onChange={(value: TimeRangeKey) => handleChange('timeRangeKey', value)}
@@ -324,7 +301,7 @@ export default function SloCreateModal({
           {/* TARGET */}
           <div>
             <label className="text-sm font-semibold text-gray-800">
-              목표값 {isLatency ? '(ms, 0~5000)' : '(0 ~ 1)'}
+              목표값 {isLatency ? '(ms, 0 이상)' : '(0 ~ 1)'}
             </label>
 
             <input

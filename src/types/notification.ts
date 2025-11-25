@@ -21,14 +21,13 @@ export interface SloTrendPoint {
 
 export interface BaseSloRecord {
   id: string;
+  serviceName: string;
   name: string;
   metric: SloMetric;
   target: number;
   sliValue: number;
   totalMinutes: number;
   actualDowntimeMinutes: number;
-  tooltipTitle: string;
-  tooltipDescription: string;
   connectedChannels: IntegrationType[];
   trend: SloTrendPoint[];
 }
@@ -69,8 +68,6 @@ export interface SloCreateInput {
   sliValue: number;
   totalMinutes?: number;
   actualDowntimeMinutes: number;
-  tooltipTitle: string;
-  tooltipDescription: string;
   connectedChannels: IntegrationType[];
   timeRangeKey?: TimeRangeKey;
 }
