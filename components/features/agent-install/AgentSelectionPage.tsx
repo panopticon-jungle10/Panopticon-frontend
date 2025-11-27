@@ -68,7 +68,7 @@ export default function AgentSelectionPage() {
 
   return (
     <div className="h-full bg-white">
-      {/* 헤더 */}
+      {/* 헤더 & 메인 콘텐츠 */}
       <div className="bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">SDK Setup</p>
@@ -77,11 +77,8 @@ export default function AgentSelectionPage() {
             서비스의 런타임 환경에 맞는 SDK를 선택하여 설치를 시작하세요.
           </p>
         </div>
-      </div>
 
-      {/* 메인 콘텐츠 */}
-      <div className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto max-w-7xl px-6 py-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {AGENTS.map((agent) => {
             const colors = getAgentColorClasses(agent.id);
             const isDisabled = agent.isComingSoon;
