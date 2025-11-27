@@ -70,9 +70,7 @@ export default function ServicesPage() {
     if (keyword.trim()) {
       const k = keyword.toLowerCase();
       services = services.filter(
-        (s) =>
-          s.service_name.toLowerCase().includes(k) ||
-          s.environment.toLowerCase().includes(k),
+        (s) => s.service_name.toLowerCase().includes(k) || s.environment.toLowerCase().includes(k),
       );
     }
 
