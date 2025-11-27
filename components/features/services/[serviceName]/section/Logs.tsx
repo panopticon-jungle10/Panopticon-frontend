@@ -185,6 +185,7 @@ export default function LogsSection({ serviceName }: LogsSectionProps) {
             }}
             messageKeywords={messageKeywords}
             serviceNames={serviceNames}
+            placeholder="msg:메시지 내용 service:서비스 이름 level:로그 레벨 또는 일반 검색어 입력"
           />
         </div>
       </div>
