@@ -9,7 +9,6 @@ import { convertTimeRangeToParams, getChartXAxisRange } from '@/src/utils/timeRa
 import {
   getTimeAxisFormatter,
   getBarMaxWidthForTimeAxis,
-  getXAxisInterval,
 } from '@/src/utils/chartFormatter';
 import { useSloMetricsMonitoring } from '@/src/hooks/useSloMetricsMonitoring';
 
@@ -86,7 +85,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
   }, [metricsArray, timeRange]);
 
   /* -------------------- 차트 공통 스타일 ------------------ */
-  const baseStyle = {
+  const baseStyle = useMemo(() => ({
     backgroundColor: 'transparent',
     animation: false, // markLine 애니메이션 비활성화
     grid: { left: 55, right: 15, top: 60, bottom: 50 },
@@ -107,7 +106,6 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         fontSize: 11,
         formatter: getTimeAxisFormatter(interval),
         hideOverlap: true,
-        interval: getXAxisInterval(interval), // interval에 따른 일정한 라벨 간격
       },
       axisLine: { show: true, lineStyle: { color: '#9ca3af', width: 1 } },
       axisTick: { show: false },
@@ -126,7 +124,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       itemGap: 10,
       textStyle: { color: '#6b7280', fontSize: 11 },
     },
-  };
+  }), [interval, xAxisMin, xAxisMax]);
 
   /* -------------------- 요청수 -------------------- */
   // 요청수 평균 계산
@@ -138,7 +136,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       : 0;
   }, [chartData.requests]);
 
-  const requestsOption = {
+  const requestsOption = useMemo(() => ({
     ...baseStyle,
     title: {
       text: '요청수',
@@ -218,7 +216,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         },
       },
     ],
-  };
+  }), [baseStyle, chartData.requests, requestsAverage, interval]);
 
   /* -------------------- 에러율 -------------------- */
   // 에러율 평균 계산
@@ -230,7 +228,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
       : 0;
   }, [chartData.errorRate]);
 
-  const errorRateOption = {
+  const errorRateOption = useMemo(() => ({
     ...baseStyle,
     title: {
       text: '에러율',
@@ -320,7 +318,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         },
       },
     ],
-  };
+  }), [baseStyle, chartData.errorRate, errorRateAverage, interval]);
 
   /* -------------------- 레이턴시 -------------------- */
   // 레이턴시 차트 색상 정의 (라벨과 선 동기화)
@@ -347,7 +345,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
     };
   }, [chartData.latency]);
 
-  const latencyOption = {
+  const latencyOption = useMemo(() => ({
     ...baseStyle,
     title: {
       text: '레이턴시',
@@ -499,7 +497,7 @@ export default function OverviewSection({ serviceName }: OverviewSectionProps) {
         },
       },
     ],
-  };
+  }), [baseStyle, chartData.latency, latencyAverages, latencyColors, interval]);
 
   return (
     <div className="space-y-4">

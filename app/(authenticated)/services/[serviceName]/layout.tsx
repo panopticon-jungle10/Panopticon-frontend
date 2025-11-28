@@ -4,7 +4,6 @@ import Sidebar from '@/components/features/services/[serviceName]/Sidebar';
 import { SelectDate } from '@/components/features/services/SelectDate';
 import type { ReactNode } from 'react';
 import { useTimeRangeStore } from '@/src/store/timeRangeStore';
-import type { TimeRange as TimeRangeType } from '@/src/utils/timeRange';
 import { TimeRange } from '@/types/time';
 import { PRESET_RANGES } from '@/src/constants/timeRanges';
 
@@ -14,7 +13,11 @@ export default function ApmLayout({ children }: { children: ReactNode }) {
   const { timeRange, setTimeRange } = useTimeRangeStore();
 
   const handleTimeRangeChange = (range: TimeRange) => {
-    setTimeRange(range.value as TimeRangeType);
+    console.log('layout - handleTimeRangeChange called with:', range);
+    console.log('layout - range.value:', range.value);
+    // TimeRange 객체 전체를 store에 전달 (커스텀 날짜도 처리하기 위해)
+    setTimeRange(range);
+    console.log('layout - after setTimeRange');
   };
 
   const selectedTimeRange: TimeRange = PRESET_RANGES.find((range) => range.value === timeRange) || {
