@@ -154,7 +154,10 @@ export default function MetricIntervalPanel({
     queryKey: ['serviceEndpointsInterval', serviceName, fromISO, toISO, selectedMetric],
     queryFn: () => {
       // Map selectedMetric to API sort_by parameter
-      const sortByMap: Record<'requests' | 'error_rate' | 'latency', 'request_count' | 'error_rate' | 'latency_p95_ms'> = {
+      const sortByMap: Record<
+        'requests' | 'error_rate' | 'latency',
+        'request_count' | 'error_rate' | 'latency_p95_ms'
+      > = {
         requests: 'request_count',
         error_rate: 'error_rate',
         latency: 'latency_p95_ms',
