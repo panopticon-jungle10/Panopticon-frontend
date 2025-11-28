@@ -13,11 +13,8 @@ export default function ApmLayout({ children }: { children: ReactNode }) {
   const { timeRange, setTimeRange } = useTimeRangeStore();
 
   const handleTimeRangeChange = (range: TimeRange) => {
-    console.log('layout - handleTimeRangeChange called with:', range);
-    console.log('layout - range.value:', range.value);
     // TimeRange 객체 전체를 store에 전달 (커스텀 날짜도 처리하기 위해)
     setTimeRange(range);
-    console.log('layout - after setTimeRange');
   };
 
   const selectedTimeRange: TimeRange = PRESET_RANGES.find((range) => range.value === timeRange) || {

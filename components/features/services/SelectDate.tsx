@@ -162,7 +162,6 @@ export const SelectDate = ({ value, onChange, className }: SelectDateProps) => {
 
   // 프리셋 범위 선택
   const handlePresetSelect = (range: TimeRange) => {
-    console.log('SelectDate - handlePresetSelect called with:', range);
     setSelectedRange(range);
     setShowCalendar(false);
     setIsOpen(false);
@@ -191,7 +190,6 @@ export const SelectDate = ({ value, onChange, className }: SelectDateProps) => {
       endDate: end,
     };
 
-    console.log('SelectDate - handleCustomDateApply called with:', customRange);
     setSelectedRange(customRange);
     setShowCalendar(false);
     setIsOpen(false);

@@ -40,8 +40,6 @@ export const useTimeRangeStore = create<TimeRangeState>((set) => ({
   interval: defaultInterval,
 
   setTimeRange: (input) => {
-    console.log('store - setTimeRange called with:', input);
-
     let timeRangeValue: TimeRange;
     let timeParams: { start_time: string; end_time: string };
     let interval: string;
@@ -80,14 +78,11 @@ export const useTimeRangeStore = create<TimeRangeState>((set) => ({
       interval = getIntervalForTimeRange(timeRangeValue);
     }
 
-    console.log('store - calculated interval:', interval);
-
     set({
       timeRange: timeRangeValue,
       startTime: timeParams.start_time,
       endTime: timeParams.end_time,
       interval,
     });
-    console.log('store - state updated');
   },
 }));
