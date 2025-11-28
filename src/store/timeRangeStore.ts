@@ -9,6 +9,11 @@ import {
 export const POLLING_MAIN_INTERVAL = 1500; // 1.5초
 export const POLLING_DETAIL_INTERVAL = 5000; // 5초
 
+// React Query 캐싱 설정 (밀리초)
+export const QUERY_STALETIME_LOGS = 300000; // 5분
+export const QUERY_STALETIME_DEFAULT = 30000; // 30초
+export const QUERY_STALETIME_SLO = 300000; // 5분 (SLO/Webhook 정보 캐싱)
+
 interface TimeRangeState {
   // 원본 timeRange 값
   timeRange: TimeRange;
