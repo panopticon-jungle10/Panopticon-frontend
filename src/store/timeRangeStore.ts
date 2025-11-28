@@ -6,7 +6,7 @@ import {
 } from '@/src/utils/timeRange';
 
 // 폴링 간격 (밀리초)
-export const POLLING_MAIN_INTERVAL = 1000; // 1초
+export const POLLING_MAIN_INTERVAL = 1500; // 1.5초
 export const POLLING_DETAIL_INTERVAL = 5000; // 5초
 
 interface TimeRangeState {
