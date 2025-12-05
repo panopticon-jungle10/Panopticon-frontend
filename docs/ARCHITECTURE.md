@@ -4,30 +4,30 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Panopticon Frontend                       │
-│  ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐   │
-│  │   Next.js     │  │   Zustand     │  │  TanStack Query   │   │
-│  │  App Router   │  │    Store      │  │  (Server State)   │   │
-│  └───────┬───────┘  └───────┬───────┘  └─────────┬─────────┘   │
+│                        Panopticon Frontend                      │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐    │
+│  │   Next.js     │  │   Zustand     │  │  TanStack Query   │    │
+│  │  App Router   │  │    Store      │  │  (Server State)   │    │
+│  └───────┬───────┘  └───────┬───────┘  └─────────┬─────────┘    │
 │          │                  │                    │              │
 │          └──────────────────┼────────────────────┘              │
 │                             │                                   │
-│  ┌──────────────────────────▼──────────────────────────────┐   │
-│  │                    API Layer                             │   │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │   │
-│  │  │  REST API   │  │  WebSocket  │  │   Auth (JWT)    │  │   │
-│  │  │   Client    │  │   Client    │  │     Handler     │  │   │
-│  │  └──────┬──────┘  └──────┬──────┘  └────────┬────────┘  │   │
-│  └─────────┼────────────────┼──────────────────┼───────────┘   │
+│  ┌──────────────────────────▼──────────────────────────────┐    │
+│  │                    API Layer                            │    │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │    │
+│  │  │  REST API   │  │  WebSocket  │  │   Auth (JWT)    │  │    │
+│  │  │   Client    │  │   Client    │  │     Handler     │  │    │
+│  │  └──────┬──────┘  └──────┬──────┘  └────────┬────────┘  │    │
+│  └─────────┼────────────────┼──────────────────┼───────────┘    │
 └────────────┼────────────────┼──────────────────┼────────────────┘
              │                │                  │
              ▼                ▼                  ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Backend Services                            │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │   APM API    │  │  WebSocket   │  │    Auth Service      │  │
-│  │   Server     │  │   Server     │  │                      │  │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                      Backend Services                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │   APM API    │  │  WebSocket   │  │    Auth Service      │   │
+│  │   Server     │  │   Server     │  │                      │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -127,6 +127,7 @@ app/
 ```
 
 **Route Group `(authenticated)`의 역할:**
+
 - 인증이 필요한 페이지들을 그룹화
 - 공통 레이아웃 (사이드바, 헤더) 적용
 - 인증 미들웨어 적용
@@ -135,9 +136,9 @@ app/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        State Management                      │
+│                        State Management                     │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
+│                                                             │
 │  ┌─────────────────────┐    ┌─────────────────────────────┐ │
 │  │    Zustand Store    │    │      TanStack Query         │ │
 │  │   (Client State)    │    │     (Server State)          │ │
@@ -147,12 +148,12 @@ app/
 │  │ • User Preferences  │    │ • Traces                    │ │
 │  │ • Panel Open/Close  │    │ • SLO Configurations        │ │
 │  └─────────────────────┘    │ • Webhooks                  │ │
-│                              │                             │ │
-│                              │ Features:                   │ │
-│                              │ • Auto Caching              │ │
-│                              │ • Background Refetch        │ │
-│                              │ • Stale-While-Revalidate    │ │
-│                              └─────────────────────────────┘ │
+│                              │                            │ │
+│                              │ Features:                  │ │
+│                              │ • Auto Caching             │ │
+│                              │ • Background Refetch       │ │
+│                              │ • Stale-While-Revalidate   │ │
+│                              └────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -163,14 +164,14 @@ app/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Component Hierarchy                     │
+│                      Component Hierarchy                    │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  Pages (app/)                                                │
+│                                                             │
+│  Pages (app/)                                               │
 │  └── Feature Components (components/features/)              │
 │      └── UI Components (components/ui/)                     │
 │          └── Base Elements (HTML + Tailwind)                │
-│                                                              │
+│                                                             │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │ Page: services/[serviceName]/page.tsx                  │ │
 │  │  │                                                     │ │
@@ -202,9 +203,9 @@ app/
 │  User    │────▶│  TimeRange   │────▶│  API Call    │────▶│   Backend    │
 │  Action  │     │  Store       │     │  (Query)     │     │   Server     │
 └──────────┘     └──────────────┘     └──────────────┘     └──────┬───────┘
-                                                                   │
-┌──────────┐     ┌──────────────┐     ┌──────────────┐             │
-│  Chart   │◀────│  Chart       │◀────│  Query       │◀────────────┘
+                                                                  │
+┌──────────┐     ┌──────────────┐     ┌──────────────┐            │
+│  Chart   │◀────│  Chart       │◀────│  Query       │◀───────────┘
 │  Render  │     │  Options     │     │  Cache       │
 └──────────┘     └──────────────┘     └──────────────┘
 ```
@@ -216,9 +217,9 @@ app/
 │   Backend    │────▶│  WebSocket   │────▶│   Custom     │
 │   Server     │     │   Client     │     │   Hook       │
 └──────────────┘     └──────────────┘     └──────┬───────┘
-                                                  │
-┌──────────────┐     ┌──────────────┐             │
-│   Log List   │◀────│   Component  │◀────────────┘
+                                                 │
+┌──────────────┐     ┌──────────────┐            │
+│   Log List   │◀────│   Component  │◀───────────┘
 │   Render     │     │   State      │
 └──────────────┘     └──────────────┘
 ```
@@ -240,12 +241,10 @@ export const apmApi = {
     fetch(`/api/services/${name}/metrics?range=${timeRange}`),
 
   // 엔드포인트 목록
-  getEndpoints: async (name: string) =>
-    fetch(`/api/services/${name}/endpoints`),
+  getEndpoints: async (name: string) => fetch(`/api/services/${name}/endpoints`),
 
   // 트레이스 상세
-  getTrace: async (traceId: string) =>
-    fetch(`/api/traces/${traceId}`),
+  getTrace: async (traceId: string) => fetch(`/api/traces/${traceId}`),
 };
 ```
 
@@ -260,7 +259,7 @@ const useServiceMetrics = (serviceName: string) => {
     queryKey: ['metrics', serviceName, timeRange],
     queryFn: () => apmApi.getServiceMetrics(serviceName, timeRange),
     refetchInterval: 10000, // 10초마다 자동 갱신
-    staleTime: 5000,        // 5초간 캐시 유효
+    staleTime: 5000, // 5초간 캐시 유효
   });
 };
 ```
@@ -291,18 +290,18 @@ const useServiceMetrics = (serviceName: string) => {
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Panel Types                             │
+│                      Panel Types                            │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
+│                                                             │
 │  SlideOverLayout          PullUpPanelLayout                 │
 │  ┌─────────────────┐     ┌─────────────────────────────────┐│
-│  │ Main    │ Side │     │         Main Content            ││
-│  │ Content │ Panel│     ├─────────────────────────────────┤│
-│  │         │      │     │       Pull-Up Panel             ││
-│  │         │◀────▶│     │           ▲                     ││
-│  │         │      │     │           │                     ││
+│  │ Main    │ Side  │     │         Main Content            ││
+│  │ Content │ Panel │     ├─────────────────────────────────┤│
+│  │         │       │     │       Pull-Up Panel             ││
+│  │         │◀─────▶│     │           ▲                     ││
+│  │         │       │     │           │                     ││
 │  └─────────────────┘     └─────────────────────────────────┘│
-│                                                              │
+│                                                             │
 │  Usage:                  Usage:                             │
 │  • Detail views          • Trace analysis                   │
 │  • Configuration         • Extended information             │
@@ -319,8 +318,8 @@ const useServiceMetrics = (serviceName: string) => {
 │  User    │────▶│  Auth Page   │────▶│  Backend     │
 │  Login   │     │  (OAuth)     │     │  Auth        │
 └──────────┘     └──────────────┘     └──────┬───────┘
-                                              │
-                                              ▼
+                                             │
+                                             ▼
 ┌──────────┐     ┌──────────────┐     ┌──────────────┐
 │  Access  │◀────│  JWT Token   │◀────│  Token       │
 │  Granted │     │  Storage     │     │  Response    │
@@ -339,14 +338,17 @@ const useServiceMetrics = (serviceName: string) => {
 ## 8. 성능 최적화 전략
 
 ### 8.1 코드 스플리팅
+
 - `next/dynamic`을 사용한 차트 라이브러리 동적 로딩
 - 라우트 기반 자동 코드 스플리팅 (App Router)
 
 ### 8.2 데이터 캐싱
+
 - TanStack Query의 `staleTime`과 `cacheTime` 활용
 - 시간 범위 변경 시에만 새 데이터 요청
 
 ### 8.3 렌더링 최적화
+
 - `useMemo`로 차트 옵션 메모이제이션
 - `React.memo`로 불필요한 리렌더링 방지
 
@@ -354,11 +356,11 @@ const useServiceMetrics = (serviceName: string) => {
 
 ## 9. 테스트 전략
 
-| 레벨 | 대상 | 도구 |
-|------|------|------|
-| Unit | 유틸리티 함수, 훅 | Jest, React Testing Library |
-| Integration | 컴포넌트 통합 | React Testing Library |
-| E2E | 사용자 시나리오 | Playwright |
+| 레벨        | 대상              | 도구                        |
+| ----------- | ----------------- | --------------------------- |
+| Unit        | 유틸리티 함수, 훅 | Jest, React Testing Library |
+| Integration | 컴포넌트 통합     | React Testing Library       |
+| E2E         | 사용자 시나리오   | Playwright                  |
 
 ---
 
@@ -366,18 +368,18 @@ const useServiceMetrics = (serviceName: string) => {
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Production Environment                    │
+│                    Production Environment                   │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
+│                                                             │
 │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐ │
 │  │    Docker    │────▶│   Next.js    │────▶│   Backend    │ │
 │  │   Compose    │     │   Server     │     │   Services   │ │
 │  └──────────────┘     └──────────────┘     └──────────────┘ │
-│                                                              │
-│  Build Process:                                              │
-│  1. npm run build (Next.js 프로덕션 빌드)                    │
+│                                                             │
+│  Build Process:                                             │
+│  1. npm run build (Next.js 프로덕션 빌드)                      │
 │  2. Docker image 생성                                        │
 │  3. Container 실행                                           │
-│                                                              │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
