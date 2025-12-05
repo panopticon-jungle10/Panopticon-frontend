@@ -6,15 +6,23 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 
 ![Panopticon Landing](./docs/imgs/사진_랜딩.png)
 
----
+## Documentation
+
+프로젝트에 대한 자세한 문서는 아래를 참조하세요:
+
+- [PRD (Product Requirements Document)](./docs/PRD.md) - 제품 요구사항 명세
+- [Architecture](./docs/ARCHITECTURE.md) - 기술 아키텍처 문서
+- [Features](./docs/FEATURES.md) - 기능 상세 설명
+- [Key Features](./docs/KEY_FEATURES.md) - 주요 기능 요약
+- [Tech Stack](./docs/TECH_STACK.md) - 기술 스택
+- [Getting Started](./docs/GETTING_STARTED.md) - 시작 가이드
+- [Organization Rules](./ORGANIZATION_RULES.md) - 브랜치/커밋 컨벤션
 
 ## Demo
 
 | 서비스 개요 데모 |
 |:----------------:|
 | ![Overview Demo](./docs/gifs/영상_개요.gif) |
-
----
 
 ## Screenshots
 
@@ -23,8 +31,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | 로그인 |
 |:------:|
 | ![Login](./docs/imgs/사진_로그인.png) |
-
----
 
 ### 서비스 목록
 
@@ -37,8 +43,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | 서비스 목록 데모 |
 |:----------------:|
 | ![Service List Demo](./docs/gifs/영상_서비스목록.gif) |
-
----
 
 ### 서비스 개요 (Overview)
 
@@ -56,8 +60,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 |:---------:|:--------------:|
 | ![Overview Demo](./docs/gifs/영상_개요.gif) | ![Overview Panel Demo](./docs/gifs/영상_개요_패널.gif) |
 
----
-
 ### 리소스 모니터링
 
 | 리소스 그래프 | 리소스 리스트 |
@@ -67,8 +69,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | 리소스 모니터링 데모 |
 |:--------------------:|
 | ![Resource Demo](./docs/gifs/영상_리소스.gif) |
-
----
 
 ### 트레이스 분석
 
@@ -82,8 +82,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 |:------------------:|
 | ![Trace Demo](./docs/gifs/영상_트레이스.gif) |
 
----
-
 ### 로그
 
 서비스의 로그를 실시간으로 확인하고 검색합니다.
@@ -91,8 +89,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | 로그 데모 |
 |:---------:|
 | ![Log Demo](./docs/gifs/영상_로그.gif) |
-
----
 
 ### SLO 알림 설정
 
@@ -109,8 +105,6 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | SLO 설정 데모 |
 |:-------------:|
 | ![SLO Demo](./docs/gifs/영상_SLO.gif) |
-
----
 
 ### SDK 설치 가이드
 
@@ -131,100 +125,3 @@ Panopticon은 분산 시스템의 트레이싱, 메트릭, 로그를 통합 관�
 | SDK 설치 데모 |
 |:-------------:|
 | ![SDK Install Demo](./docs/gifs/영상_sdk설치.gif) |
-
----
-
-## Key Features
-
-| 기능 | 설명 |
-|------|------|
-| **실시간 메트릭 모니터링** | 요청 수, 에러율, 레이턴시를 실시간으로 시각화 |
-| **분산 트레이싱** | Waterfall, Flame Graph, Map View로 트레이스 분석 |
-| **SLO 기반 알림** | 서비스 수준 목표 설정 및 위반 시 알림 발송 |
-| **다중 알림 채널** | Slack, Discord, Teams, Email 지원 |
-| **드래그 앤 드롭 대시보드** | 위젯 커스터마이징 가능 |
-| **에이전트 설치 가이드** | 단계별 설치 안내 제공 |
-
----
-
-## Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 16 (App Router) |
-| **Language** | TypeScript |
-| **State Management** | Zustand, TanStack Query |
-| **Styling** | Tailwind CSS 4 |
-| **Charts** | ECharts |
-| **Animation** | Framer Motion |
-| **Real-time** | Socket.io |
-
----
-
-## Getting Started
-
-```bash
-# 의존성 설치
-npm install
-
-# 개발 서버 실행
-npm run dev
-
-# 프로덕션 빌드
-npm run build
-
-# 프로덕션 서버 실행
-npm start
-```
-
-### Docker로 실행하기
-
-```bash
-docker-compose up -d
-```
-
-자세한 Docker 설정은 [Docker Guide](./docs/DOCKER_GUIDE.md)를 참조하세요.
-
----
-
-## Documentation
-
-프로젝트에 대한 자세한 문서는 아래를 참조하세요:
-
-- [PRD (Product Requirements Document)](./docs/PRD.md) - 제품 요구사항 명세
-- [Architecture](./docs/ARCHITECTURE.md) - 기술 아키텍처 문서
-- [Features](./docs/FEATURES.md) - 기능 상세 설명
-- [Organization Rules](./ORGANIZATION_RULES.md) - 브랜치/커밋 컨벤션
-
----
-
-## Project Structure
-
-```
-panopticon_frontend/
-├── app/                    # Next.js App Router 페이지
-│   ├── (authenticated)/    # 인증된 사용자 라우트
-│   │   ├── services/       # 서비스 관련 페이지
-│   │   └── page.tsx        # 대시보드 메인
-│   └── auth/               # 인증 페이지
-├── components/
-│   ├── analysis/           # 트레이스 분석 컴포넌트
-│   ├── features/           # 기능별 컴포넌트
-│   │   ├── dashboard/      # 대시보드 위젯
-│   │   ├── install/        # 설치 가이드
-│   │   ├── notification/   # 알림 설정
-│   │   └── services/       # 서비스 관련
-│   └── ui/                 # 공통 UI 컴포넌트
-├── src/
-│   ├── api/                # API 클라이언트
-│   ├── hooks/              # 커스텀 훅
-│   ├── store/              # Zustand 스토어
-│   └── utils/              # 유틸리티 함수
-└── docs/                   # 문서
-```
-
----
-
-## License
-
-This project is licensed under the MIT License.
