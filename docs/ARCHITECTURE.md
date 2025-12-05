@@ -31,79 +31,20 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
----
-
 ## 2. 디렉토리 구조
 
-```
-panopticon_frontend/
-├── app/                          # Next.js App Router
-│   ├── (authenticated)/          # 인증 필요 라우트 그룹
-│   │   ├── layout.tsx            # 인증 레이아웃 (Sidebar, Header)
-│   │   ├── page.tsx              # 대시보드 메인
-│   │   └── services/
-│   │       ├── page.tsx          # 서비스 목록
-│   │       ├── install/          # 에이전트 설치 가이드
-│   │       ├── notification/     # 알림 설정
-│   │       └── [serviceName]/    # 서비스 상세 (동적 라우트)
-│   ├── auth/                     # 인증 페이지
-│   ├── layout.tsx                # 루트 레이아웃
-│   ├── error.tsx                 # 에러 바운더리
-│   └── not-found.tsx             # 404 페이지
-│
-├── components/
-│   ├── analysis/                 # 트레이스 분석 컴포넌트
-│   │   ├── view/                 # 분석 뷰 (Waterfall, FlameGraph, Map)
-│   │   ├── TraceAnalysis.tsx
-│   │   └── TraceAnalysisPullUpPanel.tsx
-│   │
-│   ├── features/                 # 기능별 컴포넌트
-│   │   ├── dashboard/            # 대시보드
-│   │   │   └── widgets/          # 드래그 가능 위젯
-│   │   ├── install/              # 설치 가이드
-│   │   ├── notification/         # 알림 설정
-│   │   │   ├── modals/           # 설정 모달
-│   │   │   └── slo/              # SLO 카드
-│   │   └── services/             # 서비스 관련
-│   │       ├── servicelist/      # 서비스 목록
-│   │       └── [serviceName]/    # 서비스 상세
-│   │
-│   └── ui/                       # 공통 UI 컴포넌트
-│       ├── Button.tsx
-│       ├── Table.tsx
-│       ├── Dropdown.tsx
-│       ├── Breadcrumb.tsx
-│       ├── StateHandler.tsx      # 로딩/에러/빈 상태 처리
-│       ├── SlideOverLayout.tsx   # 슬라이드 오버 패널
-│       └── PullUpPanelLayout.tsx # 풀업 패널
-│
-├── src/
-│   ├── api/                      # API 클라이언트
-│   │   ├── apm.ts                # APM 데이터 API
-│   │   ├── auth.ts               # 인증 API
-│   │   ├── slo.ts                # SLO API
-│   │   └── webhook.ts            # 웹훅 API
-│   │
-│   ├── hooks/                    # 커스텀 훅
-│   │   ├── useAuth.ts            # 인증 상태 관리
-│   │   ├── useErrorLogsWebSocket.ts  # 에러 로그 WebSocket
-│   │   └── useSloMetricsMonitoring.ts # SLO 메트릭 모니터링
-│   │
-│   ├── store/                    # Zustand 스토어
-│   │   └── timeRangeStore.ts     # 시간 범위 상태
-│   │
-│   ├── providers/                # React Context Providers
-│   ├── constants/                # 상수 정의
-│   ├── types/                    # TypeScript 타입
-│   └── utils/                    # 유틸리티 함수
-│
-├── types/                        # 전역 타입 정의
-├── lib/                          # 라이브러리 설정
-├── public/                       # 정적 파일
-└── docs/                         # 문서
-```
-
----
+| 폴더             | 역할                                |
+| ---------------- | ----------------------------------- |
+| `app/`           | Next.js App Router 페이지 및 라우팅 |
+| `components/`    | React 컴포넌트 (분석, 기능, UI)     |
+| `src/api/`       | API 클라이언트 함수                 |
+| `src/hooks/`     | 커스텀 React 훅                     |
+| `src/store/`     | Zustand 상태 관리 스토어            |
+| `src/providers/` | React Context Providers             |
+| `src/utils/`     | 유틸리티 함수                       |
+| `types/`         | TypeScript 타입 정의                |
+| `public/`        | 정적 파일 (이미지, 아이콘 등)       |
+| `docs/`          | 프로젝트 문서                       |
 
 ## 3. 핵심 설계 패턴
 
@@ -148,17 +89,37 @@ app/
 │  │ • User Preferences  │    │ • Traces                    │ │
 │  │ • Panel Open/Close  │    │ • SLO Configurations        │ │
 │  └─────────────────────┘    │ • Webhooks                  │ │
-│                              │                            │ │
-│                              │ Features:                  │ │
-│                              │ • Auto Caching             │ │
-│                              │ • Background Refetch       │ │
-│                              │ • Stale-While-Revalidate   │ │
-│                              └────────────────────────────┘ │
+│                             │                             │ │
+│                             │ Features:                   │ │
+│                             │ • Auto Caching              │ │
+│                             │ • Background Refetch        │ │
+│                             │ • Stale-While-Revalidate    │ │
+│                             └─────────────────────────────┘ │
+│                                                             │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │         React Context Providers                        │ │
+│  ├────────────────────────────────────────────────────────┤ │
+│  │ • QueryProvider: TanStack Query 설정                    │ │
+│  │ • AlarmProvider: WebSocket 연결 및 에러 알림 상태           │ │
+│  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Zustand**: UI 상태, 사용자 설정 등 클라이언트 전용 상태
-**TanStack Query**: API 데이터, 캐싱, 자동 갱신이 필요한 서버 상태
+**Zustand** (`src/store/`): Provider 없이 사용 가능한 전역 상태 관리
+
+- UI 상태, 사용자 설정 등 클라이언트 전용 상태
+- 예: `timeRangeStore` - 시간 범위 선택 상태
+
+**TanStack Query** (`src/providers/QueryProvider.tsx`): 서버 상태 관리
+
+- API 데이터, 캐싱, 자동 갱신이 필요한 서버 상태
+- Provider로 `QueryClient` 인스턴스 제공 (라이브러리 요구사항)
+
+**React Context** (`src/providers/`): React의 기본 Context API
+
+- 앱 최상위에서 초기화가 필요한 기능 (WebSocket 연결 등)
+- Provider로 컴포넌트 트리에 제공
+- 예: `AlarmProvider` - 에러 로그 WebSocket 연결 및 알림 상태 관리
 
 ### 3.3 컴포넌트 계층 구조
 
@@ -192,8 +153,6 @@ app/
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
-
 ## 4. 데이터 흐름
 
 ### 4.1 메트릭 데이터 흐름
@@ -223,8 +182,6 @@ app/
 │   Render     │     │   State      │
 └──────────────┘     └──────────────┘
 ```
-
----
 
 ## 5. API 계층 설계
 
@@ -263,8 +220,6 @@ const useServiceMetrics = (serviceName: string) => {
   });
 };
 ```
-
----
 
 ## 6. UI 컴포넌트 설계
 
@@ -309,8 +264,6 @@ const useServiceMetrics = (serviceName: string) => {
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
-
 ## 7. 인증 흐름
 
 ```
@@ -333,8 +286,6 @@ const useServiceMetrics = (serviceName: string) => {
                └──────────────┘
 ```
 
----
-
 ## 8. 성능 최적화 전략
 
 ### 8.1 코드 스플리팅
@@ -352,8 +303,6 @@ const useServiceMetrics = (serviceName: string) => {
 - `useMemo`로 차트 옵션 메모이제이션
 - `React.memo`로 불필요한 리렌더링 방지
 
----
-
 ## 9. 테스트 전략
 
 | 레벨        | 대상              | 도구                        |
@@ -362,24 +311,74 @@ const useServiceMetrics = (serviceName: string) => {
 | Integration | 컴포넌트 통합     | React Testing Library       |
 | E2E         | 사용자 시나리오   | Playwright                  |
 
----
-
 ## 10. 배포 아키텍처
 
+### 10.1 개발 환경
+
+**Docker Compose**를 사용하여 로컬 개발 환경을 구성합니다.
+
+```bash
+docker compose up
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Production Environment                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐ │
-│  │    Docker    │────▶│   Next.js    │────▶│   Backend    │ │
-│  │   Compose    │     │   Server     │     │   Services   │ │
-│  └──────────────┘     └──────────────┘     └──────────────┘ │
-│                                                             │
-│  Build Process:                                             │
-│  1. npm run build (Next.js 프로덕션 빌드)                      │
-│  2. Docker image 생성                                        │
-│  3. Container 실행                                           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+
+- 볼륨 마운트를 통한 핫 리로드 지원
+- 컨테이너 내부의 `node_modules`로 네이티브 모듈 호환성 보장
+- 자세한 내용은 [Docker Guide](./DOCKER_GUIDE.md) 참조
+
+### 10.2 프로덕션 배포
+
+**AWS Amplify**를 통해 GitHub 저장소와 연결하여 자동 배포를 구성했습니다.
+
 ```
+┌─────────────────────────────────────────────────────────────────┐
+│                      배포 파이프라인                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  GitHub Repository                                              │
+│       │                                                         │
+│       ▼                                                         │
+│  AWS Amplify (CI/CD)                                            │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ • GitHub push 감지                                          │ │
+│  │ • Next.js 빌드 (SSR 지원)                                    │ │
+│  │ • 자동 배포                                                  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│       │                                                         │
+│       ▼                                                         │
+│  CloudFront (CDN)                                               │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ • 전역 엣지 캐싱                                              │ │
+│  │ • HTTPS 자동 적용                                            │ │
+│  │ • 빠른 콘텐츠 전송                                             │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│       │                                                         │
+│       ▼                                                         │
+│  Route53 (DNS)                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ • jungle-panopticon.cloud 도메인 관리                         │ │
+│  │ • DNS 레코드 설정                                             │ │
+│  │ • CloudFront와 연결                                          │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│       │                                                         │
+│       ▼                                                         │
+│  https://jungle-panopticon.cloud                                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 10.3 배포 프로세스
+
+1. **코드 푸시**: GitHub 저장소에 코드 변경사항 푸시
+2. **자동 빌드**: Amplify가 변경사항 감지 후 Next.js 프로덕션 빌드 실행
+3. **SSR 지원**: Next.js App Router의 Server-Side Rendering 기능 활용
+4. **CDN 배포**: CloudFront를 통해 전역 엣지 서버에 배포
+5. **DNS 라우팅**: Route53을 통해 도메인을 CloudFront와 연결
+
+### 10.4 인프라 구성
+
+| 서비스         | 역할                                  |
+| -------------- | ------------------------------------- |
+| **Amplify**    | GitHub 연동, 자동 빌드/배포, SSR 지원 |
+| **CloudFront** | 전역 CDN, HTTPS, 캐싱 최적화          |
+| **Route53**    | 도메인 관리, DNS 설정                 |
+| **도메인**     | jungle-panopticon.cloud               |
